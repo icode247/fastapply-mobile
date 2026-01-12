@@ -1,7 +1,10 @@
+"use client";
+
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
@@ -12,7 +15,7 @@ import {
   Text,
   TouchableOpacity,
   View,
-  ViewToken,
+  type ViewToken,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing } from "../../src/constants/theme";
@@ -20,7 +23,6 @@ import { useTheme } from "../../src/hooks";
 
 const { width, height } = Dimensions.get("window");
 
-// Slide 1: Hero slide
 const HeroSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
@@ -30,12 +32,12 @@ const HeroSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
       Animated.parallel([
         Animated.timing(contentOpacity, {
           toValue: 1,
-          duration: 600,
+          duration: 800,
           useNativeDriver: true,
         }),
         Animated.timing(contentTranslateY, {
           toValue: 0,
-          duration: 600,
+          duration: 800,
           easing: Easing.out(Easing.exp),
           useNativeDriver: true,
         }),
@@ -52,32 +54,26 @@ const HeroSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
         }}
       >
         <Text style={styles.headline}>
-          Land your{"\n"}dream job{"\n"}
-          <Text style={styles.headlineAccent}>today.</Text>
+          Auto-Apply to{"\n"}
+          <Text style={{ color: "rgba(255,255,255,0.8)" }}>100+ Jobs</Text>
         </Text>
 
         <Text style={styles.subtitle}>
-          AI-powered applications that get you noticed. One tap is all it takes.
+          Land your dream job 5x faster. AI-tailored resumes & cover letters for
+          every application.
         </Text>
 
-        <View style={styles.features}>
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="flash" size={16} color="#FFFFFF" />
-            </View>
-            <Text style={styles.featureText}>One-Tap Apply</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="sparkles" size={16} color="#FFFFFF" />
-            </View>
-            <Text style={styles.featureText}>AI-Powered</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="trending-up" size={16} color="#FFFFFF" />
-            </View>
-            <Text style={styles.featureText}>Track Progress</Text>
+        <View style={styles.trustBadgeContainer}>
+          <Text style={styles.trustBadgeLabel}>
+            TRUSTED BY PROFESSIONALS AT
+          </Text>
+          <View style={styles.trustLogosRow}>
+            {/* Simple text placeholders for "Big Tech" style logos for now */}
+            <Text style={styles.trustLogoText}>Google</Text>
+            <View style={styles.trustDivider} />
+            <Text style={styles.trustLogoText}>Meta</Text>
+            <View style={styles.trustDivider} />
+            <Text style={styles.trustLogoText}>Airbnb</Text>
           </View>
         </View>
       </Animated.View>
@@ -85,11 +81,21 @@ const HeroSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   );
 };
 
-// Slide 2: Discover slide (App Mock matching wireframe)
-const DiscoverSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
+const DemoSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   const contentOpacity = useRef(new Animated.Value(0)).current;
   const contentTranslateY = useRef(new Animated.Value(30)).current;
-  const mockScale = useRef(new Animated.Value(0.9)).current;
+  const cardScale = useRef(new Animated.Value(0.9)).current;
+
+  const cardRotate = useRef(new Animated.Value(0)).current;
+  const cardTranslateX = useRef(new Animated.Value(0)).current;
+  const cardOpacity = useRef(new Animated.Value(1)).current;
+  const progressWidth = useRef(new Animated.Value(0)).current;
+
+  const bgCardScale = useRef(new Animated.Value(0.95)).current;
+  const bgCardOpacity = useRef(new Animated.Value(0.5)).current;
+  const swipeHintOpacity = useRef(new Animated.Value(0)).current;
+  const swipeHintScale = useRef(new Animated.Value(0.8)).current;
+  const pulseOpacity = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
     if (isActive) {
@@ -105,71 +111,393 @@ const DiscoverSlide: React.FC<{ isActive: boolean }> = ({ isActive }) => {
           easing: Easing.out(Easing.exp),
           useNativeDriver: true,
         }),
-        Animated.spring(mockScale, {
+        Animated.spring(cardScale, {
           toValue: 1,
           tension: 50,
           friction: 7,
           useNativeDriver: true,
         }),
+        Animated.spring(bgCardScale, {
+          toValue: 1,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+          delay: 200,
+        }),
       ]).start();
+
+      const swipeHintLoop = Animated.sequence([
+        Animated.delay(1500),
+        Animated.parallel([
+          Animated.timing(swipeHintOpacity, {
+            toValue: 1,
+            duration: 400,
+            useNativeDriver: true,
+          }),
+          Animated.timing(swipeHintScale, {
+            toValue: 1,
+            duration: 400,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(500),
+        Animated.parallel([
+          Animated.timing(swipeHintOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(swipeHintScale, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(1000),
+      ]);
+
+      const pulseLoop = Animated.sequence([
+        Animated.delay(1800),
+        Animated.timing(pulseOpacity, {
+          toValue: 0.7,
+          duration: 400,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseOpacity, {
+          toValue: 0.4,
+          duration: 400,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]);
+
+      Animated.loop(swipeHintLoop).start();
+      Animated.loop(pulseLoop).start();
+
+      const animationSequence = Animated.sequence([
+        Animated.delay(1200),
+        Animated.parallel([
+          Animated.timing(cardTranslateX, {
+            toValue: 160,
+            duration: 700,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardRotate, {
+            toValue: 0.3,
+            duration: 700,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardOpacity, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressWidth, {
+            toValue: 100,
+            duration: 500,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: false,
+          }),
+          Animated.spring(bgCardScale, {
+            toValue: 1.05,
+            tension: 50,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bgCardOpacity, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(300),
+        Animated.parallel([
+          Animated.timing(cardTranslateX, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardRotate, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.spring(cardOpacity, {
+            toValue: 1,
+            tension: 60,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressWidth, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: false,
+          }),
+          Animated.spring(bgCardScale, {
+            toValue: 0.98,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bgCardOpacity, {
+            toValue: 0.5,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(600),
+        Animated.parallel([
+          Animated.timing(cardTranslateX, {
+            toValue: -160,
+            duration: 700,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardRotate, {
+            toValue: -0.3,
+            duration: 700,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardOpacity, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressWidth, {
+            toValue: 100,
+            duration: 500,
+            easing: Easing.out(Easing.ease),
+            useNativeDriver: false,
+          }),
+          Animated.spring(bgCardScale, {
+            toValue: 1.05,
+            tension: 50,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bgCardOpacity, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(300),
+        Animated.parallel([
+          Animated.timing(cardTranslateX, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.timing(cardRotate, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          }),
+          Animated.spring(cardOpacity, {
+            toValue: 1,
+            tension: 60,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(progressWidth, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: false,
+          }),
+          Animated.spring(bgCardScale, {
+            toValue: 0.98,
+            tension: 40,
+            friction: 8,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bgCardOpacity, {
+            toValue: 0.5,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.delay(800),
+      ]);
+
+      Animated.loop(animationSequence).start();
     }
+
+    return () => {
+      cardTranslateX.setValue(0);
+      cardRotate.setValue(0);
+      cardOpacity.setValue(1);
+      progressWidth.setValue(0);
+      bgCardScale.setValue(0.95);
+      bgCardOpacity.setValue(0.5);
+      swipeHintOpacity.setValue(0);
+      swipeHintScale.setValue(0.8);
+      pulseOpacity.setValue(0.4);
+    };
   }, [isActive]);
+
+  const jobCards = [
+    {
+      title: "Senior Frontend Engineer",
+      company: "TechFlow",
+      location: "San Francisco, CA",
+      salary: "$140k - $180k",
+      match: "92%",
+      workType: "Remote",
+      employment: "Full-time",
+      experience: "5+ years",
+    },
+    {
+      title: "Product Designer",
+      company: "Creative Labs",
+      location: "New York, NY",
+      salary: "$110k - $140k",
+      match: "88%",
+      workType: "Hybrid",
+      employment: "Full-time",
+      experience: "4+ years",
+    },
+  ];
 
   return (
     <View style={styles.slideContent}>
       <Animated.View
         style={[
-          styles.slide2Content,
+          styles.demoContent,
           {
             opacity: contentOpacity,
-            transform: [
-              { translateY: contentTranslateY },
-              { scale: mockScale },
-            ],
+            transform: [{ translateY: contentTranslateY }],
           },
         ]}
       >
-        {/* Mock Device Frame */}
-        <View style={styles.mockDevice}>
-          {/* Header: DISCOVER LOGO + Grid Icon */}
-          <View style={styles.mockDeviceHeader}>
-            <Text style={styles.mockDeviceLogoText}>DISCOVER LOGO</Text>
-            <View style={styles.mockGridIcon}>
-              <View style={styles.mockGridSquare} />
-              <View style={styles.mockGridSquare} />
-              <View style={styles.mockGridSquare} />
-              <View style={styles.mockGridSquare} />
+        <View style={styles.cardStack}>
+          <Animated.View
+            style={[
+              styles.jobCard,
+              styles.bgCard2,
+              {
+                transform: [{ scale: bgCardScale }],
+                opacity: bgCardOpacity,
+              },
+            ]}
+          >
+            <View style={styles.cardContent}>
+              <View style={styles.cardHeader}>
+                <View style={styles.companyLogoPlaceholder} />
+                <View style={styles.cardBadge}>
+                  <Text style={styles.badgeText}>88%</Text>
+                </View>
+              </View>
+              <Text style={styles.cardTitle}>Product Designer</Text>
+              <Text style={styles.cardCompany}>Creative Labs</Text>
+              <Text style={styles.cardLocation}>New York, NY</Text>
             </View>
-          </View>
+          </Animated.View>
 
-          {/* Squiggly text lines */}
-          <View style={styles.mockTextLines}>
-            <View style={styles.mockSquiggleLong} />
-            <View style={styles.mockSquiggleShort} />
-          </View>
+          <Animated.View
+            style={[
+              styles.jobCard,
+              styles.animatedCard,
+              {
+                transform: [
+                  { translateX: cardTranslateX },
+                  {
+                    rotate: cardRotate.interpolate({
+                      inputRange: [-1, 0, 1],
+                      outputRange: ["-18deg", "0deg", "18deg"],
+                    }),
+                  },
+                ],
+                opacity: cardOpacity,
+              },
+            ]}
+          >
+            <Animated.View
+              style={[
+                styles.cardPulseRing,
+                {
+                  opacity: pulseOpacity,
+                },
+              ]}
+            />
 
-          {/* Large content area */}
-          <View style={styles.mockContentArea} />
+            <View style={styles.cardContent}>
+              <View style={styles.cardHeader}>
+                <View style={styles.companyLogoPlaceholder} />
+                <View style={styles.cardBadge}>
+                  <Text style={styles.badgeText}>92%</Text>
+                </View>
+              </View>
+              <Text style={styles.cardTitle}>Senior Frontend Engineer</Text>
+              <Text style={styles.cardCompany}>TechFlow</Text>
+              <Text style={styles.cardLocation}>San Francisco, CA</Text>
 
-          {/* Bottom action bar */}
-          <View style={styles.mockBottomBar}>
-            <View style={styles.mockIconCircle}>
-              <Ionicons name="power" size={18} color="#0B6BCB" />
+              <View style={styles.jobDetailsSection}>
+                <View style={styles.detailItem}>
+                  <Text style={styles.detailLabel}>Compensation</Text>
+                  <Text style={styles.detailValue}>$140k - $180k</Text>
+                </View>
+                <View style={styles.detailRow}>
+                  <View style={[styles.detailBadge, styles.badgeRemote]}>
+                    <Text style={styles.badgeLabelText}>Remote</Text>
+                  </View>
+                  <View style={[styles.detailBadge, styles.badgeFulltime]}>
+                    <Text style={styles.badgeLabelText}>Full-time</Text>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View style={styles.mockBarDivider} />
-            <Ionicons name="book-outline" size={20} color="#0B6BCB" />
-            <View style={styles.mockBarDivider} />
-            <Text style={styles.mockXIcon}>X</Text>
-            <View style={styles.mockBarDivider} />
-            <View style={[styles.mockIconCircle, styles.mockMicCircle]}>
-              <Ionicons name="mic" size={18} color="#FFFFFF" />
-            </View>
-          </View>
+            <Animated.View
+              style={[
+                styles.progressIndicator,
+                {
+                  width: progressWidth.interpolate({
+                    inputRange: [0, 100],
+                    outputRange: ["0%", "100%"],
+                  }),
+                },
+              ]}
+            />
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.swipeHintLeft,
+              {
+                opacity: swipeHintOpacity,
+                transform: [{ scale: swipeHintScale }],
+              },
+            ]}
+          >
+            <Ionicons name="arrow-back" size={32} color="rgba(255,68,68,0.8)" />
+          </Animated.View>
+          <Animated.View
+            style={[
+              styles.swipeHintRight,
+              {
+                opacity: swipeHintOpacity,
+                transform: [{ scale: swipeHintScale }],
+              },
+            ]}
+          >
+            <Ionicons
+              name="arrow-forward"
+              size={32}
+              color="rgba(76,175,80,0.8)"
+            />
+          </Animated.View>
         </View>
 
-        {/* Caption */}
-        <Text style={styles.mockDeviceCaption}>
-          Experience the app in action
+        <Text style={styles.actionInstructions}>
+          ← Swipe to pass • Swipe to apply →
+        </Text>
+
+        <Text style={styles.supportingText}>
+          Matches appear every day. Never miss an opportunity again.
         </Text>
       </Animated.View>
     </View>
@@ -279,7 +607,7 @@ export default function WelcomeScreen() {
 
   const slides = [
     { id: "hero", component: HeroSlide },
-    { id: "discover", component: DiscoverSlide },
+    { id: "demo", component: DemoSlide },
   ];
 
   const onViewableItemsChanged = useRef(
@@ -473,177 +801,260 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing[6],
     justifyContent: "center",
-    paddingTop: spacing[16], // Push content down to visual center
+    paddingTop: spacing[8], // Reduced top padding
   },
-  // Slide 1 styles
   headline: {
-    fontSize: 52,
+    fontSize: 42, // Reduced from 52
     fontWeight: "800",
     color: "#FFFFFF",
-    lineHeight: 58,
-    letterSpacing: -1.5,
-  },
-  headlineAccent: {
-    color: "rgba(255,255,255,0.7)",
+    lineHeight: 48,
+    letterSpacing: -1.2,
   },
   subtitle: {
-    fontSize: 17,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: spacing[6],
+    fontSize: 16,
+    color: "rgba(255,255,255,0.85)",
+    marginTop: spacing[5],
     lineHeight: 24,
-    maxWidth: 280,
+    maxWidth: 300,
+    fontWeight: "500",
   },
-  features: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing[3],
+  trustBadgeContainer: {
     marginTop: spacing[8],
+    alignItems: "flex-start",
   },
-  featureItem: {
+  trustBadgeLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.5)",
+    letterSpacing: 1.5,
+    marginBottom: spacing[3],
+  },
+  trustLogosRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.15)",
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[3],
-    borderRadius: borderRadius.full,
-    gap: spacing[2],
   },
-  featureIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+  trustLogoText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.9)",
+    letterSpacing: -0.5,
+  },
+  trustDivider: {
+    width: 1,
+    height: 12,
     backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
+    marginHorizontal: spacing[4],
   },
-  featureText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#FFFFFF",
-  },
-  // Slide 2 content wrapper
-  slide2Content: {
+  demoContent: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "center", // Reverting to center as header text is gone
     width: "100%",
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[0], // Removing the extra padding
   },
-  // Slide 2 styles (Mock Device matching wireframe)
-  mockDevice: {
+  demoTitle: {
+    fontSize: 32, // Reduced from 40
+    fontWeight: "800",
+    color: "#FFFFFF",
+    marginBottom: spacing[2],
+    lineHeight: 38,
+    textAlign: "center",
+    letterSpacing: -0.5,
+  },
+  demoTitleAccent: {
+    color: "#FCD34D",
+    fontStyle: "italic",
+  },
+  demoSubheading: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.8)",
+    marginBottom: spacing[4], // Reduced margin
+    textAlign: "center",
+    lineHeight: 20,
+    maxWidth: 300,
+  },
+  cardStack: {
+    width: 280,
+    height: 380, // Reduced height
+    marginVertical: spacing[4],
+    position: "relative",
+  },
+  jobCard: {
+    position: "absolute",
     width: "100%",
-    maxWidth: 280,
-    height: 420,
+    height: "100%",
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
-    borderWidth: 2,
-    borderColor: "#0B6BCB",
+    borderWidth: 1,
+    borderColor: "rgba(11, 107, 203, 0.08)",
     padding: spacing[4],
     justifyContent: "space-between",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 8,
   },
-  mockDeviceHeader: {
+  animatedCard: {
+    zIndex: 10,
+    overflow: "hidden",
+  },
+  bgCard2: {
+    zIndex: 5,
+    transform: [{ translateY: 10 }, { scale: 0.95 }],
+    opacity: 0.5,
+  },
+  cardContent: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    paddingBottom: spacing[3],
+    alignItems: "flex-start",
+    marginBottom: spacing[2],
   },
-  mockDeviceLogoText: {
-    fontSize: 14,
+  companyLogoPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: "#0B6BCB",
+    opacity: 0.1,
+  },
+  cardBadge: {
+    backgroundColor: "rgba(16, 185, 129, 0.1)", // Softer bg
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: borderRadius.md,
+    borderWidth: 1,
+    borderColor: "rgba(16, 185, 129, 0.2)",
+  },
+  badgeText: {
+    fontSize: 11,
     fontWeight: "700",
-    color: "#0B6BCB",
-    letterSpacing: 0.5,
+    color: "#059669", // Darker text
+    letterSpacing: 0,
   },
-  mockGridIcon: {
-    width: 28,
-    height: 28,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignContent: "space-between",
-    padding: 2,
-    borderWidth: 2,
-    borderColor: "#0B6BCB",
-    borderRadius: 4,
-  },
-  mockGridSquare: {
-    width: 10,
-    height: 10,
-    backgroundColor: "#0B6BCB",
-  },
-  mockTextLines: {
-    marginTop: spacing[3],
-    gap: spacing[2],
-  },
-  mockSquiggleLong: {
-    height: 8,
-    backgroundColor: "#0B6BCB",
-    borderRadius: 4,
-    width: "85%",
-  },
-  mockSquiggleShort: {
-    height: 8,
-    backgroundColor: "#0B6BCB",
-    borderRadius: 4,
-    width: "70%",
-  },
-  mockContentArea: {
-    height: 200,
-    backgroundColor: "#F8F9FA",
-    borderRadius: 16,
-    marginTop: spacing[4],
-    marginBottom: spacing[4],
-    borderWidth: 2,
-    borderColor: "#0B6BCB",
-  },
-  mockBottomBar: {
-    flexDirection: "row",
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: "#0B6BCB",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    paddingHorizontal: spacing[2],
-    backgroundColor: "#FFFFFF",
-  },
-  mockBarDivider: {
-    width: 1,
-    height: 16,
-    backgroundColor: "#0B6BCB",
-    opacity: 0.4,
-  },
-  mockIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 2,
-    borderColor: "#0B6BCB",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  mockMicCircle: {
-    backgroundColor: "#0B6BCB",
-  },
-  mockXIcon: {
+  cardTitle: {
     fontSize: 18,
     fontWeight: "700",
+    color: "#111827",
+    marginBottom: 4,
+    letterSpacing: -0.3,
+  },
+  cardCompany: {
+    fontSize: 14,
+    fontWeight: "600",
     color: "#0B6BCB",
+    marginBottom: 2,
   },
-  mockDeviceCaption: {
-    color: "#FFFFFF",
-    marginTop: spacing[5],
-    fontSize: 16,
+  cardLocation: {
+    fontSize: 13,
     fontWeight: "500",
-    textAlign: "center",
-    opacity: 0.9,
+    color: "#6B7280",
+    marginBottom: spacing[3],
   },
-  // Pagination
+  jobDetailsSection: {
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    paddingTop: spacing[3],
+    gap: spacing[2],
+  },
+  detailItem: {
+    gap: 2,
+  },
+  detailLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#9CA3AF",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  detailValue: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#10B981",
+  },
+  detailRow: {
+    flexDirection: "row",
+    gap: spacing[2],
+    marginTop: spacing[1],
+  },
+  detailBadge: {
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+  },
+  badgeRemote: {
+    backgroundColor: "rgba(11, 107, 203, 0.05)",
+  },
+  badgeFulltime: {
+    backgroundColor: "rgba(236, 72, 153, 0.05)",
+  },
+  badgeLabelText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#4B5563",
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    gap: spacing[8],
+    marginTop: spacing[4], // Reduced margin
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  actionHint: {
+    alignItems: "center",
+    gap: spacing[1],
+  },
+  actionButton: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+    transform: [{ scale: 1 }],
+  },
+  rejectButton: {
+    backgroundColor: "#EF4444",
+  },
+  acceptButton: {
+    backgroundColor: "#10B981",
+  },
+  actionLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.9)",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  actionInstructions: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.8)",
+    marginTop: spacing[6],
+    textAlign: "center",
+    letterSpacing: 0.3,
+  },
+  supportingText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.65)",
+    marginTop: spacing[3],
+    textAlign: "center",
+    lineHeight: 18,
+    fontStyle: "italic",
+  },
   pagination: {
     flexDirection: "row",
     justifyContent: "center",
@@ -656,7 +1067,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#FFFFFF",
   },
-  // Buttons
   buttonsContainer: {
     gap: spacing[4],
     paddingHorizontal: spacing[6],
@@ -692,5 +1102,35 @@ const styles = StyleSheet.create({
   signInText: {
     color: "#FFFFFF",
     fontWeight: "600",
+  },
+  progressIndicator: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    height: 4,
+    backgroundColor: "#10B981",
+    opacity: 0.8,
+  },
+  cardPulseRing: {
+    position: "absolute",
+    top: -8,
+    left: -8,
+    right: -8,
+    bottom: -8,
+    borderRadius: borderRadius.xl,
+    borderWidth: 1,
+    borderColor: "rgba(76,175,80,0.3)",
+  },
+  swipeHintLeft: {
+    position: "absolute",
+    left: -50,
+    top: "50%",
+    marginTop: -16,
+  },
+  swipeHintRight: {
+    position: "absolute",
+    right: -50,
+    top: "50%",
+    marginTop: -16,
   },
 });

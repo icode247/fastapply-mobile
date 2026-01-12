@@ -1,10 +1,21 @@
 import { Platform } from "react-native";
 
+import Constants from "expo-constants";
+
 // Helper to pick the right URL
 const getBaseUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) return process.env.EXPO_PUBLIC_API_URL;
 
-  // Automatic selection for development
+  // Use the IP address of the computer running the Expo server
+  // This is required for physical devices to connect to the backend
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  const localhost = debuggerHost?.split(":")[0];
+
+  if (localhost) {
+    return `http://${localhost}:3001`;
+  }
+
+  // Automatic selection for development (fallbacks)
   if (Platform.OS === "android") {
     return "http://10.0.2.2:3001"; // Android Emulator
   }

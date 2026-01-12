@@ -1,13 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
-import {
-  Alert,
-  Share,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   JobFilters,
@@ -18,6 +11,7 @@ import {
   ProfileSelectorModal,
 } from "../../src/components/feed/ProfileSelectorModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
+import { VoiceActivityIcon } from "../../src/components/feed/VoiceActivityIcon";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { Job, MOCK_JOBS } from "../../src/mocks/jobs";
@@ -61,17 +55,15 @@ export default function FeedScreen() {
     setShowProfileSelector(true);
   };
 
-  const handleShare = async () => {
-    const currentJob = swipeDeckRef.current?.getCurrentJob();
-    if (!currentJob) return;
+  // Voice command state
+  const [isListening, setIsListening] = useState(false);
 
-    try {
-      await Share.share({
-        title: `${currentJob.title} at ${currentJob.company}`,
-        message: `Check out this job opportunity!\n\n${currentJob.title} at ${currentJob.company}\n${currentJob.salary} • ${currentJob.workMode}\n\nApply now on Tap2Apply!`,
-      });
-    } catch (error) {
-      console.error("Share failed:", error);
+  const handleVoiceCommand = () => {
+    setIsListening(!isListening);
+    // TODO: Implement actual voice command logic
+    if (!isListening) {
+      // Simulate listening start
+      Alert.alert("Listening...", "Try saying 'Apply to this job'");
     }
   };
 
@@ -117,7 +109,12 @@ export default function FeedScreen() {
       </View>
 
       {/* Action Buttons */}
-      <View style={styles.actionsContainer}>
+      <View
+        style={[
+          styles.actionsContainer,
+          { backgroundColor: colors.surfaceSecondary },
+        ]}
+      >
         {/* Undo */}
         <TouchableOpacity
           style={[
@@ -166,16 +163,24 @@ export default function FeedScreen() {
           <Ionicons name="heart" size={36} color="#00C853" />
         </TouchableOpacity>
 
-        {/* Share */}
+        {/* Voice Command (ChatGPT Style) */}
         <TouchableOpacity
           style={[
             styles.actionButton,
             styles.smallButton,
-            { backgroundColor: colors.surface },
+            { backgroundColor: isListening ? colors.text : colors.surface },
           ]}
-          onPress={handleShare}
+          onPress={handleVoiceCommand}
         >
-          <Ionicons name="share-outline" size={22} color="#4CC9F0" />
+          {isListening ? (
+            <VoiceActivityIcon color={colors.background} />
+          ) : (
+            <MaterialCommunityIcons
+              name="waveform"
+              size={24}
+              color={colors.text}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -239,33 +244,39 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
+    justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
+    width: "85%",
+    alignSelf: "center",
     paddingHorizontal: spacing[4],
-    paddingBottom: spacing[2],
-    height: 90,
+    paddingVertical: spacing[3],
+    position: "absolute",
+    bottom: spacing[6],
+    zIndex: 100,
+    borderRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   actionButton: {
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
   },
   smallButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
   },
   largeButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
   },
 });
