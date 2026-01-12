@@ -1,19 +1,32 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
-import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 import userService from "./user.service";
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Check if running in Expo Go (where push notifications are not supported in SDK 53+)
+const isExpoGo = Constants.appOwnership === "expo";
+
+// Dynamically import notifications only when not in Expo Go
+let Notifications: typeof import("expo-notifications") | null = null;
+
+if (!isExpoGo) {
+  Notifications = require("expo-notifications");
+
+  // Configure notification handler
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+} else {
+  console.log(
+    "expo-notifications: Running in Expo Go - push notifications disabled. Use a development build for full functionality."
+  );
+}
 
 export const notificationService = {
   /**
@@ -21,6 +34,11 @@ export const notificationService = {
    * Returns the token if successful, null otherwise
    */
   async registerForPushNotificationsAsync(): Promise<string | null> {
+    if (!Notifications) {
+      console.log("Push notifications not available in Expo Go");
+      return null;
+    }
+
     let token = null;
 
     if (Platform.OS === "android") {
@@ -91,8 +109,11 @@ export const notificationService = {
    * Add listener for incoming notifications (foreground)
    */
   addNotificationReceivedListener(
-    callback: (notification: Notifications.Notification) => void
-  ) {
+    callback: (notification: any) => void
+  ): { remove: () => void } {
+    if (!Notifications) {
+      return { remove: () => {} };
+    }
     return Notifications.addNotificationReceivedListener(callback);
   },
 
@@ -100,8 +121,11 @@ export const notificationService = {
    * Add listener for user tapping notification
    */
   addNotificationResponseReceivedListener(
-    callback: (response: Notifications.NotificationResponse) => void
-  ) {
+    callback: (response: any) => void
+  ): { remove: () => void } {
+    if (!Notifications) {
+      return { remove: () => {} };
+    }
     return Notifications.addNotificationResponseReceivedListener(callback);
   },
 
@@ -109,6 +133,7 @@ export const notificationService = {
    * Reduce badge count
    */
   async clearBadge() {
+    if (!Notifications) return;
     if (Platform.OS === "ios") {
       await Notifications.setBadgeCountAsync(0);
     }
