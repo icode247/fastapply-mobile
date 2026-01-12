@@ -1,0 +1,867 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Alert,
+  Animated,
+  Easing,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ConfirmModal } from "../../src/components";
+import { getPlanDisplayName } from "../../src/constants/subscription-limits";
+import { borderRadius, spacing } from "../../src/constants/theme";
+import { useAuth, useTheme } from "../../src/hooks";
+import { subscriptionService, userService } from "../../src/services";
+import { Subscription, User } from "../../src/types";
+import { storage } from "../../src/utils/storage";
+
+// Setting item component
+const SettingItem: React.FC<{
+  icon: keyof typeof Ionicons.glyphMap;
+  iconColor: string;
+  label: string;
+  value?: string;
+  onPress?: () => void;
+  isSwitch?: boolean;
+  switchValue?: boolean;
+  onSwitchChange?: (value: boolean) => void;
+  isDestructive?: boolean;
+  delay: number;
+  colors: any;
+  isDark: boolean;
+}> = ({
+  icon,
+  iconColor,
+  label,
+  value,
+  onPress,
+  isSwitch,
+  switchValue,
+  onSwitchChange,
+  isDestructive,
+  delay,
+  colors,
+  isDark,
+}) => {
+  const translateX = useRef(new Animated.Value(40)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(translateX, {
+        toValue: 0,
+        duration: 500,
+        delay,
+        easing: Easing.out(Easing.back(1.2)),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 300,
+        delay,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [delay]);
+
+  const handlePressIn = () => {
+    if (!isSwitch) {
+      Animated.spring(scale, {
+        toValue: 0.98,
+        tension: 100,
+        friction: 10,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const handlePressOut = () => {
+    if (!isSwitch) {
+      Animated.spring(scale, {
+        toValue: 1,
+        tension: 100,
+        friction: 10,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  return (
+    <Animated.View
+      style={[
+        styles.settingItem,
+        {
+          opacity,
+          transform: [{ translateX }, { scale }],
+          backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+        },
+      ]}
+    >
+      <TouchableOpacity
+        style={styles.settingItemInner}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={isSwitch ? 1 : 0.7}
+        disabled={isSwitch}
+      >
+        <View
+          style={[styles.settingIcon, { backgroundColor: iconColor + "20" }]}
+        >
+          <Ionicons name={icon} size={20} color={iconColor} />
+        </View>
+        <View style={styles.settingContent}>
+          <Text
+            style={[
+              styles.settingLabel,
+              { color: isDestructive ? "#EF4444" : colors.text },
+            ]}
+          >
+            {label}
+          </Text>
+          {value && (
+            <Text
+              style={[styles.settingValue, { color: colors.textSecondary }]}
+            >
+              {value}
+            </Text>
+          )}
+        </View>
+        {isSwitch ? (
+          <Switch
+            value={switchValue}
+            onValueChange={onSwitchChange}
+            trackColor={{
+              false: isDark ? colors.border : colors.borderLight,
+              true: colors.primary,
+            }}
+            thumbColor="#FFFFFF"
+            ios_backgroundColor={isDark ? "#333" : "#E5E5E5"}
+          />
+        ) : (
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={colors.textTertiary}
+          />
+        )}
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+// Settings section
+const SettingsSection: React.FC<{
+  title: string;
+  children: React.ReactNode;
+  delay: number;
+  colors: any;
+}> = ({ title, children, delay, colors }) => {
+  const titleOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(titleOpacity, {
+      toValue: 1,
+      duration: 400,
+      delay,
+      useNativeDriver: true,
+    }).start();
+  }, [delay]);
+
+  return (
+    <View style={styles.section}>
+      <Animated.Text
+        style={[
+          styles.sectionTitle,
+          { color: colors.textSecondary, opacity: titleOpacity },
+        ]}
+      >
+        {title}
+      </Animated.Text>
+      <View style={styles.sectionItems}>{children}</View>
+    </View>
+  );
+};
+
+export default function SettingsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors, isDark, setMode, mode } = useTheme();
+  const { logout } = useAuth();
+
+  const [notifications, setNotifications] = useState(true);
+  const [biometrics, setBiometrics] = useState(false);
+  const [autoApply, setAutoApply] = useState(true);
+
+  // User and subscription data
+  const [user, setUser] = useState<User | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+
+  // Modal State
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Header animation
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+  const profileScale = useRef(new Animated.Value(0.8)).current;
+
+  // Load preferences from storage
+  const loadPreferences = useCallback(async () => {
+    try {
+      const [notifPref, bioPref, autoPref] = await Promise.all([
+        storage.getItem("pref_notifications"),
+        storage.getItem("pref_biometrics"),
+        storage.getItem("pref_auto_apply"),
+      ]);
+      if (notifPref !== null) setNotifications(notifPref === "true");
+      if (bioPref !== null) setBiometrics(bioPref === "true");
+      if (autoPref !== null) setAutoApply(autoPref === "true");
+    } catch (error) {
+      console.error("Failed to load preferences:", error);
+    }
+  }, []);
+
+  // Fetch user and subscription data
+  const fetchData = useCallback(async () => {
+    try {
+      const [userData, subData] = await Promise.all([
+        userService.getMe().catch((err) => {
+          console.log("[Settings] Failed to fetch user:", err?.message);
+          return null;
+        }),
+        subscriptionService.getCurrentSubscription().catch((err) => {
+          console.log("[Settings] Failed to fetch subscription:", err?.message);
+          return null;
+        }),
+      ]);
+      console.log("[Settings] User data:", userData?.email);
+      console.log(
+        "[Settings] Subscription data:",
+        subData?.tier,
+        subData?.status
+      );
+      if (userData) setUser(userData);
+      if (subData) setSubscription(subData);
+    } catch (error) {
+      console.error("Failed to fetch settings data:", error);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+      loadPreferences();
+    }, [fetchData, loadPreferences])
+  );
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerOpacity, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.spring(profileScale, {
+        toValue: 1,
+        tension: 50,
+        friction: 8,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  // Preference handlers with persistence
+  const handleNotificationsChange = async (value: boolean) => {
+    setNotifications(value);
+    await storage.setItem("pref_notifications", String(value));
+  };
+
+  const handleBiometricsChange = async (value: boolean) => {
+    setBiometrics(value);
+    await storage.setItem("pref_biometrics", String(value));
+  };
+
+  const handleAutoApplyChange = async (value: boolean) => {
+    setAutoApply(value);
+    await storage.setItem("pref_auto_apply", String(value));
+  };
+
+  // Navigation handlers
+  const handleEditProfile = () => {
+    router.push("/settings/edit-profile");
+  };
+
+  const handleSubscription = () => {
+    router.push("/settings/subscription");
+  };
+
+  // Support handlers
+  const handleHelpCenter = async () => {
+    const url = "https://fastapply.co/help";
+    const canOpen = await Linking.canOpenURL(url);
+    if (canOpen) {
+      await Linking.openURL(url);
+    }
+  };
+
+  const handleContactSupport = async () => {
+    const email = "support@fastapply.co";
+    const subject = "Tap2Apply Support Request";
+    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+    const canOpen = await Linking.canOpenURL(url);
+    if (canOpen) {
+      await Linking.openURL(url);
+    } else {
+      Alert.alert("Contact Support", `Please email us at ${email}`);
+    }
+  };
+
+  const handleRateApp = async () => {
+    // TODO: Replace with actual App Store / Play Store URLs
+    const url = "https://apps.apple.com/app/tap2apply";
+    const canOpen = await Linking.canOpenURL(url);
+    if (canOpen) {
+      await Linking.openURL(url);
+    }
+  };
+
+  const handlePrivacyPolicy = async () => {
+    const url = "https://fastapply.co/privacy";
+    const canOpen = await Linking.canOpenURL(url);
+    if (canOpen) {
+      await Linking.openURL(url);
+    }
+  };
+
+  const handleLogout = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const processLogout = async () => {
+    setActionLoading(true);
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setActionLoading(false);
+      setLogoutModalVisible(false);
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const processDeleteAccount = async () => {
+    setActionLoading(true);
+    try {
+      await userService.deleteAccount();
+      await logout();
+    } catch (error) {
+      console.error("Delete account failed", error);
+      // We might want to show an error toast here if we had one
+    } finally {
+      setActionLoading(false);
+      setDeleteModalVisible(false);
+    }
+  };
+
+  // Helper functions
+  const getUserInitials = () => {
+    if (!user?.name) return user?.email?.slice(0, 2).toUpperCase() || "??";
+    const parts = user.name.split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return user.name.slice(0, 2).toUpperCase();
+  };
+
+  const getPlanName = () => {
+    if (!subscription) return "Free";
+    return getPlanDisplayName(subscription.tier);
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Header gradient */}
+      <LinearGradient
+        colors={
+          isDark
+            ? [colors.primaryDark, colors.background]
+            : [colors.primary, colors.background]
+        }
+        style={styles.headerGradient}
+      />
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 20 },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
+          <Text style={[styles.title, { color: colors.text }]}>Settings</Text>
+        </Animated.View>
+
+        {/* Profile Card */}
+        <Animated.View
+          style={[
+            styles.profileCard,
+            {
+              transform: [{ scale: profileScale }],
+              backgroundColor: isDark
+                ? colors.surfaceSecondary
+                : colors.surface,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.profileCardInner}
+            activeOpacity={0.7}
+            onPress={handleEditProfile}
+          >
+            <LinearGradient
+              colors={[colors.primary, colors.primaryDark]}
+              style={styles.profileAvatar}
+            >
+              <Text style={styles.avatarText}>{getUserInitials()}</Text>
+            </LinearGradient>
+            <View style={styles.profileInfo}>
+              <Text style={[styles.profileName, { color: colors.text }]}>
+                {user?.name || "User"}
+              </Text>
+              <Text
+                style={[styles.profileEmail, { color: colors.textSecondary }]}
+              >
+                {user?.email || "Loading..."}
+              </Text>
+              <View style={styles.planBadge}>
+                <LinearGradient
+                  colors={
+                    subscription?.tier === "free"
+                      ? ["#636B74", "#32383E"]
+                      : ["#F59E0B", "#EF4444"]
+                  }
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={styles.planBadgeGradient}
+                >
+                  <Ionicons
+                    name={subscription?.tier === "free" ? "person" : "sparkles"}
+                    size={12}
+                    color="#FFF"
+                  />
+                  <Text style={styles.planBadgeText}>{getPlanName()}</Text>
+                </LinearGradient>
+              </View>
+            </View>
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={colors.textTertiary}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* Subscription Banner - Only show for free users */}
+        {(!subscription || subscription.tier === "free") && (
+          <Animated.View style={{ opacity: headerOpacity }}>
+            <TouchableOpacity
+              activeOpacity={0.9}
+              onPress={() => router.push("/settings/subscription")}
+            >
+              <LinearGradient
+                colors={["#4F46E5", "#7C3AED"]} // Premium purple/indigo gradient
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.subscriptionBanner}
+              >
+                <View style={styles.subscriptionContent}>
+                  <View style={styles.subscriptionIcon}>
+                    <Ionicons name="sparkles" size={28} color="#FFF" />
+                  </View>
+                  <View style={styles.subscriptionInfo}>
+                    <Text style={styles.subscriptionTitle}>
+                      Upgrade to Unlimited
+                    </Text>
+                    <Text style={styles.subscriptionDesc}>
+                      Unlimited applications • Priority support
+                    </Text>
+                  </View>
+                  <View style={styles.subscriptionArrow}>
+                    <Ionicons name="arrow-forward" size={20} color="#FFF" />
+                  </View>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
+        {/* Account Section */}
+        <SettingsSection title="ACCOUNT" delay={100} colors={colors}>
+          <SettingItem
+            icon="person-outline"
+            iconColor="#0ea5e9"
+            label="Edit Profile"
+            delay={150}
+            colors={colors}
+            isDark={isDark}
+            onPress={handleEditProfile}
+          />
+          <SettingItem
+            icon="card-outline"
+            iconColor="#10B981"
+            label="Subscription"
+            value={getPlanName()}
+            delay={200}
+            colors={colors}
+            isDark={isDark}
+            onPress={handleSubscription}
+          />
+        </SettingsSection>
+
+        {/* Preferences Section */}
+        <SettingsSection title="PREFERENCES" delay={300} colors={colors}>
+          <SettingItem
+            icon="notifications-outline"
+            iconColor="#0284c7"
+            label="Push Notifications"
+            delay={350}
+            colors={colors}
+            isDark={isDark}
+            isSwitch
+            switchValue={notifications}
+            onSwitchChange={handleNotificationsChange}
+          />
+          <SettingItem
+            icon="finger-print-outline"
+            iconColor="#EC4899"
+            label="Face ID / Touch ID"
+            delay={400}
+            colors={colors}
+            isDark={isDark}
+            isSwitch
+            switchValue={biometrics}
+            onSwitchChange={handleBiometricsChange}
+          />
+          <SettingItem
+            icon="flash-outline"
+            iconColor="#3B82F6"
+            label="Quick Apply"
+            delay={450}
+            colors={colors}
+            isDark={isDark}
+            isSwitch
+            switchValue={autoApply}
+            onSwitchChange={handleAutoApplyChange}
+          />
+          <SettingItem
+            icon={isDark ? "moon-outline" : "sunny-outline"}
+            iconColor={isDark ? "#F59E0B" : "#0ea5e9"}
+            label="Dark Mode"
+            delay={500}
+            colors={colors}
+            isDark={isDark}
+            isSwitch
+            switchValue={isDark}
+            onSwitchChange={(value) => setMode(value ? "dark" : "light")}
+          />
+        </SettingsSection>
+
+        {/* Support Section */}
+        <SettingsSection title="SUPPORT" delay={550} colors={colors}>
+          <SettingItem
+            icon="help-circle-outline"
+            iconColor="#0ea5e9"
+            label="Help Center"
+            delay={600}
+            colors={colors}
+            isDark={isDark}
+            onPress={handleHelpCenter}
+          />
+          <SettingItem
+            icon="chatbubble-ellipses-outline"
+            iconColor="#10B981"
+            label="Contact Support"
+            delay={650}
+            colors={colors}
+            isDark={isDark}
+            onPress={handleContactSupport}
+          />
+          <SettingItem
+            icon="star-outline"
+            iconColor="#F59E0B"
+            label="Rate the App"
+            delay={700}
+            colors={colors}
+            isDark={isDark}
+            onPress={handleRateApp}
+          />
+          <SettingItem
+            icon="document-text-outline"
+            iconColor="#0284c7"
+            label="Privacy Policy"
+            delay={750}
+            colors={colors}
+            isDark={isDark}
+            onPress={handlePrivacyPolicy}
+          />
+        </SettingsSection>
+
+        {/* Danger Zone */}
+        <SettingsSection title="DANGER ZONE" delay={800} colors={colors}>
+          <SettingItem
+            icon="log-out-outline"
+            iconColor="#EF4444"
+            label="Sign Out"
+            delay={850}
+            colors={colors}
+            isDark={isDark}
+            isDestructive
+            onPress={handleLogout}
+          />
+          <SettingItem
+            icon="trash-outline"
+            iconColor="#EF4444"
+            label="Delete Account"
+            delay={900}
+            colors={colors}
+            isDark={isDark}
+            isDestructive
+            onPress={handleDeleteAccount}
+          />
+        </SettingsSection>
+
+        {/* App Version */}
+        <View style={[styles.footer, { paddingBottom: insets.bottom + 100 }]}>
+          <Text style={[styles.versionText, { color: colors.textTertiary }]}>
+            Tap2Apply v1.0.0
+          </Text>
+          <Text style={[styles.copyrightText, { color: colors.textTertiary }]}>
+            © 2025 Tap2Apply. All rights reserved.
+          </Text>
+        </View>
+      </ScrollView>
+
+      {/* Modals */}
+      <ConfirmModal
+        visible={logoutModalVisible}
+        onClose={() => setLogoutModalVisible(false)}
+        onConfirm={processLogout}
+        title="Sign Out"
+        message="Are you sure you want to sign out?"
+        confirmText="Sign Out"
+        type="danger"
+        loading={actionLoading}
+      />
+
+      <ConfirmModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onConfirm={processDeleteAccount}
+        title="Delete Account"
+        message="This action is irreversible. All your data will be permanently deleted."
+        confirmText="Delete"
+        type="danger"
+        loading={actionLoading}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerGradient: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 200,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: spacing[6],
+  },
+  header: {
+    marginBottom: spacing[6],
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+  },
+  profileCard: {
+    borderRadius: borderRadius.xl,
+    marginBottom: spacing[5],
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  profileCardInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: spacing[4],
+  },
+  profileAvatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: "#FFF",
+  },
+  profileInfo: {
+    flex: 1,
+    marginLeft: spacing[4],
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  profileEmail: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  planBadge: {
+    marginTop: spacing[2],
+    alignSelf: "flex-start",
+  },
+  planBadgeGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing[3],
+    paddingVertical: 4,
+    borderRadius: borderRadius.full,
+    gap: 4,
+  },
+  planBadgeText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#FFF",
+  },
+  subscriptionBanner: {
+    borderRadius: borderRadius.xl,
+    marginBottom: spacing[8],
+    padding: spacing[5],
+    shadowColor: "#0ea5e9",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  subscriptionContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  subscriptionIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  subscriptionInfo: {
+    flex: 1,
+    marginLeft: spacing[4],
+  },
+  subscriptionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#FFF",
+  },
+  subscriptionDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    marginTop: 2,
+  },
+  subscriptionArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  section: {
+    marginBottom: spacing[6],
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 1,
+    marginBottom: spacing[3],
+    marginLeft: spacing[1],
+  },
+  sectionItems: {
+    gap: spacing[3],
+  },
+  settingItem: {
+    borderRadius: borderRadius.xl,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  settingItemInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: spacing[4],
+  },
+  settingIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  settingContent: {
+    flex: 1,
+    marginLeft: spacing[4],
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  settingValue: {
+    fontSize: 14,
+    marginTop: 2,
+  },
+  footer: {
+    alignItems: "center",
+    paddingTop: spacing[8],
+  },
+  versionText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  copyrightText: {
+    fontSize: 12,
+    marginTop: spacing[1],
+  },
+});

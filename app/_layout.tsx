@@ -1,59 +1,147 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as Notifications from "expo-notifications";
+import { Stack, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useRef } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { LoadingScreen } from "../src/components";
+import { notificationService } from "../src/services";
+import { useAuthStore, useThemeStore } from "../src/stores";
 
-import { useColorScheme } from '@/components/useColorScheme';
-
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
-
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
-
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const router = useRouter();
+  const segments = useSegments();
+
+  const { isAuthenticated, isInitialized, hasCompletedOnboarding, initialize } =
+    useAuthStore();
+  const { initialize: initTheme, activeTheme } = useThemeStore();
+
+  const notificationListener = useRef<Notifications.Subscription | undefined>(
+    undefined
+  );
+  const responseListener = useRef<Notifications.Subscription | undefined>(
+    undefined
+  );
+
+  // Initialize stores on mount
+  useEffect(() => {
+    const init = async () => {
+      await Promise.all([initialize(), initTheme()]);
+    };
+    init();
+  }, []);
+
+  // Handle navigation based on auth state
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const inAuthGroup = segments[0] === "(auth)";
+    const inOnboardingGroup = segments[0] === "(onboarding)";
+
+    if (!isAuthenticated && !inAuthGroup) {
+      // Redirect to welcome screen if not authenticated
+      router.replace("/(auth)/welcome");
+    } else if (
+      isAuthenticated &&
+      !hasCompletedOnboarding &&
+      !inOnboardingGroup
+    ) {
+      // Redirect to onboarding if authenticated but not completed onboarding
+      router.replace("/(onboarding)/upload-resume");
+    } else if (
+      isAuthenticated &&
+      hasCompletedOnboarding &&
+      (inAuthGroup || inOnboardingGroup)
+    ) {
+      // Redirect to main app if authenticated and completed onboarding
+      router.replace("/(tabs)");
+    }
+  }, [isAuthenticated, isInitialized, hasCompletedOnboarding, segments]);
+
+  // Push Notifications Setup
+  useEffect(() => {
+    let isMounted = true;
+
+    const registerForPushNotifications = async () => {
+      if (isAuthenticated) {
+        const token =
+          await notificationService.registerForPushNotificationsAsync();
+        if (token && isMounted) {
+          await notificationService.updateServerToken(token);
+        }
+      }
+    };
+
+    registerForPushNotifications();
+
+    notificationListener.current =
+      notificationService.addNotificationReceivedListener((notification) => {
+        // Handle foreground notification
+        console.log("Notification received:", notification);
+      });
+
+    responseListener.current =
+      notificationService.addNotificationResponseReceivedListener(
+        (response) => {
+          // Handle notification tap
+          console.log("Notification tapped:", response);
+          const data = response.notification.request.content.data;
+          if (data?.url) {
+            router.push((data as any).url);
+          }
+        }
+      );
+
+    return () => {
+      isMounted = false;
+      if (notificationListener.current) {
+        notificationListener.current.remove();
+      }
+      if (responseListener.current) {
+        responseListener.current.remove();
+      }
+    };
+  }, [isAuthenticated]);
+
+  if (!isInitialized) {
+    return <LoadingScreen message="Loading..." />;
+  }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+    <>
+      <StatusBar style={activeTheme === "dark" ? "light" : "dark"} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="application/[id]"
+          options={{ headerShown: true, title: "Application Details" }}
+        />
+        <Stack.Screen
+          name="profile/[id]"
+          options={{ headerShown: true, title: "Edit Profile" }}
+        />
       </Stack>
-    </ThemeProvider>
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <RootLayoutNav />
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }
