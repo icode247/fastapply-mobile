@@ -35,15 +35,22 @@ export interface RegisterDto {
   name: string;
   invitationToken?: string;
   referralCode?: string;
+  device?: string;
 }
 
 export interface SignInDto {
   email: string;
   invitationToken?: string;
+  device?: string;
 }
 
 export interface VerifyDto {
   token: string;
+}
+
+export interface VerifyOtpDto {
+  email: string;
+  otp: string;
 }
 
 export interface MessageResponse {

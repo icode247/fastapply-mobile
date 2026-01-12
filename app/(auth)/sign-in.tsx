@@ -270,7 +270,7 @@ export default function SignInScreen() {
     setLoading(true);
 
     try {
-      await authService.signIn({ email });
+      await authService.signIn({ email, device: "mobile" });
       router.push({ pathname: "/(auth)/verify", params: { email } });
     } catch (error) {
       Alert.alert("Error", getApiErrorMessage(error));
@@ -334,7 +334,7 @@ export default function SignInScreen() {
             <Text style={styles.welcomeBack}>Welcome back</Text>
             <Text style={styles.title}>Sign in to continue</Text>
             <Text style={styles.subtitle}>
-              Enter your email and we'll send you a magic link to sign in
+              Enter your email and we'll send you a verification code to sign in
               instantly
             </Text>
           </Animated.View>

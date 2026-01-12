@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { authService } from "../services";
 import { getApiErrorMessage } from "../services/api";
 import { useAuthStore } from "../stores";
-import { AuthResponse, RegisterDto, SignInDto } from "../types";
+import { AuthResponse, RegisterDto, SignInDto, VerifyOtpDto } from "../types";
 
 export const useAuth = () => {
   const {
@@ -49,6 +49,19 @@ export const useAuth = () => {
     [login]
   );
 
+  const verifyOtp = useCallback(
+    async (data: VerifyOtpDto) => {
+      try {
+        const response = await authService.verifyOtp(data);
+        await login(response.tokens, response.user, response.primaryJobProfile);
+        return { success: true, user: response.user };
+      } catch (error) {
+        return { success: false, error: getApiErrorMessage(error) };
+      }
+    },
+    [login]
+  );
+
   const handleGoogleCallback = useCallback(
     async (code: string) => {
       try {
@@ -83,6 +96,7 @@ export const useAuth = () => {
     register,
     signIn,
     verifyMagicLink,
+    verifyOtp,
     handleGoogleCallback,
     signOut,
     logout: signOut,

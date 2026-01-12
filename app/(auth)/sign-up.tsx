@@ -285,7 +285,12 @@ export default function SignUpScreen() {
     setLoading(true);
 
     try {
-      await authService.register({ name, email, referralCode });
+      await authService.register({
+        name,
+        email,
+        referralCode,
+        device: "mobile",
+      });
       router.push({ pathname: "/(auth)/verify", params: { email } });
     } catch (error) {
       Alert.alert("Error", getApiErrorMessage(error));
@@ -359,28 +364,6 @@ export default function SignUpScreen() {
               AI-powered applications
             </Text>
           </Animated.View>
-
-          {/* Feature pills */}
-          <View style={styles.features}>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Ionicons name="flash" size={16} color="#FFFFFF" />
-              </View>
-              <Text style={styles.featureText}>One-Tap Apply</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Ionicons name="sparkles" size={16} color="#FFFFFF" />
-              </View>
-              <Text style={styles.featureText}>AI-Powered</Text>
-            </View>
-            <View style={styles.featureItem}>
-              <View style={styles.featureIcon}>
-                <Ionicons name="trending-up" size={16} color="#FFFFFF" />
-              </View>
-              <Text style={styles.featureText}>Track Progress</Text>
-            </View>
-          </View>
 
           {/* Form */}
           <View style={styles.form}>

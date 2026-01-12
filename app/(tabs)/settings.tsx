@@ -316,7 +316,7 @@ export default function SettingsScreen() {
 
   const handleContactSupport = async () => {
     const email = "support@fastapply.co";
-    const subject = "Tap2Apply Support Request";
+    const subject = "FastApply Support Request";
     const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
@@ -328,7 +328,7 @@ export default function SettingsScreen() {
 
   const handleRateApp = async () => {
     // TODO: Replace with actual App Store / Play Store URLs
-    const url = "https://apps.apple.com/app/tap2apply";
+    const url = "https://apps.apple.com/app/fastapply";
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
@@ -649,10 +649,10 @@ export default function SettingsScreen() {
         {/* App Version */}
         <View style={[styles.footer, { paddingBottom: insets.bottom + 100 }]}>
           <Text style={[styles.versionText, { color: colors.textTertiary }]}>
-            Tap2Apply v1.0.0
+            FastApply v1.0.0
           </Text>
           <Text style={[styles.copyrightText, { color: colors.textTertiary }]}>
-            © 2025 Tap2Apply. All rights reserved.
+            © 2025 FastApply. All rights reserved.
           </Text>
         </View>
       </ScrollView>

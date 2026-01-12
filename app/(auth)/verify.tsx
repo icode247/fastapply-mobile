@@ -14,17 +14,20 @@ import {
 import { Button } from "../../src/components";
 import { borderRadius, spacing, typography } from "../../src/constants/theme";
 import { useAuth, useTheme } from "../../src/hooks";
+import { getApiErrorMessage } from "../../src/services/api";
 
 export default function VerifyScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { colors } = useTheme();
-  const { verifyMagicLink } = useAuth();
+  const { verifyMagicLink, verifyOtp } = useAuth();
   const [isVerifying, setIsVerifying] = useState(false);
   const [manualToken, setManualToken] = useState("");
+  const [otp, setOtp] = useState("");
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "success" | "error"
   >("pending");
+  const email = params.email as string | undefined;
 
   useEffect(() => {
     // Check if we have a token from deep link
@@ -50,7 +53,6 @@ export default function VerifyScreen() {
       const result = await verifyMagicLink(token);
       if (result.success) {
         setVerificationStatus("success");
-        // Navigation will be handled by root layout
       } else {
         setVerificationStatus("error");
         Alert.alert(
@@ -61,6 +63,24 @@ export default function VerifyScreen() {
     } catch (error) {
       setVerificationStatus("error");
       Alert.alert("Error", "Something went wrong during verification");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleOtpVerification = async () => {
+    if (!email || !otp) return;
+    setIsVerifying(true);
+    try {
+      await verifyOtp({ email, otp });
+      setVerificationStatus("success");
+      // Wait a bit to show success state before redirecting
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 1500);
+    } catch (error) {
+      setVerificationStatus("error");
+      Alert.alert("Verification Failed", getApiErrorMessage(error));
     } finally {
       setIsVerifying(false);
     }
@@ -97,6 +117,8 @@ export default function VerifyScreen() {
             name={
               verificationStatus === "success"
                 ? "checkmark-circle"
+                : email
+                ? "keypad-outline"
                 : "mail-open-outline"
             }
             size={64}
@@ -112,19 +134,59 @@ export default function VerifyScreen() {
             ? "Verifying..."
             : verificationStatus === "success"
             ? "Verified!"
+            : email
+            ? "Enter Verification Code"
             : "Check your email"}
         </Text>
 
         <Text style={[styles.description, { color: colors.textSecondary }]}>
           {isVerifying
-            ? "Please wait while we verify your email..."
+            ? "Please wait while we verify..."
             : verificationStatus === "success"
-            ? "Your email has been verified. Redirecting..."
+            ? "Redirecting..."
+            : email
+            ? `We sent a 6-digit code to ${email}`
             : "We sent you a magic link. Click the link in your email to sign in."}
         </Text>
 
-        {/* Spam notice */}
-        {verificationStatus === "pending" && !isVerifying && (
+        {/* OTP Input for Mobile Auth */}
+        {email && verificationStatus !== "success" && !isVerifying && (
+          <View style={styles.manualInputContainer}>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors.surfaceSecondary,
+                  color: colors.text,
+                  borderColor: colors.border,
+                  textAlign: "center",
+                  letterSpacing: 4,
+                  fontSize: 24,
+                  fontWeight: "600",
+                },
+              ]}
+              placeholder="000000"
+              placeholderTextColor={colors.textTertiary}
+              value={otp}
+              onChangeText={setOtp}
+              keyboardType="number-pad"
+              maxLength={6}
+              autoFocus
+            />
+            <Button
+              title="Verify Code"
+              onPress={handleOtpVerification}
+              variant="primary"
+              disabled={otp.length !== 6}
+              loading={isVerifying}
+              style={{ marginTop: spacing[4] }}
+              fullWidth
+            />
+          </View>
+        )}
+
+        {/* Spam notice (Only show for magic link flow) */}
+        {!email && verificationStatus === "pending" && !isVerifying && (
           <View
             style={[
               styles.notice,
@@ -142,8 +204,8 @@ export default function VerifyScreen() {
           </View>
         )}
 
-        {/* Manual Token Input */}
-        {verificationStatus !== "success" && !isVerifying && (
+        {/* Manual Token Input (Fallback for Magic Link) */}
+        {!email && verificationStatus !== "success" && !isVerifying && (
           <View style={styles.manualInputContainer}>
             <Text style={[styles.manualLabel, { color: colors.textSecondary }]}>
               Or enter code manually:
@@ -178,7 +240,7 @@ export default function VerifyScreen() {
         {verificationStatus !== "success" && !isVerifying && (
           <View style={styles.actions}>
             <Button
-              title="Resend Magic Link"
+              title="Resend Code"
               onPress={handleResendLink}
               variant="outline"
               fullWidth
@@ -189,7 +251,7 @@ export default function VerifyScreen() {
               onPress={() =>
                 Alert.alert(
                   "Help",
-                  "Contact support@tap2apply.com for assistance"
+                  "Contact support@fastapply.com for assistance"
                 )
               }
             >

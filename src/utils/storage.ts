@@ -2,12 +2,12 @@ import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
 const STORAGE_KEYS = {
-  ACCESS_TOKEN: "tap2apply_access_token",
-  REFRESH_TOKEN: "tap2apply_refresh_token",
-  USER: "tap2apply_user",
-  PRIMARY_JOB_PROFILE: "tap2apply_primary_job_profile",
-  ONBOARDING_COMPLETE: "tap2apply_onboarding_complete",
-  THEME: "tap2apply_theme",
+  ACCESS_TOKEN: "fastapply_access_token",
+  REFRESH_TOKEN: "fastapply_refresh_token",
+  USER: "fastapply_user",
+  PRIMARY_JOB_PROFILE: "fastapply_primary_job_profile",
+  ONBOARDING_COMPLETE: "fastapply_onboarding_complete",
+  THEME: "fastapply_theme",
 } as const;
 
 // For web, use localStorage fallback

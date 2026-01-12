@@ -33,6 +33,7 @@ export const ENDPOINTS = {
     REGISTER: "/api/v1/auth/register",
     SIGNIN: "/api/v1/auth/signin",
     VERIFY: "/api/v1/auth/verify",
+    VERIFY_OTP: "/api/v1/auth/verify-otp",
     GOOGLE: "/api/v1/auth/google",
     GOOGLE_CALLBACK: "/api/v1/auth/google/callback",
     REFRESH: "/api/v1/auth/refresh",
@@ -84,8 +85,8 @@ export const ENDPOINTS = {
 
 // App Configuration
 export const APP_CONFIG = {
-  APP_NAME: "Tap2Apply",
-  APP_SCHEME: "tap2apply",
+  APP_NAME: "FastApply",
+  APP_SCHEME: "fastapply",
   TOKEN_REFRESH_THRESHOLD: 60 * 5, // 5 minutes before expiry
   MAX_RESUME_SIZE_MB: 5,
   SUPPORTED_RESUME_TYPES: [

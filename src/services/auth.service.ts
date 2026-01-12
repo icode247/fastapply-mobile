@@ -6,6 +6,7 @@ import {
   RegisterDto,
   SignInDto,
   User,
+  VerifyOtpDto,
 } from "../types";
 import { storage } from "../utils/storage";
 import { api, getApiErrorMessage } from "./api";
@@ -30,6 +31,26 @@ export const authService = {
       ENDPOINTS.AUTH.SIGNIN,
       data
     );
+    return response.data;
+  },
+
+  /**
+   * Verify OTP and get auth tokens
+   */
+  async verifyOtp(data: VerifyOtpDto): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>(
+      ENDPOINTS.AUTH.VERIFY_OTP,
+      data
+    );
+    const { tokens, user, primaryJobProfile } = response.data;
+
+    // Store tokens, user, and primary job profile
+    await storage.setTokens(tokens.accessToken, tokens.refreshToken);
+    await storage.setUser(user);
+    if (primaryJobProfile) {
+      await storage.setPrimaryJobProfile(primaryJobProfile);
+    }
+
     return response.data;
   },
 
