@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.fastapply.app",
       "infoPlist": {
         "NSDocumentsFolderUsageDescription": "We need access to documents to upload your resume",
-        "NSPhotoLibraryUsageDescription": "We need access to photos to upload profile pictures"
+        "NSPhotoLibraryUsageDescription": "We need access to photos to upload profile pictures",
+        "NSMicrophoneUsageDescription": "We need microphone access for voice commands to search and apply for jobs hands-free"
       }
     },
     "android": {
@@ -30,7 +31,8 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -46,7 +48,8 @@
         {
           "iCloudContainerEnvironment": "Production"
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

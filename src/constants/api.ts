@@ -81,6 +81,17 @@ export const ENDPOINTS = {
     UPGRADE: "/api/v1/subscriptions/upgrade",
     CANCEL: "/api/v1/subscriptions/cancel",
   },
+  // Automations
+  AUTOMATIONS: {
+    BASE: "/api/v1/automations",
+    BY_ID: (id: string) => `/api/v1/automations/${id}`,
+    TOGGLE: (id: string) => `/api/v1/automations/${id}/toggle`,
+    URLS: (id: string) => `/api/v1/automations/${id}/urls`,
+    URLS_RETRY: (id: string) => `/api/v1/automations/${id}/urls/retry`,
+    QUEUE_STATS: (id: string) => `/api/v1/automations/${id}/queue-stats`,
+    RUNS: (id: string) => `/api/v1/automations/${id}/runs`,
+    STATS: (id: string) => `/api/v1/automations/${id}/stats`,
+  },
 } as const;
 
 // App Configuration

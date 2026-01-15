@@ -26,28 +26,6 @@ interface ProfileSelectorModalProps {
   profiles: Profile[];
 }
 
-// Mock profiles for now - will be replaced with real data from profileService
-export const MOCK_PROFILES: Profile[] = [
-  {
-    id: "1",
-    name: "Primary Profile",
-    headline: "Senior Frontend Engineer",
-    isComplete: true,
-  },
-  {
-    id: "2",
-    name: "Design Profile",
-    headline: "Product Designer",
-    isComplete: true,
-  },
-  {
-    id: "3",
-    name: "Backend Profile",
-    headline: "Backend Developer",
-    isComplete: false,
-  },
-];
-
 export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
   visible,
   onClose,

@@ -1,10 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import * as NavigationBar from "expo-navigation-bar";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LoadingScreen } from "../src/components";
+import { useTheme } from "../src/hooks";
 import { notificationService } from "../src/services";
 import { useAuthStore, useThemeStore } from "../src/stores";
 
@@ -24,6 +27,7 @@ function RootLayoutNav() {
   const { isAuthenticated, isInitialized, hasCompletedOnboarding, initialize } =
     useAuthStore();
   const { initialize: initTheme, activeTheme } = useThemeStore();
+  const { colors } = useTheme();
 
   const notificationListener = useRef<Notifications.Subscription | undefined>(
     undefined
@@ -39,6 +43,14 @@ function RootLayoutNav() {
     };
     init();
   }, []);
+
+  // Set Android navigation bar color to match theme
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync(colors.background);
+      NavigationBar.setButtonStyleAsync(activeTheme === "dark" ? "light" : "dark");
+    }
+  }, [colors.background, activeTheme]);
 
   // Handle navigation based on auth state
   useEffect(() => {

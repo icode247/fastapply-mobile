@@ -1,46 +1,308 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import * as NavigationBar from "expo-navigation-bar";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   JobFilters,
   JobFiltersModal,
 } from "../../src/components/feed/JobFiltersModal";
-import {
-  MOCK_PROFILES,
-  ProfileSelectorModal,
-} from "../../src/components/feed/ProfileSelectorModal";
+import { ProfileSelectorModal } from "../../src/components/feed/ProfileSelectorModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
 import { VoiceActivityIcon } from "../../src/components/feed/VoiceActivityIcon";
+import { VoiceCommandOverlay } from "../../src/components/feed/VoiceCommandOverlay";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
-import { Job, MOCK_JOBS } from "../../src/mocks/jobs";
+import { useAutomation } from "../../src/hooks/useAutomation";
+import { useVoiceCommand } from "../../src/hooks/useVoiceCommand";
+import { automationService } from "../../src/services/automation.service";
+import { jobService } from "../../src/services/job.service";
+import { profileService } from "../../src/services/profile.service";
+import { EmploymentType, NormalizedJob, WorkplaceType } from "../../src/types/job.types";
+import { JobProfile } from "../../src/types/profile.types";
+
+// Profile interface for ProfileSelectorModal
+interface Profile {
+  id: string;
+  name: string;
+  headline?: string;
+  isComplete: boolean;
+}
+
+// Convert JobProfile to Profile format for modal
+function toProfile(profile: JobProfile): Profile {
+  // Consider a profile complete if it has basic info filled
+  const hasBasicInfo = !!(profile.firstName && profile.lastName && profile.email);
+  return {
+    id: profile.id,
+    name: profile.name,
+    headline: profile.headline,
+    isComplete: hasBasicInfo,
+  };
+}
+
+// Legacy Job interface for backward compatibility with SwipeDeck
+interface LegacyJob {
+  id: string;
+  title: string;
+  company: string;
+  logo: string;
+  salary: string;
+  type: string;
+  workMode: string;
+  location: string;
+  experience: string;
+  description: string;
+  postedAt: string;
+  tags: string[];
+}
+
+// Convert NormalizedJob to LegacyJob format for SwipeDeck
+function toLegacyJob(job: NormalizedJob): LegacyJob {
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company,
+    logo: job.logo,
+    salary: job.salary,
+    type: job.type,
+    workMode: job.workMode,
+    location: job.location,
+    experience: job.experience,
+    description: job.description,
+    postedAt: job.postedAt,
+    tags: job.tags,
+  };
+}
 
 export default function FeedScreen() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
+
+  // Load jobs from service
+  const [jobs, setJobs] = useState<NormalizedJob[]>([]);
+  const [currentJobIndex, setCurrentJobIndex] = useState(0);
+
+  // Set Android navigation bar color to match theme
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync(colors.background);
+      NavigationBar.setButtonStyleAsync(
+        colors.background === "#FFFFFF" || colors.background.toLowerCase() === "#fff"
+          ? "dark"
+          : "light"
+      );
+    }
+  }, [colors.background]);
 
   // Modal states
   const [showFilters, setShowFilters] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
   const [filters, setFilters] = useState<JobFilters | null>(null);
-  const [selectedProfileId, setSelectedProfileId] = useState(
-    MOCK_PROFILES[0]?.id
+
+  // Real profiles from backend
+  const [profiles, setProfiles] = useState<JobProfile[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(true);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+
+  // Fetch profiles on mount
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        setProfilesLoading(true);
+        const fetchedProfiles = await profileService.getProfiles();
+        setProfiles(fetchedProfiles);
+
+        // Select primary profile by default, or first profile
+        const primaryProfile = fetchedProfiles.find(p => p.isPrimary);
+        if (primaryProfile) {
+          setSelectedProfileId(primaryProfile.id);
+        } else if (fetchedProfiles.length > 0) {
+          setSelectedProfileId(fetchedProfiles[0].id);
+        }
+
+        console.log("Loaded profiles:", fetchedProfiles.length);
+
+        // Clean up any cached data for profiles that no longer exist
+        const validProfileIds = fetchedProfiles.map(p => p.id);
+        await automationService.cleanupInvalidProfiles(validProfileIds);
+      } catch (error) {
+        console.error("Failed to load profiles:", error);
+      } finally {
+        setProfilesLoading(false);
+      }
+    };
+
+    loadProfiles();
+  }, []);
+
+  // Get selected profile
+  const selectedProfile = useMemo(
+    () => profiles.find((p) => p.id === selectedProfileId),
+    [profiles, selectedProfileId]
   );
 
-  const handleSwipeLeft = (job: Job) => {
+  // Convert profiles to modal format
+  const modalProfiles = useMemo(
+    () => profiles.map(toProfile),
+    [profiles]
+  );
+
+  // Convert jobs to legacy format for SwipeDeck
+  const legacyJobs = useMemo(() => jobs.map(toLegacyJob), [jobs]);
+
+  // Automation hook - queues jobs on swipe right
+  const {
+    isReady: automationReady,
+    isProcessing: automationProcessing,
+    queueJob,
+    queueStats,
+    pendingCount,
+    lastError: automationError,
+    clearError: clearAutomationError,
+  } = useAutomation({
+    profileId: selectedProfileId,
+    profileName: selectedProfile?.name,
+    onSuccess: (job, automationId) => {
+      console.log(`Job queued successfully: ${job.title} -> automation ${automationId}`);
+    },
+    onError: (job, error) => {
+      console.error(`Failed to queue job: ${job.title}`, error);
+    },
+  });
+
+  // Helper to find NormalizedJob from LegacyJob id
+  const getJobById = useCallback(
+    (id: string): NormalizedJob | undefined => {
+      return jobs.find((j) => j.id === id);
+    },
+    [jobs]
+  );
+
+  // Voice command hook
+  const {
+    isListening,
+    isProcessing,
+    lastCommand,
+    error: voiceError,
+    isConfigured: voiceConfigured,
+    startListening,
+    stopListening,
+    cancelListening,
+  } = useVoiceCommand({
+    jobs,
+    currentJobIndex,
+    profile: selectedProfile || null,
+    onApply: () => {
+      swipeDeckRef.current?.swipeRight();
+    },
+    onSkip: () => {
+      swipeDeckRef.current?.swipeLeft();
+    },
+    onUndo: () => {
+      swipeDeckRef.current?.undo();
+    },
+    onNext: () => {
+      swipeDeckRef.current?.swipeLeft();
+    },
+    onSearch: (filteredJobs) => {
+      // Update jobs with search results
+      console.log("Search returned", filteredJobs.length, "jobs");
+    },
+    onFilter: (filteredJobs) => {
+      // Update jobs with filtered results
+      console.log("Filter returned", filteredJobs.length, "jobs");
+    },
+    onError: (error) => {
+      console.error("Voice command error:", error);
+    },
+    hapticFeedback: true,
+  });
+
+  // Load jobs on mount
+  useEffect(() => {
+    const allJobs = jobService.getAllJobs();
+    setJobs(allJobs);
+
+    // Log stats
+    const stats = jobService.getStats();
+    console.log("Loaded jobs:", stats);
+  }, []);
+
+  const handleSwipeLeft = (job: LegacyJob) => {
     console.log("Rejected:", job.title);
-    // TODO: Connect to applicationService.rejectJob(job.id)
+    setCurrentJobIndex((prev) => prev + 1);
   };
 
-  const handleSwipeRight = (job: Job) => {
+  const handleSwipeRight = async (job: LegacyJob) => {
     console.log("Applied:", job.title);
-    // TODO: Connect to applicationService.applyToJob(job.id)
-    Alert.alert("Application Sent! 🎉", `You applied to ${job.company}`);
+    setCurrentJobIndex((prev) => prev + 1);
+
+    // Check if profiles are loaded and selected
+    if (profilesLoading) {
+      Alert.alert("Loading", "Please wait while profiles are loading...");
+      return;
+    }
+
+    if (!selectedProfileId || profiles.length === 0) {
+      Alert.alert(
+        "Profile Required",
+        "Please create or select a job profile to enable job automation.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Find the full normalized job to get the URL
+    const normalizedJob = getJobById(job.id);
+
+    if (!normalizedJob) {
+      console.error("Could not find job details for:", job.id);
+      Alert.alert("Application Queued", `Added ${job.title} at ${job.company} to your queue.`);
+      return;
+    }
+
+    // Queue job to automation service
+    const success = await queueJob(normalizedJob);
+
+    if (success) {
+      Alert.alert(
+        "Application Queued!",
+        `${job.title} at ${job.company} has been added to your automation queue.` +
+          (queueStats
+            ? `\n\nQueue: ${(queueStats.pending || 0) + 1} pending`
+            : ""),
+        [{ text: "OK" }]
+      );
+    } else {
+      // Check if it's a profile-related error
+      const isProfileError = automationError?.toLowerCase().includes("profile") ||
+        automationError?.toLowerCase().includes("uuid") ||
+        automationError?.toLowerCase().includes("not found");
+
+      if (isProfileError) {
+        Alert.alert(
+          "Profile Not Found",
+          "The selected profile could not be found. Please create a profile in your account settings.",
+          [{ text: "OK", onPress: clearAutomationError }]
+        );
+      } else {
+        // Job will be retried in background - still show positive feedback
+        Alert.alert(
+          "Application Queued",
+          `${job.title} at ${job.company} will be processed shortly.` +
+            (automationError ? `\n\nNote: ${automationError}` : ""),
+          [{ text: "OK", onPress: clearAutomationError }]
+        );
+      }
+    }
   };
 
   const handleUndo = () => {
     swipeDeckRef.current?.undo();
+    setCurrentJobIndex((prev) => Math.max(0, prev - 1));
   };
 
   const handleReject = () => {
@@ -52,25 +314,105 @@ export default function FeedScreen() {
   };
 
   const handleSelectProfile = () => {
+    if (profilesLoading) {
+      Alert.alert("Loading", "Please wait while profiles are loading...");
+      return;
+    }
+    if (profiles.length === 0) {
+      Alert.alert(
+        "No Profiles Found",
+        "Please create a job profile first to enable job automation.",
+        [{ text: "OK" }]
+      );
+      return;
+    }
     setShowProfileSelector(true);
   };
 
-  // Voice command state
-  const [isListening, setIsListening] = useState(false);
-
-  const handleVoiceCommand = () => {
-    setIsListening(!isListening);
-    // TODO: Implement actual voice command logic
-    if (!isListening) {
-      // Simulate listening start
-      Alert.alert("Listening...", "Try saying 'Apply to this job'");
+  // Voice command handler
+  const handleVoiceCommand = async () => {
+    if (!voiceConfigured) {
+      Alert.alert(
+        "Voice Commands Not Configured",
+        "Please add your OpenAI API key to enable voice commands.\n\n" +
+        "Add EXPO_PUBLIC_OPENAI_API_KEY to your environment variables.",
+        [{ text: "OK" }]
+      );
+      return;
     }
+
+    if (isListening) {
+      // Stop listening and process
+      setShowVoiceOverlay(false);
+      await stopListening();
+    } else {
+      // Start listening
+      setShowVoiceOverlay(true);
+      const started = await startListening();
+      if (!started) {
+        setShowVoiceOverlay(false);
+        Alert.alert(
+          "Microphone Access Required",
+          "Please allow microphone access to use voice commands.",
+          [{ text: "OK" }]
+        );
+      }
+    }
+  };
+
+  const handleCloseVoiceOverlay = async () => {
+    if (isListening) {
+      await cancelListening();
+    }
+    setShowVoiceOverlay(false);
+  };
+
+  const handleStopListening = async () => {
+    await stopListening();
+    // Keep overlay open briefly to show result
+    setTimeout(() => {
+      setShowVoiceOverlay(false);
+    }, 1500);
   };
 
   const handleApplyFilters = (newFilters: JobFilters) => {
     setFilters(newFilters);
     console.log("Filters applied:", newFilters);
-    // TODO: Use filters to fetch filtered jobs from API
+
+    // Apply filters to jobs - map JobFilters to JobSearchFilters
+    const jobTypesMap: Record<string, EmploymentType> = {
+      "full-time": "full_time",
+      "part-time": "part_time",
+      "contract": "contract",
+      "internship": "internship",
+      "freelance": "freelance",
+    };
+
+    const workModesMap: Record<string, WorkplaceType> = {
+      "remote": "remote",
+      "hybrid": "hybrid",
+      "on-site": "onsite",
+      "onsite": "onsite",
+    };
+
+    const searchFilters = {
+      remoteOnly: newFilters.remoteOnly,
+      salaryMin: newFilters.salaryMin,
+      salaryMax: newFilters.salaryMax,
+      jobTypes: newFilters.jobTypes.length > 0
+        ? newFilters.jobTypes.map(t => jobTypesMap[t.toLowerCase()] || null).filter(Boolean) as EmploymentType[]
+        : undefined,
+      workModes: newFilters.workModes.length > 0
+        ? newFilters.workModes.map(m => workModesMap[m.toLowerCase()] || null).filter(Boolean) as WorkplaceType[]
+        : undefined,
+      countries: newFilters.country ? [newFilters.country] : undefined,
+      cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
+    };
+
+    const result = jobService.searchJobs(searchFilters);
+    console.log("Filtered jobs:", result.total, "of", jobService.getAllJobs().length);
+    setJobs(result.jobs);
+    setCurrentJobIndex(0);
   };
 
   return (
@@ -79,30 +421,61 @@ export default function FeedScreen() {
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
-          Discover
-        </Text>
-        <TouchableOpacity
-          style={[
-            styles.filterButton,
-            { backgroundColor: colors.surfaceSecondary },
-          ]}
-          onPress={() => setShowFilters(true)}
-        >
-          <Ionicons name="options-outline" size={22} color={colors.text} />
-          {filters && (
+        <View>
+          <Text style={[styles.headerTitle, { color: colors.text }]}>
+            Discover
+          </Text>
+          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            {jobs.length} jobs available
+            {profilesLoading ? " • Loading profiles..." :
+              profiles.length === 0 ? " • No profile" :
+              selectedProfile ? ` • ${selectedProfile.name}` : ""}
+            {queueStats && queueStats.pending > 0 && (
+              ` • ${queueStats.pending} queued`
+            )}
+            {pendingCount > 0 && (
+              ` • ${pendingCount} syncing`
+            )}
+          </Text>
+        </View>
+        <View style={styles.headerActions}>
+          {/* Queue indicator */}
+          {(automationProcessing || pendingCount > 0) && (
             <View
-              style={[styles.filterBadge, { backgroundColor: colors.primary }]}
-            />
+              style={[
+                styles.queueIndicator,
+                { backgroundColor: colors.surfaceSecondary },
+              ]}
+            >
+              <MaterialCommunityIcons
+                name="sync"
+                size={18}
+                color={colors.primary}
+              />
+            </View>
           )}
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.filterButton,
+              { backgroundColor: colors.surfaceSecondary },
+            ]}
+            onPress={() => setShowFilters(true)}
+          >
+            <Ionicons name="options-outline" size={22} color={colors.text} />
+            {filters && (
+              <View
+                style={[styles.filterBadge, { backgroundColor: colors.primary }]}
+              />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Swipe Deck */}
       <View style={styles.deckContainer}>
         <SwipeDeck
           ref={swipeDeckRef}
-          jobs={MOCK_JOBS}
+          jobs={legacyJobs}
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
         />
@@ -112,7 +485,10 @@ export default function FeedScreen() {
       <View
         style={[
           styles.actionsContainer,
-          { backgroundColor: colors.surfaceSecondary },
+          {
+            backgroundColor: colors.surfaceSecondary,
+            bottom: Math.max(insets.bottom, 16) + 8,
+          },
         ]}
       >
         {/* Undo */}
@@ -163,26 +539,40 @@ export default function FeedScreen() {
           <Ionicons name="heart" size={36} color="#00C853" />
         </TouchableOpacity>
 
-        {/* Voice Command (ChatGPT Style) */}
+        {/* Voice Command */}
         <TouchableOpacity
           style={[
             styles.actionButton,
             styles.smallButton,
-            { backgroundColor: isListening ? colors.text : colors.surface },
+            {
+              backgroundColor: isListening ? colors.primary : colors.surface,
+            },
           ]}
           onPress={handleVoiceCommand}
         >
-          {isListening ? (
-            <VoiceActivityIcon color={colors.background} />
+          {isListening || isProcessing ? (
+            <VoiceActivityIcon
+              color={isListening ? "#FFFFFF" : colors.primary}
+            />
           ) : (
             <MaterialCommunityIcons
               name="waveform"
               size={24}
-              color={colors.text}
+              color={voiceConfigured ? colors.text : colors.textTertiary}
             />
           )}
         </TouchableOpacity>
       </View>
+
+      {/* Voice Command Overlay */}
+      <VoiceCommandOverlay
+        visible={showVoiceOverlay}
+        isListening={isListening}
+        isProcessing={isProcessing}
+        suggestion={lastCommand?.suggestion}
+        onClose={handleCloseVoiceOverlay}
+        onStopListening={handleStopListening}
+      />
 
       {/* Modals */}
       <JobFiltersModal
@@ -199,8 +589,8 @@ export default function FeedScreen() {
           setSelectedProfileId(profile.id);
           console.log("Selected profile:", profile.name);
         }}
-        selectedProfileId={selectedProfileId}
-        profiles={MOCK_PROFILES}
+        selectedProfileId={selectedProfileId || undefined}
+        profiles={modalProfiles}
       />
     </SafeAreaView>
   );
@@ -222,6 +612,10 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize["3xl"],
     fontWeight: "800",
   },
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
+    marginTop: 2,
+  },
   filterButton: {
     width: 44,
     height: 44,
@@ -237,6 +631,18 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  queueIndicator: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   deckContainer: {
     flex: 1,
     zIndex: 1,
@@ -251,7 +657,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
     position: "absolute",
-    bottom: spacing[6],
+    // bottom is set dynamically with safe area insets
     zIndex: 100,
     borderRadius: 40,
     shadowColor: "#000",

@@ -40,11 +40,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
 
         <View style={styles.companyRow}>
           <Image source={{ uri: job.logo }} style={styles.logo} />
-          <View>
-            <Text style={[styles.company, { color: colors.text }]}>
+          <View style={styles.companyInfo}>
+            <Text style={[styles.company, { color: colors.text }]} numberOfLines={1}>
               {job.company}
             </Text>
-            <Text style={[styles.location, { color: colors.textTertiary }]}>
+            <Text style={[styles.location, { color: colors.textTertiary }]} numberOfLines={1}>
               {job.location}
             </Text>
           </View>
@@ -171,6 +171,9 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     marginRight: spacing[3],
+  },
+  companyInfo: {
+    flex: 1,
   },
   company: {
     fontSize: typography.fontSize.lg,
