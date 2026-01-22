@@ -1,6 +1,7 @@
 "use client";
 
 import { Ionicons } from "@expo/vector-icons";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -13,6 +14,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -37,6 +41,150 @@ const PageIndicator: React.FC<{ currentPage: number; totalPages: number }> = ({
     </View>
   );
 };
+
+// ============== SLIDE 1 COMPONENTS ==============
+
+// Company logo imports
+const companyLogos = {
+  google: require("../../assets/icons/google-icon.png"),
+  meta: require("../../assets/icons/meta-icon.png"),
+  airbnb: require("../../assets/icons/airbnb-icon.png"),
+};
+
+// Company data for trust cards
+const companies = [
+  {
+    name: "Google",
+    jobs: "2,847 jobs",
+    logo: companyLogos.google,
+  },
+  {
+    name: "Meta",
+    jobs: "1,923 jobs",
+    logo: companyLogos.meta,
+    hasCheck: true,
+  },
+  {
+    name: "Airbnb",
+    jobs: "1,456 jobs",
+    logo: companyLogos.airbnb,
+  },
+];
+
+// Company Card Component for Slide 1
+const CompanyCard: React.FC<{
+  company: (typeof companies)[0];
+  index: number;
+  animatedValue: Animated.Value;
+}> = ({ company, index, animatedValue }) => {
+  const translateY = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [50 + index * 20, 0],
+  });
+
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  // First card tilts down (negative rotation), last card tilts up (positive rotation)
+  // Middle card stays flat
+  const getRotation = () => {
+    if (index === 0) return "-4deg"; // First card - tilted down/left
+    if (index === 2) return "4deg"; // Last card - tilted up/right
+    return "0deg"; // Middle card - flat
+  };
+
+  return (
+    <Animated.View
+      style={[
+        styles.companyCard,
+        {
+          opacity,
+          transform: [{ translateY }, { rotate: getRotation() }],
+        },
+      ]}
+    >
+      <View style={styles.companyCardInner}>
+        <View style={styles.companyLogo}>
+          <Image source={company.logo} style={styles.companyLogoImage} resizeMode="contain" />
+        </View>
+        <View style={styles.companyInfo}>
+          <Text style={styles.companyName}>{company.name}</Text>
+          <Text style={styles.companyJobs}>{company.jobs}</Text>
+        </View>
+        {company.hasCheck && (
+          <View style={styles.checkBadge}>
+            <Ionicons name="checkmark" size={16} color="#10B981" />
+          </View>
+        )}
+      </View>
+    </Animated.View>
+  );
+};
+
+// Gradient Text Component for Slide 1 title
+const GradientText: React.FC<{ children: string; style?: any }> = ({ children, style }) => {
+  return (
+    <MaskedView
+      maskElement={
+        <Text style={[styles.slide1Title, style]}>
+          {children}
+        </Text>
+      }
+    >
+      <LinearGradient
+        colors={["#FFFFFF", "#B4DBE8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Text style={[styles.slide1Title, style, { opacity: 0 }]}>
+          {children}
+        </Text>
+      </LinearGradient>
+    </MaskedView>
+  );
+};
+
+// Slide 1 Component
+const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({ cardsAnimation }) => {
+  return (
+    <View style={styles.slideContainer}>
+      {/* Title Section - positioned at top: 98px from nav (which is at 62px) = 36px from header */}
+      <View style={styles.slide1TitleSection}>
+        <GradientText>
+          {`Swipe-Apply with\nVoice Auto-Pilot`}
+        </GradientText>
+      </View>
+
+      {/* Subtitle - positioned at top: 194px */}
+      <View style={styles.slide1SubtitleSection}>
+        <Text style={styles.slide1Subtitle}>
+          Just tell Scout what you're looking for. Our AI voice assistant finds, matches, and applies to 50+ jobs daily-hands-free.
+        </Text>
+      </View>
+
+      {/* Trust Section - positioned at top: 300px */}
+      <View style={styles.trustSection}>
+        <Text style={styles.trustLabel}>TRUSTED BY PROFESSIONALS AT</Text>
+
+        {/* Company Cards */}
+        <View style={styles.cardsContainer}>
+          {companies.map((company, index) => (
+            <CompanyCard
+              key={company.name}
+              company={company}
+              index={index}
+              animatedValue={cardsAnimation}
+            />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+};
+
+// ============== SLIDE 2 COMPONENTS ==============
 
 // Arrow Left Icon
 const ArrowLeftIcon: React.FC = () => (
@@ -102,8 +250,8 @@ const JobCard: React.FC<{
       >
         {/* Card Header */}
         <View style={styles.cardHeader}>
-          <View style={styles.companyLogo}>
-            <View style={styles.companyLogoPlaceholder} />
+          <View style={styles.jobCompanyLogo}>
+            <View style={styles.jobCompanyLogoPlaceholder} />
           </View>
           <View style={styles.matchBadge}>
             <Text style={styles.matchBadgeText}>92%</Text>
@@ -115,8 +263,8 @@ const JobCard: React.FC<{
           <View style={styles.jobTitleRow}>
             <Text style={styles.jobTitle}>Software Engineer (Frontend)</Text>
           </View>
-          <View style={styles.companyRow}>
-            <Text style={styles.companyName}>Global Solutions - New York, NY</Text>
+          <View style={styles.jobCompanyRow}>
+            <Text style={styles.jobCompanyName}>Global Solutions - New York, NY</Text>
           </View>
         </View>
 
@@ -183,16 +331,68 @@ const NewJobsBadge: React.FC<{ animatedValue: Animated.Value }> = ({
   );
 };
 
+// Slide 2 Component
+const Slide2: React.FC<{ cardAnimation: Animated.Value }> = ({ cardAnimation }) => {
+  return (
+    <View style={styles.slideContainer}>
+      {/* Title Section */}
+      <View style={styles.titleSection}>
+        {/* Main Title with gradient text effect */}
+        <View style={styles.titleContainer}>
+          <Text style={styles.mainTitle}>
+            Swipe to Your{"\n"}Next Interview
+          </Text>
+        </View>
+
+        {/* Subtitle */}
+        <Text style={styles.subtitle}>
+          Quickly browse and swipe to apply to jobs tailored just for you.
+          Matches appear everyday.
+        </Text>
+      </View>
+
+      {/* Swipe Instructions & Card Section */}
+      <View style={styles.swipeSection}>
+        {/* Swipe Instructions */}
+        <View style={styles.swipeInstructions}>
+          <View style={styles.swipeDirection}>
+            <ArrowLeftIcon />
+            <Text style={styles.swipeText}>SWIPE TO PASS</Text>
+          </View>
+          <View style={styles.swipeDot} />
+          <View style={styles.swipeDirection}>
+            <Text style={styles.swipeText}>SWIPE TO APPLY</Text>
+            <ArrowRightIcon />
+          </View>
+        </View>
+
+        {/* Job Card with stacked effect */}
+        <View style={styles.cardSection}>
+          {/* Bottom stacked card (rotated more) */}
+          <View style={styles.bottomStackedCard} />
+
+          {/* Job Card */}
+          <JobCard animatedValue={cardAnimation} />
+
+          {/* New Jobs Badge */}
+          <NewJobsBadge animatedValue={cardAnimation} />
+        </View>
+      </View>
+    </View>
+  );
+};
+
+// ============== MAIN COMPONENT ==============
 export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [currentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   // Animations
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const headerTranslateY = useRef(new Animated.Value(-20)).current;
-  const titleOpacity = useRef(new Animated.Value(0)).current;
-  const titleTranslateY = useRef(new Animated.Value(20)).current;
+  const cardsAnimation = useRef(new Animated.Value(0)).current;
   const cardAnimation = useRef(new Animated.Value(0)).current;
   const buttonsOpacity = useRef(new Animated.Value(0)).current;
   const buttonsTranslateY = useRef(new Animated.Value(30)).current;
@@ -213,24 +413,16 @@ export default function WelcomeScreen() {
       }),
     ]).start();
 
-    // Title entrance
-    Animated.parallel([
-      Animated.timing(titleOpacity, {
-        toValue: 1,
-        duration: 600,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(titleTranslateY, {
-        toValue: 0,
-        duration: 600,
-        delay: 200,
-        easing: Easing.out(Easing.exp),
-        useNativeDriver: true,
-      }),
-    ]).start();
+    // Cards animation (for slide 1)
+    Animated.timing(cardsAnimation, {
+      toValue: 1,
+      duration: 800,
+      delay: 400,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
 
-    // Card entrance
+    // Card animation (for slide 2)
     Animated.timing(cardAnimation, {
       toValue: 1,
       duration: 800,
@@ -244,18 +436,24 @@ export default function WelcomeScreen() {
       Animated.timing(buttonsOpacity, {
         toValue: 1,
         duration: 500,
-        delay: 600,
+        delay: 300,
         useNativeDriver: true,
       }),
       Animated.timing(buttonsTranslateY, {
         toValue: 0,
         duration: 500,
-        delay: 600,
+        delay: 300,
         easing: Easing.out(Easing.exp),
         useNativeDriver: true,
       }),
     ]).start();
   }, []);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const page = Math.round(offsetX / (SCREEN_WIDTH - 44));
+    setCurrentPage(page);
+  };
 
   return (
     <View style={styles.container}>
@@ -290,64 +488,27 @@ export default function WelcomeScreen() {
           <PageIndicator currentPage={currentPage} totalPages={2} />
         </Animated.View>
 
-        {/* Title Section */}
-        <Animated.View
-          style={[
-            styles.titleSection,
-            {
-              opacity: titleOpacity,
-              transform: [{ translateY: titleTranslateY }],
-            },
-          ]}
+        {/* Swipeable Slides */}
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewContent}
         >
-          {/* Main Title with gradient text effect */}
-          <View style={styles.titleContainer}>
-            <Text style={styles.mainTitle}>
-              Swipe to Your{"\n"}Next Interview
-            </Text>
+          {/* Slide 1 */}
+          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+            <Slide1 cardsAnimation={cardsAnimation} />
           </View>
 
-          {/* Subtitle */}
-          <Text style={styles.subtitle}>
-            Quickly browse and swipe to apply to jobs tailored just for you.
-            Matches appear everyday.
-          </Text>
-        </Animated.View>
-
-        {/* Swipe Instructions & Card Section */}
-        <View style={styles.swipeSection}>
-          {/* Swipe Instructions */}
-          <Animated.View
-            style={[
-              styles.swipeInstructions,
-              {
-                opacity: titleOpacity,
-              },
-            ]}
-          >
-            <View style={styles.swipeDirection}>
-              <ArrowLeftIcon />
-              <Text style={styles.swipeText}>SWIPE TO PASS</Text>
-            </View>
-            <View style={styles.swipeDot} />
-            <View style={styles.swipeDirection}>
-              <Text style={styles.swipeText}>SWIPE TO APPLY</Text>
-              <ArrowRightIcon />
-            </View>
-          </Animated.View>
-
-          {/* Job Card with stacked effect */}
-          <View style={styles.cardSection}>
-            {/* Bottom stacked card (rotated more) */}
-            <View style={styles.bottomStackedCard} />
-
-            {/* Job Card */}
-            <JobCard animatedValue={cardAnimation} />
-
-            {/* New Jobs Badge */}
-            <NewJobsBadge animatedValue={cardAnimation} />
+          {/* Slide 2 */}
+          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+            <Slide2 cardAnimation={cardAnimation} />
           </View>
-        </View>
+        </ScrollView>
 
         {/* Bottom Buttons */}
         <Animated.View
@@ -394,8 +555,8 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     backgroundColor: "rgba(255,255,255,0.12)",
-    top: 83,
-    left: 15,
+    top: 77,
+    left: 8,
   },
   content: {
     flex: 1,
@@ -429,7 +590,114 @@ const styles = StyleSheet.create({
     width: 8,
     backgroundColor: "rgba(217,217,217,0.3)",
   },
-  // Title section styles
+  // ScrollView styles
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  slide: {
+    flex: 1,
+  },
+  slideContainer: {
+    flex: 1,
+  },
+  // ============== SLIDE 1 STYLES ==============
+  slide1TitleSection: {
+    alignItems: "center",
+    marginTop: 36,
+  },
+  slide1Title: {
+    fontSize: 40,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textAlign: "center",
+    lineHeight: 42,
+    width: 350,
+    // Note: React Native doesn't support gradient text natively
+    // The gradient effect (132deg, white to #B4DBE8) would need expo-linear-gradient with MaskedView
+  },
+  slide1SubtitleSection: {
+    alignItems: "center",
+    marginTop: 16,
+    paddingHorizontal: 12,
+  },
+  slide1Subtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    textAlign: "center",
+    lineHeight: 22,
+    width: 326,
+  },
+  trustSection: {
+    marginTop: 40,
+    alignItems: "center",
+  },
+  trustLabel: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "rgba(255,255,255,0.5)",
+    letterSpacing: 2,
+    textAlign: "center",
+    marginBottom: 48,
+    width: 297,
+  },
+  cardsContainer: {
+    gap: 24,
+    width: "100%",
+    paddingHorizontal: 0,
+  },
+  companyCard: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  companyCardInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  companyLogo: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  companyLogoImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+  },
+  companyInfo: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  companyName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    marginBottom: 2,
+  },
+  companyJobs: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.6)",
+  },
+  checkBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(16, 185, 129, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  // ============== SLIDE 2 STYLES ==============
   titleSection: {
     alignItems: "center",
     gap: 8,
@@ -443,7 +711,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     textAlign: "center",
     lineHeight: 48,
-    // Simulating gradient text with a lighter blue-white color
     textShadowColor: "rgba(180,219,232,0.3)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
@@ -456,7 +723,6 @@ const styles = StyleSheet.create({
     maxWidth: 326,
     marginTop: 8,
   },
-  // Swipe section styles
   swipeSection: {
     flex: 1,
     alignItems: "center",
@@ -492,7 +758,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // Card section styles
   cardSection: {
     width: "100%",
     height: 350,
@@ -514,7 +779,6 @@ const styles = StyleSheet.create({
     top: 20,
     left: 25,
   },
-  // Job card styles
   jobCardContainer: {
     position: "relative",
     width: 260,
@@ -550,7 +814,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
   },
-  companyLogo: {
+  jobCompanyLogo: {
     width: 50,
     height: 50,
     borderRadius: 8,
@@ -558,7 +822,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  companyLogoPlaceholder: {
+  jobCompanyLogoPlaceholder: {
     width: 30,
     height: 30,
     borderRadius: 4,
@@ -577,7 +841,6 @@ const styles = StyleSheet.create({
     color: "#43A047",
     lineHeight: 22,
   },
-  // Job info styles
   jobInfo: {
     gap: 0,
   },
@@ -591,16 +854,15 @@ const styles = StyleSheet.create({
     color: "rgba(17,17,17,0.7)",
     lineHeight: 22,
   },
-  companyRow: {
+  jobCompanyRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  companyName: {
+  jobCompanyName: {
     fontSize: 10,
     color: "rgba(17,17,17,0.7)",
     lineHeight: 22,
   },
-  // Job details styles
   jobDetails: {
     gap: 12,
   },
@@ -623,7 +885,6 @@ const styles = StyleSheet.create({
     color: "rgba(17,17,17,0.7)",
     lineHeight: 22,
   },
-  // Remote badge styles
   remoteBadgeContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -639,7 +900,6 @@ const styles = StyleSheet.create({
     color: "rgba(132,112,54,0.8)",
     lineHeight: 22,
   },
-  // New jobs badge styles
   newJobsBadgeContainer: {
     position: "absolute",
     top: -25,
