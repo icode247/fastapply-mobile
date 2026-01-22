@@ -314,12 +314,12 @@ const NewJobsBadge: React.FC<{ animatedValue: Animated.Value }> = ({
         styles.newJobsBadgeContainer,
         {
           opacity: badgeOpacity,
-          transform: [{ scale: badgeScale }, { rotate: "15.72deg" }],
+          transform: [{ scale: badgeScale }, { rotate: "5deg" }],
         },
       ]}
     >
       <LinearGradient
-        colors={["#FF6B6B", "#FF8E53"]}
+        colors={["rgba(255,107,107,0.7)", "rgba(255,142,83,0.7)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.newJobsBadge}
@@ -902,8 +902,10 @@ const styles = StyleSheet.create({
   },
   newJobsBadgeContainer: {
     position: "absolute",
-    top: -25,
-    right: 10,
+    top: 5,
+    left: 0,
+    right: 40,
+    alignItems: "center",
   },
   newJobsBadge: {
     flexDirection: "row",

@@ -149,28 +149,41 @@ export default function EditProfileScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
-        showsVerticalScrollIndicator={false}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Fixed Header */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top + spacing[2],
+            backgroundColor: colors.background,
+            borderBottomColor: colors.border,
+          },
+        ]}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="arrow-back" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>
-            Edit Profile
-          </Text>
-        </View>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: colors.text }]}>Edit Profile</Text>
+        <View style={styles.placeholder} />
+      </View>
 
-        <View style={styles.content}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: 100 + insets.bottom },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={{ marginBottom: 20 }}>
             <Text
               style={{ color: colors.text, fontWeight: "600", marginBottom: 6 }}
@@ -188,7 +201,6 @@ export default function EditProfileScreen() {
                 backgroundColor: colors.surface,
               }}
             >
-              {/* Manual input simulation for now, relying on explicit TextInputs inside sections mostly */}
               <Text style={{ color: colors.text }}>{formData.name}</Text>
             </View>
             <Text
@@ -206,8 +218,6 @@ export default function EditProfileScreen() {
             <PersonalSection formData={formData} onChange={updateFormData} />
           </View>
 
-          <View style={styles.separator} />
-
           <View style={styles.sectionContainer}>
             <ProfessionalSection
               formData={formData}
@@ -217,8 +227,6 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          <View style={styles.separator} />
-
           <View style={styles.sectionContainer}>
             <EducationSection
               education={formData.education || []}
@@ -226,16 +234,12 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          <View style={styles.separator} />
-
           <View style={styles.sectionContainer}>
             <ExperienceSection
               experience={formData.experience || []}
               onChange={(exp) => updateFormData("experience", exp)}
             />
           </View>
-
-          <View style={styles.separator} />
 
           <View style={styles.sectionContainer}>
             <PreferencesSection
@@ -247,25 +251,35 @@ export default function EditProfileScreen() {
             />
           </View>
 
-          <View style={styles.separator} />
-
           <View style={styles.sectionContainer}>
             <DemographicsSection
               demographics={demographics}
               onChange={setDemographics}
             />
           </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-          <Button
-            title="Save Changes"
-            onPress={handleSubmit}
-            loading={isSaving}
-            size="lg"
-            style={styles.submitButton}
-          />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      {/* Fixed Bottom Button */}
+      <View
+        style={[
+          styles.footer,
+          {
+            paddingBottom: insets.bottom + spacing[4],
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+          },
+        ]}
+      >
+        <Button
+          title="Save Changes"
+          onPress={handleSubmit}
+          loading={isSaving}
+          size="lg"
+          fullWidth
+        />
+      </View>
+    </View>
   );
 }
 
@@ -276,28 +290,35 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing[6],
-    marginBottom: spacing[6],
+    justifyContent: "space-between",
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
   },
   backButton: {
-    marginRight: spacing[4],
+    padding: spacing[1],
   },
   title: {
-    fontSize: typography.fontSize["2xl"],
+    fontSize: typography.fontSize.xl,
     fontWeight: "700",
   },
-  content: {
+  placeholder: {
+    width: 32,
+  },
+  scrollContent: {
     paddingHorizontal: spacing[6],
+    paddingTop: spacing[4],
   },
   sectionContainer: {
-    marginBottom: spacing[6],
+    marginBottom: spacing[4],
   },
-  separator: {
-    height: 1,
-    backgroundColor: "#E5E7EB", // Should use colors.border but not available in styles directly
-    marginVertical: spacing[6],
-  },
-  submitButton: {
-    marginTop: spacing[2],
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
   },
 });

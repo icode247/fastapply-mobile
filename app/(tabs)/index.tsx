@@ -593,14 +593,17 @@ export default function DashboardScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Status bar background */}
+      <View
+        style={[
+          styles.statusBarBackground,
+          { backgroundColor: colors.background, height: insets.top },
+        ]}
+      />
       {/* Header gradient overlay */}
       <LinearGradient
-        colors={
-          isDark
-            ? [colors.background, "transparent"]
-            : [colors.primary, "transparent"]
-        }
-        style={styles.headerGradient}
+        colors={[colors.background, "transparent"]}
+        style={[styles.headerGradient, { top: insets.top }]}
       />
 
       <ScrollView
@@ -629,7 +632,7 @@ export default function DashboardScreen() {
           ]}
         >
           <View>
-            <Text style={styles.greeting}>{getGreeting()}</Text>
+            <Text style={[styles.greeting, { color: colors.textSecondary }]}>{getGreeting()}</Text>
             <Text style={[styles.userName, { color: colors.text }]}>
               {getUserDisplayName()} 👋
             </Text>
@@ -638,14 +641,14 @@ export default function DashboardScreen() {
             <BlurView
               intensity={20}
               tint={isDark ? "dark" : "light"}
-              style={styles.notificationBtnBlur}
+              style={[styles.notificationBtnBlur, { borderColor: colors.border }]}
             >
               <Ionicons
                 name="notifications-outline"
                 size={22}
                 color={colors.text}
               />
-              <View style={styles.notificationDot} />
+              <View style={[styles.notificationDot, { borderColor: colors.background }]} />
             </BlurView>
           </TouchableOpacity>
         </Animated.View>
@@ -772,9 +775,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerGradient: {
+  statusBarBackground: {
     position: "absolute",
     top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  headerGradient: {
+    position: "absolute",
     left: 0,
     right: 0,
     height: 200,
@@ -794,7 +803,6 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
     fontWeight: "500",
   },
   userName: {
@@ -813,7 +821,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
   },
   notificationDot: {
     position: "absolute",
@@ -824,7 +831,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#EF4444",
     borderWidth: 2,
-    borderColor: "#1A1A2E",
   },
   statsGrid: {
     flexDirection: "row",

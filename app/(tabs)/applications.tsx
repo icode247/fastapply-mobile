@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -351,14 +350,14 @@ const ApplicationsHeader: React.FC<{
     <View style={{ marginBottom: spacing[4] }}>
       {/* Header */}
       <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
-        <Text style={[styles.title, { color: "#FFFFFF" }]}>Applications</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Applications</Text>
         <View style={styles.headerStats}>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: "#FFFFFF" }]}>
+            <Text style={[styles.statNumber, { color: colors.text }]}>
               {totalCount}
             </Text>
             <Text
-              style={[styles.statLabel, { color: "rgba(255,255,255,0.8)" }]}
+              style={[styles.statLabel, { color: colors.textSecondary }]}
             >
               Total
             </Text>
@@ -367,7 +366,7 @@ const ApplicationsHeader: React.FC<{
             style={[
               styles.statDivider,
               {
-                backgroundColor: "rgba(255,255,255,0.2)",
+                backgroundColor: colors.border,
               },
             ]}
           />
@@ -376,7 +375,7 @@ const ApplicationsHeader: React.FC<{
               {offerCount}
             </Text>
             <Text
-              style={[styles.statLabel, { color: "rgba(255,255,255,0.8)" }]}
+              style={[styles.statLabel, { color: colors.textSecondary }]}
             >
               Completed
             </Text>
@@ -385,7 +384,7 @@ const ApplicationsHeader: React.FC<{
             style={[
               styles.statDivider,
               {
-                backgroundColor: "rgba(255,255,255,0.2)",
+                backgroundColor: colors.border,
               },
             ]}
           />
@@ -394,7 +393,7 @@ const ApplicationsHeader: React.FC<{
               {interviewCount}
             </Text>
             <Text
-              style={[styles.statLabel, { color: "rgba(255,255,255,0.8)" }]}
+              style={[styles.statLabel, { color: colors.textSecondary }]}
             >
               Processing
             </Text>
@@ -406,36 +405,34 @@ const ApplicationsHeader: React.FC<{
       <Animated.View
         style={[
           styles.searchContainer,
-          { transform: [{ scale: searchScale }] },
+          {
+            transform: [{ scale: searchScale }],
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
         ]}
       >
-        <BlurView
-          intensity={isDark ? 30 : 50}
-          tint={isDark ? "dark" : "light"}
-          style={styles.searchBlur}
-        >
-          <Ionicons
-            name="search-outline"
-            size={20}
-            color={colors.textSecondary}
-          />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Search companies or positions..."
-            placeholderTextColor={colors.textTertiary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons
-                name="close-circle"
-                size={20}
-                color={colors.textSecondary}
-              />
-            </TouchableOpacity>
-          )}
-        </BlurView>
+        <Ionicons
+          name="search-outline"
+          size={20}
+          color={colors.textSecondary}
+        />
+        <TextInput
+          style={[styles.searchInput, { color: colors.text }]}
+          placeholder="Search companies or positions..."
+          placeholderTextColor={colors.textTertiary}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery("")}>
+            <Ionicons
+              name="close-circle"
+              size={20}
+              color={colors.textSecondary}
+            />
+          </TouchableOpacity>
+        )}
       </Animated.View>
 
       {/* Filters */}
@@ -613,14 +610,17 @@ export default function ApplicationsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Status bar background */}
+      <View
+        style={[
+          styles.statusBarBackground,
+          { backgroundColor: colors.background, height: insets.top },
+        ]}
+      />
       {/* Header gradient */}
       <LinearGradient
-        colors={
-          isDark
-            ? [colors.primaryDark, colors.background]
-            : [colors.primary, colors.background]
-        }
-        style={styles.headerGradient}
+        colors={[colors.background, colors.background]}
+        style={[styles.headerGradient, { top: insets.top }]}
       />
 
       <FlatList
@@ -682,9 +682,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerGradient: {
+  statusBarBackground: {
     position: "absolute",
     top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  headerGradient: {
+    position: "absolute",
     left: 0,
     right: 0,
     height: 200,
@@ -727,16 +733,11 @@ const styles = StyleSheet.create({
   searchContainer: {
     marginBottom: spacing[5],
     borderRadius: borderRadius.xl,
-    overflow: "hidden",
-  },
-  searchBlur: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3] + 2,
-    borderRadius: borderRadius.xl,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
   },
   searchInput: {
     flex: 1,

@@ -383,30 +383,45 @@ export default function CreateProfileScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Fixed Header */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top + spacing[2],
+            backgroundColor: colors.background,
+            borderBottomColor: colors.border,
+          },
+        ]}
       >
-        <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Ionicons name="close" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.title, { color: colors.text }]}>
-            {currentStep === 0 ? "Create Profile" : STEPS[currentStep]}
-          </Text>
-          <Text style={[styles.stepIndicator, { color: colors.textTertiary }]}>
-            {currentStep + 1} / {STEPS.length}
-          </Text>
-        </View>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <Ionicons name="close" size={24} color={colors.text} />
+        </TouchableOpacity>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {currentStep === 0 ? "Create Profile" : STEPS[currentStep]}
+        </Text>
+        <Text style={[styles.stepIndicator, { color: colors.textTertiary }]}>
+          {currentStep + 1} / {STEPS.length}
+        </Text>
+      </View>
 
-        <View style={styles.content}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingBottom: 100 + insets.bottom },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
           {/* Step 0: Upload */}
           {currentStep === 0 && (
             <View>
@@ -535,35 +550,36 @@ export default function CreateProfileScreen() {
               onChange={setDemographics}
             />
           )}
-        </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-        {/* Footer Navigation */}
-        <View
-          style={[
-            styles.footer,
-            {
-              paddingBottom: insets.bottom + 20,
-              borderTopColor: colors.border,
-            },
-          ]}
-        >
-          {currentStep > 0 && (
-            <Button
-              title="Back"
-              variant="ghost"
-              onPress={handlePrev}
-              style={{ flex: 1, marginRight: 8 }}
-            />
-          )}
+      {/* Fixed Footer Navigation */}
+      <View
+        style={[
+          styles.footer,
+          {
+            paddingBottom: insets.bottom + spacing[4],
+            backgroundColor: colors.background,
+            borderTopColor: colors.border,
+          },
+        ]}
+      >
+        {currentStep > 0 && (
           <Button
-            title={currentStep === STEPS.length - 1 ? "Create Profile" : "Next"}
-            onPress={handleNext}
-            loading={isLoading}
-            style={{ flex: 2 }}
+            title="Back"
+            variant="ghost"
+            onPress={handlePrev}
+            style={{ flex: 1, marginRight: 8 }}
           />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        )}
+        <Button
+          title={currentStep === STEPS.length - 1 ? "Create Profile" : "Next"}
+          onPress={handleNext}
+          loading={isLoading}
+          style={{ flex: 2 }}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -572,10 +588,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing[6],
-    marginBottom: spacing[6],
+    paddingHorizontal: spacing[4],
+    paddingBottom: spacing[4],
+    borderBottomWidth: 1,
   },
-  backButton: { marginRight: spacing[4] },
+  backButton: { marginRight: spacing[4], padding: spacing[1] },
   title: {
     fontSize: typography.fontSize.xl,
     fontWeight: "700",
@@ -585,7 +602,10 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     fontWeight: "600",
   },
-  content: { paddingHorizontal: spacing[6], flex: 1 },
+  scrollContent: {
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[4],
+  },
   stepDesc: { marginBottom: 16, lineHeight: 20 },
   uploadCard: { marginBottom: 16 },
   uploadContent: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -599,11 +619,14 @@ const styles = StyleSheet.create({
   uploadTitle: { fontWeight: "600", marginBottom: 2 },
   uploadSubtitle: { fontSize: 12 },
   footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     paddingHorizontal: spacing[6],
     paddingTop: spacing[4],
     borderTopWidth: 1,
-    marginTop: spacing[4],
   },
   label: { fontSize: 14, fontWeight: "600", marginBottom: 6 },
   inputContainer: { borderWidth: 1, borderRadius: 8, height: 48 },

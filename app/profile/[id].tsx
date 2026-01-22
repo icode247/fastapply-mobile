@@ -193,6 +193,13 @@ export default function ProfileDetailsScreen() {
 
   return (
     <>
+      {/* Status bar background */}
+      <View
+        style={[
+          styles.statusBarBackground,
+          { backgroundColor: colors.background, height: insets.top },
+        ]}
+      />
       <ScrollView
         style={[styles.container, { backgroundColor: colors.background }]}
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
@@ -201,7 +208,7 @@ export default function ProfileDetailsScreen() {
         <View
           style={[
             styles.header,
-            { paddingTop: insets.top + 20, borderBottomColor: colors.border },
+            { paddingTop: 20, borderBottomColor: colors.border },
           ]}
         >
           <TouchableOpacity
@@ -416,6 +423,13 @@ export default function ProfileDetailsScreen() {
 }
 
 const styles = StyleSheet.create({
+  statusBarBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
   container: {
     flex: 1,
   },

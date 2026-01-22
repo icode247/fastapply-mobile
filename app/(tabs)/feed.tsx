@@ -242,16 +242,10 @@ export default function FeedScreen() {
 
     // Check if profiles are loaded and selected
     if (profilesLoading) {
-      Alert.alert("Loading", "Please wait while profiles are loading...");
       return;
     }
 
     if (!selectedProfileId || profiles.length === 0) {
-      Alert.alert(
-        "Profile Required",
-        "Please create or select a job profile to enable job automation.",
-        [{ text: "OK" }]
-      );
       return;
     }
 
@@ -260,43 +254,15 @@ export default function FeedScreen() {
 
     if (!normalizedJob) {
       console.error("Could not find job details for:", job.id);
-      Alert.alert("Application Queued", `Added ${job.title} at ${job.company} to your queue.`);
       return;
     }
 
-    // Queue job to automation service
-    const success = await queueJob(normalizedJob);
+    // Queue job to automation service silently
+    await queueJob(normalizedJob);
 
-    if (success) {
-      Alert.alert(
-        "Application Queued!",
-        `${job.title} at ${job.company} has been added to your automation queue.` +
-          (queueStats
-            ? `\n\nQueue: ${(queueStats.pending || 0) + 1} pending`
-            : ""),
-        [{ text: "OK" }]
-      );
-    } else {
-      // Check if it's a profile-related error
-      const isProfileError = automationError?.toLowerCase().includes("profile") ||
-        automationError?.toLowerCase().includes("uuid") ||
-        automationError?.toLowerCase().includes("not found");
-
-      if (isProfileError) {
-        Alert.alert(
-          "Profile Not Found",
-          "The selected profile could not be found. Please create a profile in your account settings.",
-          [{ text: "OK", onPress: clearAutomationError }]
-        );
-      } else {
-        // Job will be retried in background - still show positive feedback
-        Alert.alert(
-          "Application Queued",
-          `${job.title} at ${job.company} will be processed shortly.` +
-            (automationError ? `\n\nNote: ${automationError}` : ""),
-          [{ text: "OK", onPress: clearAutomationError }]
-        );
-      }
+    // Clear any errors silently
+    if (automationError) {
+      clearAutomationError();
     }
   };
 
@@ -433,9 +399,6 @@ export default function FeedScreen() {
             {queueStats && queueStats.pending > 0 && (
               ` • ${queueStats.pending} queued`
             )}
-            {pendingCount > 0 && (
-              ` • ${pendingCount} syncing`
-            )}
           </Text>
         </View>
         <View style={styles.headerActions}>
@@ -487,7 +450,7 @@ export default function FeedScreen() {
           styles.actionsContainer,
           {
             backgroundColor: colors.surfaceSecondary,
-            bottom: Math.max(insets.bottom, 16) + 8,
+            bottom: insets.bottom - 10,
           },
         ]}
       >

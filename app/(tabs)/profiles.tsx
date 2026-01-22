@@ -491,14 +491,17 @@ export default function ProfilesScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
+      {/* Status bar background */}
+      <View
+        style={[
+          styles.statusBarBackground,
+          { backgroundColor: colors.background, height: insets.top },
+        ]}
+      />
       {/* Header gradient */}
       <LinearGradient
-        colors={
-          isDark
-            ? [colors.primaryDark, colors.background]
-            : [colors.primary, colors.background]
-        }
-        style={styles.headerGradient}
+        colors={[colors.background, colors.background]}
+        style={[styles.headerGradient, { top: insets.top }]}
       />
 
       <ScrollView
@@ -638,9 +641,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerGradient: {
+  statusBarBackground: {
     position: "absolute",
     top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+  },
+  headerGradient: {
+    position: "absolute",
     left: 0,
     right: 0,
     height: 200,

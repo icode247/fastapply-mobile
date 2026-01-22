@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
@@ -7,8 +7,10 @@ import {
   Alert,
   Animated,
   Easing,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -16,253 +18,97 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { borderRadius, spacing } from "../../src/constants/theme";
-import { useTheme } from "../../src/hooks";
 import { getApiErrorMessage } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
 
-// Animated input component
-const AnimatedInput: React.FC<{
+// Input Field Component
+const InputField: React.FC<{
+  label: string;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
-  icon: keyof typeof Ionicons.glyphMap;
   keyboardType?: "default" | "email-address";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
-  delay: number;
 }> = ({
+  label,
   placeholder,
   value,
   onChangeText,
-  icon,
   keyboardType = "default",
   autoCapitalize = "none",
-  delay,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
-  const translateY = useRef(new Animated.Value(30)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const borderScale = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 600,
-        delay,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [delay]);
-
-  useEffect(() => {
-    Animated.spring(borderScale, {
-      toValue: isFocused ? 1 : 0,
-      tension: 100,
-      friction: 10,
-      useNativeDriver: false,
-    }).start();
-  }, [isFocused]);
-
-  const borderColor = borderScale.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["rgba(255,255,255,0.2)", "#FFFFFF"],
-  });
 
   return (
-    <Animated.View
-      style={[
-        styles.inputWrapper,
-        {
-          opacity,
-          transform: [{ translateY }],
-        },
-      ]}
-    >
-      <Animated.View style={[styles.inputContainer, { borderColor }]}>
-        <View style={styles.inputInner}>
-          <Ionicons
-            name={icon}
-            size={20}
-            color={isFocused ? "#FFFFFF" : "rgba(255,255,255,0.6)"}
-            style={styles.inputIcon}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder={placeholder}
-            placeholderTextColor="rgba(255,255,255,0.5)"
-            value={value}
-            onChangeText={onChangeText}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            keyboardType={keyboardType}
-            autoCapitalize={autoCapitalize}
-          />
-        </View>
-      </Animated.View>
-    </Animated.View>
+    <View style={styles.inputFieldContainer}>
+      <Text style={styles.inputLabel}>{label}</Text>
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused && styles.inputContainerFocused,
+        ]}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder={placeholder}
+          placeholderTextColor="rgba(255,255,255,0.5)"
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          keyboardType={keyboardType}
+          autoCapitalize={autoCapitalize}
+        />
+      </View>
+    </View>
   );
 };
 
-// Animated button with press effect
-const AnimatedButton: React.FC<{
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-  variant: "primary" | "social";
-  icon?: keyof typeof Ionicons.glyphMap;
-  delay: number;
-  colors: any;
-}> = ({ title, onPress, loading, variant, icon, delay, colors }) => {
-  const translateY = useRef(new Animated.Value(30)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 600,
-        delay,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [delay]);
-
-  const handlePressIn = () => {
-    Animated.spring(scale, {
-      toValue: 0.96,
-      tension: 100,
-      friction: 10,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      tension: 100,
-      friction: 10,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  if (variant === "primary") {
-    return (
-      <Animated.View
-        style={[
-          styles.buttonWrapper,
-          {
-            opacity,
-            transform: [{ translateY }, { scale }],
-          },
-        ]}
-      >
-        <TouchableOpacity
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          activeOpacity={1}
-          disabled={loading}
-          style={styles.primaryButton}
-        >
-          {loading ? (
-            <Animated.View style={styles.loadingDot} />
-          ) : (
-            <>
-              <Text
-                style={[styles.primaryButtonText, { color: colors.primary }]}
-              >
-                {title}
-              </Text>
-              <Ionicons name="arrow-forward" size={20} color={colors.primary} />
-            </>
-          )}
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }
-
+// Gradient Text Component
+const GradientText: React.FC<{ children: string; style?: any }> = ({
+  children,
+  style,
+}) => {
   return (
-    <Animated.View
-      style={[
-        styles.buttonWrapper,
-        {
-          opacity,
-          transform: [{ translateY }, { scale }],
-        },
-      ]}
+    <MaskedView
+      maskElement={<Text style={[styles.title, style]}>{children}</Text>}
     >
-      <TouchableOpacity
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        activeOpacity={1}
-        style={styles.socialButton}
+      <LinearGradient
+        colors={["#FFFFFF", "#B4DBE8"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
       >
-        {icon && (
-          <Ionicons
-            name={icon}
-            size={22}
-            color="#FFF"
-            style={{ marginRight: spacing[3] }}
-          />
-        )}
-        <Text style={styles.socialButtonText}>{title}</Text>
-      </TouchableOpacity>
-    </Animated.View>
+        <Text style={[styles.title, style, { opacity: 0 }]}>{children}</Text>
+      </LinearGradient>
+    </MaskedView>
   );
 };
 
 export default function SignInScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors, isDark } = useTheme();
 
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Header animations
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const headerTranslateY = useRef(new Animated.Value(-30)).current;
-  const decorativeOpacity = useRef(new Animated.Value(0)).current;
+  // Animations
+  const fadeIn = useRef(new Animated.Value(0)).current;
+  const slideUp = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(headerOpacity, {
+      Animated.timing(fadeIn, {
         toValue: 1,
         duration: 600,
         useNativeDriver: true,
       }),
-      Animated.timing(headerTranslateY, {
+      Animated.timing(slideUp, {
         toValue: 0,
         duration: 600,
-        easing: Easing.out(Easing.back(1.2)),
+        easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
     ]).start();
-
-    // Decorative elements
-    Animated.timing(decorativeOpacity, {
-      toValue: 1,
-      duration: 800,
-      delay: 300,
-      useNativeDriver: true,
-    }).start();
   }, []);
 
   const handleSignIn = async () => {
@@ -285,110 +131,176 @@ export default function SignInScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Background - Match Welcome Screen */}
+      {/* Background gradient matching Figma: 173deg */}
       <LinearGradient
-        colors={
-          isDark
-            ? [colors.primary, colors.primaryDark, colors.background]
-            : [colors.primary, colors.primaryDark, colors.primary700]
-        }
-        start={{ x: 0, y: 0 }}
-        end={{ x: 0.5, y: 1 }}
+        colors={["#1263B2", "#0D4982", "#082A4C"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Decorative circles - Match Welcome Screen */}
-      <Animated.View
-        style={[styles.decorativeCircle1, { opacity: decorativeOpacity }]}
-      />
-      <Animated.View
-        style={[styles.decorativeCircle2, { opacity: decorativeOpacity }]}
-      />
+      {/* Decorative circle */}
+      <View style={styles.decorativeCircle} />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* Back button */}
-        <TouchableOpacity
-          style={[styles.backButton, { top: insets.top + 10 }]}
-          onPress={() => router.back()}
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 12 },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <BlurView intensity={20} tint="light" style={styles.backButtonBlur}>
-            <Ionicons name="chevron-back" size={24} color="#FFF" />
-          </BlurView>
-        </TouchableOpacity>
+          {/* Back Button */}
+          <Animated.View
+            style={[
+              styles.backButtonContainer,
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+          </Animated.View>
 
-        {/* Content */}
-        <View style={[styles.content, { paddingTop: insets.top + 70 }]}>
           {/* Header */}
           <Animated.View
             style={[
               styles.header,
               {
-                opacity: headerOpacity,
-                transform: [{ translateY: headerTranslateY }],
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
               },
             ]}
           >
-            <Text style={styles.welcomeBack}>Welcome back</Text>
-            <Text style={styles.title}>Sign in to continue</Text>
+            <GradientText>Welcome Back</GradientText>
             <Text style={styles.subtitle}>
-              Enter your email and we'll send you a verification code to sign in
-              instantly
+              A verification code will be sent to your email to access your
+              account
             </Text>
           </Animated.View>
 
-          {/* Form */}
-          <View style={styles.form}>
-            <AnimatedInput
-              placeholder="Enter your email"
+          {/* Form Card */}
+          <Animated.View
+            style={[
+              styles.formCard,
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
+          >
+            <InputField
+              label="Email address"
+              placeholder="example@gmail.com"
               value={email}
               onChangeText={setEmail}
-              icon="mail-outline"
               keyboardType="email-address"
               autoCapitalize="none"
-              delay={200}
             />
+          </Animated.View>
 
-            <AnimatedButton
-              title="Continue with Email"
-              onPress={handleSignIn}
-              loading={loading}
-              variant="primary"
-              delay={400}
-              colors={colors}
-            />
+          {/* Spacer to push buttons to bottom */}
+          <View style={styles.spacer} />
 
-            {/* Divider */}
-            <Animated.View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or</Text>
-              <View style={styles.dividerLine} />
-            </Animated.View>
-
-            <AnimatedButton
-              title="Continue with Google"
-              onPress={handleGoogleSignIn}
-              variant="social"
-              icon="logo-google"
-              delay={600}
-              colors={colors}
-            />
-          </View>
-
-          {/* Footer */}
+          {/* Sign In Button */}
           <Animated.View
-            style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}
+            style={[
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
           >
-            <TouchableOpacity onPress={() => router.push("/(auth)/sign-up")}>
-              <Text style={styles.footerText}>
-                Don't have an account?{" "}
-                <Text style={styles.footerLink}>Sign up</Text>
-              </Text>
+            <TouchableOpacity
+              style={styles.signInButton}
+              onPress={handleSignIn}
+              activeOpacity={0.9}
+              disabled={loading}
+            >
+              {loading ? (
+                <View style={styles.loadingContainer}>
+                  <View style={styles.loadingDot} />
+                  <View style={[styles.loadingDot, { opacity: 0.7 }]} />
+                  <View style={[styles.loadingDot, { opacity: 0.4 }]} />
+                </View>
+              ) : (
+                <Text style={styles.signInButtonText}>Sign in</Text>
+              )}
             </TouchableOpacity>
           </Animated.View>
-        </View>
+
+          {/* Create Account Link */}
+          <Animated.View
+            style={[
+              styles.createAccountContainer,
+              {
+                opacity: fadeIn,
+              },
+            ]}
+          >
+            <Text style={styles.createAccountText}>
+              <Text style={styles.createAccountTextLight}>
+                Don't have an account?{" "}
+              </Text>
+              <Text
+                style={styles.createAccountLink}
+                onPress={() => router.push("/(auth)/sign-up")}
+              >
+                Create Account
+              </Text>
+            </Text>
+          </Animated.View>
+
+          {/* Divider */}
+          <Animated.View
+            style={[
+              styles.dividerContainer,
+              {
+                opacity: fadeIn,
+              },
+            ]}
+          >
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </Animated.View>
+
+          {/* Continue with Google Button */}
+          <Animated.View
+            style={[
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+                paddingBottom: insets.bottom + 20,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.googleButton}
+              onPress={handleGoogleSignIn}
+              activeOpacity={0.9}
+            >
+              <Image
+                source={require("../../assets/icons/g-icon.png")}
+                style={styles.googleIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -398,173 +310,173 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  decorativeCircle1: {
+  decorativeCircle: {
     position: "absolute",
-    width: 300,
-    height: 300,
-    borderRadius: 150,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    top: -100,
-    right: -100,
-  },
-  decorativeCircle2: {
-    position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "rgba(255,255,255,0.03)",
-    bottom: 100,
-    left: -80,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    top: 77,
+    left: 8,
   },
   keyboardView: {
     flex: 1,
   },
-  logoHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing[4],
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    flexGrow: 1,
+  },
+  // Back Button
+  backButtonContainer: {
+    marginBottom: 16,
   },
   backButton: {
-    position: "absolute",
-    left: spacing[4],
-    zIndex: 10,
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  backButtonBlur: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 1000,
+    backgroundColor: "rgba(255,255,255,0.05)",
     justifyContent: "center",
     alignItems: "center",
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: spacing[6],
-    paddingTop: spacing[8],
-  },
+  // Header
   header: {
-    marginBottom: spacing[10],
-  },
-  welcomeBack: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: "500",
-    marginBottom: spacing[2],
+    marginBottom: 24,
   },
   title: {
-    fontSize: 36,
-    fontWeight: "800",
+    fontSize: 40,
+    fontWeight: "700",
     color: "#FFFFFF",
-    letterSpacing: -0.5,
-    marginBottom: spacing[3],
+    lineHeight: 48,
   },
   subtitle: {
+    fontSize: 14,
+    color: "#FFFFFF",
+    lineHeight: 22,
+    marginTop: 8,
+  },
+  // Form Card
+  formCard: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderRadius: 16,
+    padding: 16,
+  },
+  // Input Field
+  inputFieldContainer: {
+    gap: 8,
+  },
+  inputLabel: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.75)",
     lineHeight: 24,
   },
-  form: {
-    gap: spacing[4],
-  },
-  inputWrapper: {
-    marginBottom: spacing[2],
-  },
   inputContainer: {
-    borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    overflow: "hidden",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(208,209,212,0.5)",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
-  inputInner: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[4],
-  },
-  inputIcon: {
-    marginRight: spacing[3],
+  inputContainerFocused: {
+    borderColor: "rgba(255,255,255,0.6)",
   },
   input: {
-    flex: 1,
     fontSize: 16,
     color: "#FFFFFF",
-    fontWeight: "500",
+    lineHeight: 24,
   },
-  buttonWrapper: {
-    borderRadius: borderRadius.xl,
-    overflow: "hidden",
+  // Spacer
+  spacer: {
+    flex: 1,
+    minHeight: 180,
   },
-  primaryButton: {
-    flexDirection: "row",
+  // Sign In Button
+  signInButton: {
+    backgroundColor: "#FBFBFB",
+    borderRadius: 100,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#FFFFFF",
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[6],
-    borderRadius: borderRadius.xl,
-    gap: spacing[2],
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
     elevation: 6,
   },
-  primaryButtonText: {
-    fontSize: 17,
-    fontWeight: "700",
+  signInButtonText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#0D4982",
+  },
+  loadingContainer: {
+    flexDirection: "row",
+    gap: 6,
   },
   loadingDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "rgba(0,0,0,0.2)",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#0D4982",
   },
-  socialButton: {
-    flexDirection: "row",
+  // Create Account
+  createAccountContainer: {
+    marginTop: 24,
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing[4],
-    paddingHorizontal: spacing[6],
-    borderRadius: borderRadius.xl,
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.2)",
-    backgroundColor: "rgba(255,255,255,0.1)",
   },
-  socialButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
+  createAccountText: {
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: "center",
+  },
+  createAccountTextLight: {
+    color: "rgba(255,255,255,0.7)",
+  },
+  createAccountLink: {
     color: "#FFFFFF",
+    fontWeight: "600",
   },
-  divider: {
+  // Divider
+  dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: spacing[4],
+    marginVertical: 24,
+    gap: 7,
   },
   dividerLine: {
     flex: 1,
     height: 1,
     backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 1000,
   },
   dividerText: {
-    color: "rgba(255,255,255,0.5)",
-    marginHorizontal: spacing[4],
     fontSize: 14,
+    color: "rgba(255,255,255,0.2)",
+    lineHeight: 22,
   },
-  footer: {
-    marginTop: "auto",
+  // Google Button
+  googleButton: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 1000,
+    paddingVertical: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
   },
-  footerText: {
-    fontSize: 15,
-    color: "rgba(255,255,255,0.7)",
+  googleIcon: {
+    width: 40,
+    height: 40,
   },
-  footerLink: {
-    color: "#FFF",
-    fontWeight: "700",
+  googleButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    lineHeight: 22,
   },
 });
