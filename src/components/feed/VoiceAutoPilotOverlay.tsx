@@ -1,9 +1,9 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
-  Easing,
   Modal,
   StyleSheet,
   Text,
@@ -14,16 +14,15 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../../src/hooks";
 import { spacing, typography } from "../../../src/constants/theme";
+import { WebView } from "react-native-webview";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // Simulated voice commands for demo
 const DEMO_COMMANDS = [
   "Find me remote software engineer jobs",
   "Show full-time positions in San Francisco",
   "Apply to all jobs paying over $100k",
-  "Skip contract positions",
-  "Find hybrid roles in New York",
 ];
 
 export interface ParsedVoiceCommand {
@@ -49,148 +48,98 @@ interface VoiceAutoPilotOverlayProps {
   onCommandParsed: (command: ParsedVoiceCommand) => void;
 }
 
-// Voice visualization bars component
-const VoiceWaveform: React.FC<{ isListening: boolean; intensity: number }> = ({
-  isListening,
-  intensity,
-}) => {
-  const { colors } = useTheme();
-  const barCount = 5;
-  const barAnimations = useRef(
-    Array.from({ length: barCount }, () => new Animated.Value(0.3))
-  ).current;
+const ORB_SIZE = 150;
 
-  useEffect(() => {
-    if (isListening) {
-      // Animate bars with random heights based on intensity
-      const animateBar = (index: number) => {
-        const baseHeight = 0.3;
-        const maxHeight = Math.min(1, baseHeight + intensity * 0.7);
-        const randomHeight = baseHeight + Math.random() * (maxHeight - baseHeight);
+// CSS Animation HTML for WebView
+const CSS_ANIMATION = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: transparent;
+            margin: 0;
+            overflow: hidden;
+        }
 
-        Animated.sequence([
-          Animated.timing(barAnimations[index], {
-            toValue: randomHeight,
-            duration: 100 + Math.random() * 100,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: false,
-          }),
-          Animated.timing(barAnimations[index], {
-            toValue: baseHeight + Math.random() * 0.2,
-            duration: 100 + Math.random() * 100,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: false,
-          }),
-        ]).start(() => {
-          if (isListening) {
-            animateBar(index);
-          }
-        });
-      };
+        .voice-orb {
+            position: relative;
+            width: 180px;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-      barAnimations.forEach((_, index) => {
-        setTimeout(() => animateBar(index), index * 50);
-      });
-    } else {
-      // Reset bars
-      barAnimations.forEach((anim) => {
-        Animated.timing(anim, {
-          toValue: 0.3,
-          duration: 300,
-          useNativeDriver: false,
-        }).start();
-      });
-    }
-  }, [isListening, intensity, barAnimations]);
+        .inner-core {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #ffffff 0%, #c2e9fb 25%, #00c6ff 50%, #0072ff 75%, #ffffff 100%);
+            background-size: 300% 300%;
+            border-radius: 46% 54% 45% 55% / 55% 46% 54% 45%;
+            animation: wobble 10s ease-in-out infinite, paint-flow 5s ease infinite alternate;
+        }
 
+        @keyframes paint-flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes wobble {
+            0% { transform: rotate(0deg); border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
+            33% { border-radius: 55% 45% 60% 40% / 45% 55% 40% 60%; }
+            66% { border-radius: 40% 60% 55% 45% / 60% 40% 45% 55%; }
+            100% { transform: rotate(360deg); border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="voice-orb">
+        <div class="inner-core"></div>
+    </div>
+</body>
+</html>
+`;
+
+// WebView-based Voice Orb with CSS animations
+const WebViewOrb: React.FC = () => {
   return (
-    <View style={styles.waveformContainer}>
-      {barAnimations.map((anim, index) => (
-        <Animated.View
-          key={index}
-          style={[
-            styles.waveformBar,
-            {
-              backgroundColor: colors.primary,
-              height: anim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 80],
-              }),
-            },
-          ]}
-        />
-      ))}
+    <View style={orbStyles.container}>
+      <WebView
+        originWhitelist={["*"]}
+        source={{ html: CSS_ANIMATION }}
+        style={orbStyles.webview}
+        scrollEnabled={false}
+      />
     </View>
   );
 };
 
-// Pulsing ring animation
-const PulsingRings: React.FC<{ isActive: boolean }> = ({ isActive }) => {
-  const { colors } = useTheme();
-  const ring1 = useRef(new Animated.Value(0)).current;
-  const ring2 = useRef(new Animated.Value(0)).current;
-  const ring3 = useRef(new Animated.Value(0)).current;
+const orbStyles = StyleSheet.create({
+  container: {
+    width: 250,
+    height: 250,
+    backgroundColor: "transparent",
+  },
+  webview: {
+    backgroundColor: "transparent",
+  },
+});
 
-  useEffect(() => {
-    if (isActive) {
-      const animateRing = (ring: Animated.Value, delay: number) => {
-        Animated.loop(
-          Animated.sequence([
-            Animated.delay(delay),
-            Animated.timing(ring, {
-              toValue: 1,
-              duration: 2000,
-              easing: Easing.out(Easing.ease),
-              useNativeDriver: true,
-            }),
-            Animated.timing(ring, {
-              toValue: 0,
-              duration: 0,
-              useNativeDriver: true,
-            }),
-          ])
-        ).start();
-      };
-
-      animateRing(ring1, 0);
-      animateRing(ring2, 666);
-      animateRing(ring3, 1333);
-    } else {
-      ring1.setValue(0);
-      ring2.setValue(0);
-      ring3.setValue(0);
-    }
-  }, [isActive, ring1, ring2, ring3]);
-
-  const renderRing = (ring: Animated.Value) => (
-    <Animated.View
-      style={[
-        styles.pulsingRing,
-        {
-          borderColor: colors.primary,
-          opacity: ring.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.6, 0],
-          }),
-          transform: [
-            {
-              scale: ring.interpolate({
-                inputRange: [0, 1],
-                outputRange: [1, 2.5],
-              }),
-            },
-          ],
-        },
-      ]}
-    />
-  );
-
+// Animated Voice Orb wrapper with touch
+const AnimatedVoiceOrb: React.FC<{
+  onTap: () => void;
+}> = ({ onTap }) => {
   return (
-    <View style={styles.ringsContainer}>
-      {renderRing(ring1)}
-      {renderRing(ring2)}
-      {renderRing(ring3)}
-    </View>
+    <TouchableOpacity activeOpacity={0.9} onPress={onTap} style={styles.orbTouchable}>
+      <WebViewOrb />
+    </TouchableOpacity>
   );
 };
 
@@ -205,25 +154,14 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   // States
   const [phase, setPhase] = useState<"listening" | "processing" | "confirming">("listening");
   const [simulatedText, setSimulatedText] = useState("");
-  const [voiceIntensity, setVoiceIntensity] = useState(0);
   const [parsedCommand, setParsedCommand] = useState<ParsedVoiceCommand | null>(null);
   const [manualInput, setManualInput] = useState("");
   const [showManualInput, setShowManualInput] = useState(false);
 
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const micScale = useRef(new Animated.Value(1)).current;
-
-  // Simulate voice intensity changes
-  useEffect(() => {
-    if (visible && phase === "listening") {
-      const interval = setInterval(() => {
-        setVoiceIntensity(Math.random());
-      }, 100);
-      return () => clearInterval(interval);
-    }
-  }, [visible, phase]);
+  const slideAnim = useRef(new Animated.Value(30)).current;
+  const contentFade = useRef(new Animated.Value(0)).current;
 
   // Entry animation
   useEffect(() => {
@@ -237,7 +175,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 300,
+          duration: 400,
           useNativeDriver: true,
         }),
         Animated.spring(slideAnim, {
@@ -245,30 +183,19 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           friction: 8,
           useNativeDriver: true,
         }),
+        Animated.timing(contentFade, {
+          toValue: 1,
+          duration: 600,
+          delay: 200,
+          useNativeDriver: true,
+        }),
       ]).start();
-
-      // Mic pulse animation
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(micScale, {
-            toValue: 1.1,
-            duration: 500,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-          Animated.timing(micScale, {
-            toValue: 1,
-            duration: 500,
-            easing: Easing.inOut(Easing.ease),
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
     } else {
       fadeAnim.setValue(0);
-      slideAnim.setValue(50);
+      slideAnim.setValue(30);
+      contentFade.setValue(0);
     }
-  }, [visible, fadeAnim, slideAnim, micScale]);
+  }, [visible, fadeAnim, slideAnim, contentFade]);
 
   // Parse voice command (simulated - keyword based)
   const parseCommand = useCallback((text: string): ParsedVoiceCommand => {
@@ -322,12 +249,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
 
     // Locations
     const locations: string[] = [];
-    const locationPatterns = [
-      /in\s+([\w\s]+?)(?:\s+paying|\s+over|\s+under|$)/i,
-      /(?:san francisco|new york|los angeles|chicago|seattle|austin|boston|denver)/gi,
-    ];
-
-    const cityMatches = lowerText.match(locationPatterns[1]);
+    const cityMatches = lowerText.match(/(?:san francisco|new york|los angeles|chicago|seattle|austin|boston|denver)/gi);
     if (cityMatches) {
       locations.push(...cityMatches.map(c => c.trim()));
     }
@@ -343,19 +265,11 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
     }
 
     // Keywords (job titles)
-    const titlePatterns = [
-      /(?:software|frontend|backend|full.?stack|mobile|ios|android|web|data|ml|ai)\s*(?:engineer|developer|designer)?/gi,
-      /(?:product|project|program)\s*manager/gi,
-      /(?:ui|ux|product)\s*designer/gi,
-    ];
-
     const keywords: string[] = [];
-    titlePatterns.forEach(pattern => {
-      const matches = lowerText.match(pattern);
-      if (matches) {
-        keywords.push(...matches.map(k => k.trim()));
-      }
-    });
+    const titleMatches = lowerText.match(/(?:software|frontend|backend|full.?stack|mobile|ios|android|web|data|ml|ai)\s*(?:engineer|developer|designer)?/gi);
+    if (titleMatches) {
+      keywords.push(...titleMatches.map(k => k.trim()));
+    }
     if (keywords.length > 0) {
       command.filters!.keywords = keywords;
     }
@@ -363,17 +277,13 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
     return command;
   }, []);
 
-  // Handle simulated voice input completion
-  const handleSimulatedComplete = useCallback(() => {
-    setPhase("processing");
-
-    // Simulate processing delay
-    setTimeout(() => {
-      const command = parseCommand(simulatedText || manualInput);
-      setParsedCommand(command);
-      setPhase("confirming");
-    }, 1000);
-  }, [simulatedText, manualInput, parseCommand]);
+  // Handle orb tap - simulate stopping listening
+  const handleOrbTap = useCallback(() => {
+    if (phase === "listening" && !showManualInput) {
+      // Show manual input on tap
+      setShowManualInput(true);
+    }
+  }, [phase, showManualInput]);
 
   // Handle demo command selection
   const handleDemoCommand = useCallback((command: string) => {
@@ -384,7 +294,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       const parsed = parseCommand(command);
       setParsedCommand(parsed);
       setPhase("confirming");
-    }, 800);
+    }, 1200);
   }, [parseCommand]);
 
   // Handle confirm
@@ -399,50 +309,43 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   const handleManualSubmit = useCallback(() => {
     if (manualInput.trim()) {
       setSimulatedText(manualInput.trim());
-      handleSimulatedComplete();
+      setPhase("processing");
+
+      setTimeout(() => {
+        const parsed = parseCommand(manualInput.trim());
+        setParsedCommand(parsed);
+        setPhase("confirming");
+      }, 1000);
     }
-  }, [manualInput, handleSimulatedComplete]);
+  }, [manualInput, parseCommand]);
 
   const renderListeningPhase = () => (
     <View style={styles.listeningContainer}>
-      {/* Pulsing rings behind mic */}
-      <PulsingRings isActive={phase === "listening"} />
+      {/* Animated Voice Orb */}
+      <AnimatedVoiceOrb onTap={handleOrbTap} />
 
-      {/* Main mic button */}
-      <Animated.View
+      {/* Status text */}
+      <Animated.Text
         style={[
-          styles.micButton,
-          {
-            backgroundColor: colors.primary,
-            transform: [{ scale: micScale }],
-          },
+          styles.statusText,
+          { color: colors.textSecondary, opacity: contentFade },
         ]}
       >
-        <MaterialCommunityIcons name="microphone" size={48} color="#FFFFFF" />
-      </Animated.View>
-
-      {/* Voice waveform */}
-      <VoiceWaveform isListening={phase === "listening"} intensity={voiceIntensity} />
-
-      {/* Listening text */}
-      <Text style={[styles.listeningText, { color: colors.text }]}>
-        {phase === "listening" ? "Listening..." : "Processing..."}
-      </Text>
-
-      {/* Manual input toggle */}
-      <TouchableOpacity
-        style={[styles.manualInputToggle, { borderColor: colors.border }]}
-        onPress={() => setShowManualInput(!showManualInput)}
-      >
-        <Ionicons name="keyboard-outline" size={20} color={colors.textSecondary} />
-        <Text style={[styles.manualInputToggleText, { color: colors.textSecondary }]}>
-          Type instead
-        </Text>
-      </TouchableOpacity>
+        {phase === "processing" ? "Processing..." : "Tap the orb or try a command below"}
+      </Animated.Text>
 
       {/* Manual input field */}
       {showManualInput && (
-        <View style={[styles.manualInputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <Animated.View
+          style={[
+            styles.manualInputContainer,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+              opacity: contentFade,
+            },
+          ]}
+        >
           <TextInput
             style={[styles.manualInput, { color: colors.text }]}
             placeholder="Type your command..."
@@ -458,28 +361,30 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           >
             <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       )}
 
       {/* Demo commands */}
-      <View style={styles.demoSection}>
-        <Text style={[styles.demoTitle, { color: colors.textSecondary }]}>
-          Try saying:
+      <Animated.View style={[styles.demoSection, { opacity: contentFade }]}>
+        <Text style={[styles.demoTitle, { color: colors.textTertiary }]}>
+          Try these commands:
         </Text>
-        <View style={styles.demoCommands}>
-          {DEMO_COMMANDS.slice(0, 3).map((cmd, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[styles.demoCommand, { backgroundColor: colors.surface, borderColor: colors.border }]}
-              onPress={() => handleDemoCommand(cmd)}
-            >
-              <Text style={[styles.demoCommandText, { color: colors.text }]} numberOfLines={1}>
-                "{cmd}"
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
+        {DEMO_COMMANDS.map((cmd, index) => (
+          <TouchableOpacity
+            key={index}
+            style={[
+              styles.demoCommand,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+            onPress={() => handleDemoCommand(cmd)}
+          >
+            <Text style={[styles.demoCommandText, { color: colors.text }]}>
+              "{cmd}"
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.textTertiary} />
+          </TouchableOpacity>
+        ))}
+      </Animated.View>
     </View>
   );
 
@@ -488,7 +393,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       <View style={[styles.parsedCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
         {/* Heard text */}
         <Text style={[styles.parsedLabel, { color: colors.textSecondary }]}>
-          I heard:
+          I understood:
         </Text>
         <Text style={[styles.parsedText, { color: colors.text }]}>
           "{parsedCommand?.rawText}"
@@ -497,7 +402,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
         {/* Parsed actions */}
         <View style={styles.parsedActions}>
           <Text style={[styles.parsedLabel, { color: colors.textSecondary }]}>
-            I'll do this:
+            Actions:
           </Text>
 
           {parsedCommand?.action === "filter" || parsedCommand?.action === "search" ? (
@@ -557,11 +462,18 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           <Text style={[styles.confirmButtonText, { color: colors.text }]}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.confirmButton, styles.goButton, { backgroundColor: colors.primary }]}
+          style={[styles.confirmButton, styles.goButton]}
           onPress={handleConfirm}
         >
-          <Text style={[styles.confirmButtonText, { color: "#FFFFFF" }]}>Let's Go!</Text>
-          <MaterialCommunityIcons name="rocket-launch" size={20} color="#FFFFFF" />
+          <LinearGradient
+            colors={["#0B6BCB", "#4393E4"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.goButtonGradient}
+          >
+            <Text style={[styles.confirmButtonText, { color: "#FFFFFF" }]}>Let's Go!</Text>
+            <MaterialCommunityIcons name="rocket-launch" size={20} color="#FFFFFF" />
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -579,7 +491,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
         style={[
           styles.overlay,
           {
-            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.98)",
+            backgroundColor: isDark ? "rgba(10, 10, 20, 0.98)" : "rgba(250, 250, 255, 0.98)",
             opacity: fadeAnim,
           },
         ]}
@@ -592,32 +504,24 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           <Ionicons name="close" size={28} color={colors.text} />
         </TouchableOpacity>
 
-        {/* Title */}
+        {/* Header */}
         <Animated.View
           style={[
-            styles.titleContainer,
+            styles.headerContainer,
             {
-              paddingTop: insets.top + 60,
+              paddingTop: insets.top + 20,
               transform: [{ translateY: slideAnim }],
+              opacity: contentFade,
             },
           ]}
         >
-          <MaterialCommunityIcons name="robot-happy" size={32} color={colors.primary} />
           <Text style={[styles.title, { color: colors.text }]}>Voice Auto-Pilot</Text>
-          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Tell me what jobs you're looking for
-          </Text>
         </Animated.View>
 
         {/* Content based on phase */}
-        <Animated.View
-          style={[
-            styles.content,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
-        >
+        <View style={styles.content}>
           {phase === "confirming" ? renderConfirmingPhase() : renderListeningPhase()}
-        </Animated.View>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -633,19 +537,13 @@ const styles = StyleSheet.create({
     zIndex: 10,
     padding: 8,
   },
-  titleContainer: {
+  headerContainer: {
     alignItems: "center",
     paddingHorizontal: spacing[6],
   },
   title: {
-    fontSize: typography.fontSize["2xl"],
-    fontWeight: "800",
-    marginTop: spacing[2],
-  },
-  subtitle: {
-    fontSize: typography.fontSize.base,
-    marginTop: spacing[1],
-    textAlign: "center",
+    fontSize: typography.fontSize.xl,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
@@ -655,69 +553,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: -60,
+    paddingBottom: 100,
   },
-  ringsContainer: {
-    position: "absolute",
-    width: 200,
-    height: 200,
+  orbTouchable: {
     alignItems: "center",
     justifyContent: "center",
+    marginBottom: 20,
   },
-  pulsingRing: {
-    position: "absolute",
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-  },
-  micButton: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  waveformContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    height: 100,
-    marginTop: spacing[6],
-    gap: 8,
-  },
-  waveformBar: {
-    width: 6,
-    borderRadius: 3,
-  },
-  listeningText: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: "600",
+  statusText: {
+    fontSize: typography.fontSize.base,
     marginTop: spacing[4],
-  },
-  manualInputToggle: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: spacing[6],
-    paddingVertical: spacing[2],
-    paddingHorizontal: spacing[4],
-    borderRadius: 20,
-    borderWidth: 1,
-    gap: 8,
-  },
-  manualInputToggleText: {
-    fontSize: typography.fontSize.sm,
+    textAlign: "center",
   },
   manualInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: spacing[4],
-    borderRadius: 12,
+    marginTop: spacing[6],
+    borderRadius: 16,
     borderWidth: 1,
     paddingLeft: spacing[4],
     width: "100%",
@@ -725,15 +577,15 @@ const styles = StyleSheet.create({
   manualInput: {
     flex: 1,
     fontSize: typography.fontSize.base,
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[4],
   },
   manualSubmitButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: 48,
+    height: 48,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    margin: 4,
+    margin: 6,
   },
   demoSection: {
     marginTop: spacing[8],
@@ -743,39 +595,44 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.sm,
     marginBottom: spacing[3],
     textAlign: "center",
-  },
-  demoCommands: {
-    gap: spacing[2],
+    textTransform: "uppercase",
+    letterSpacing: 1,
   },
   demoCommand: {
-    paddingVertical: spacing[3],
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: spacing[4],
     paddingHorizontal: spacing[4],
     borderRadius: 12,
     borderWidth: 1,
+    marginBottom: spacing[2],
   },
   demoCommandText: {
     fontSize: typography.fontSize.sm,
-    fontStyle: "italic",
+    flex: 1,
   },
   confirmingContainer: {
     flex: 1,
     justifyContent: "center",
-    paddingBottom: 100,
+    paddingBottom: 60,
   },
   parsedCard: {
-    borderRadius: 16,
+    borderRadius: 20,
     borderWidth: 1,
     padding: spacing[5],
   },
   parsedLabel: {
     fontSize: typography.fontSize.sm,
     marginBottom: spacing[1],
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
   parsedText: {
     fontSize: typography.fontSize.lg,
     fontWeight: "600",
-    fontStyle: "italic",
     marginBottom: spacing[4],
+    lineHeight: 26,
   },
   parsedActions: {
     marginTop: spacing[2],
@@ -812,17 +669,23 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     flex: 1,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  cancelButton: {
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing[4],
+  },
+  goButton: {},
+  goButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: spacing[4],
-    borderRadius: 12,
     gap: spacing[2],
   },
-  cancelButton: {
-    borderWidth: 1,
-  },
-  goButton: {},
   confirmButtonText: {
     fontSize: typography.fontSize.base,
     fontWeight: "700",

@@ -9,12 +9,13 @@ import {
 } from "../../src/components/feed/JobFiltersModal";
 import { ProfileSelectorModal } from "../../src/components/feed/ProfileSelectorModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
-import { VoiceActivityIcon } from "../../src/components/feed/VoiceActivityIcon";
-import { VoiceCommandOverlay } from "../../src/components/feed/VoiceCommandOverlay";
+import {
+  ParsedVoiceCommand,
+  VoiceAutoPilotOverlay,
+} from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { useAutomation } from "../../src/hooks/useAutomation";
-import { useVoiceCommand } from "../../src/hooks/useVoiceCommand";
 import { automationService } from "../../src/services/automation.service";
 import { jobService } from "../../src/services/job.service";
 import { profileService } from "../../src/services/profile.service";
@@ -83,6 +84,11 @@ export default function FeedScreen() {
   // Load jobs from service
   const [jobs, setJobs] = useState<NormalizedJob[]>([]);
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
+
+  // Auto-pilot state
+  const [isAutoPilotActive, setIsAutoPilotActive] = useState(false);
+  const [autoPilotProgress, setAutoPilotProgress] = useState({ current: 0, total: 0 });
+  const autoPilotRef = useRef<NodeJS.Timeout | null>(null);
 
   // Set Android navigation bar color to match theme
   useEffect(() => {
@@ -181,46 +187,6 @@ export default function FeedScreen() {
     [jobs]
   );
 
-  // Voice command hook
-  const {
-    isListening,
-    isProcessing,
-    lastCommand,
-    error: voiceError,
-    isConfigured: voiceConfigured,
-    startListening,
-    stopListening,
-    cancelListening,
-  } = useVoiceCommand({
-    jobs,
-    currentJobIndex,
-    profile: selectedProfile || null,
-    onApply: () => {
-      swipeDeckRef.current?.swipeRight();
-    },
-    onSkip: () => {
-      swipeDeckRef.current?.swipeLeft();
-    },
-    onUndo: () => {
-      swipeDeckRef.current?.undo();
-    },
-    onNext: () => {
-      swipeDeckRef.current?.swipeLeft();
-    },
-    onSearch: (filteredJobs) => {
-      // Update jobs with search results
-      console.log("Search returned", filteredJobs.length, "jobs");
-    },
-    onFilter: (filteredJobs) => {
-      // Update jobs with filtered results
-      console.log("Filter returned", filteredJobs.length, "jobs");
-    },
-    onError: (error) => {
-      console.error("Voice command error:", error);
-    },
-    hapticFeedback: true,
-  });
-
   // Load jobs on mount
   useEffect(() => {
     const allJobs = jobService.getAllJobs();
@@ -229,6 +195,15 @@ export default function FeedScreen() {
     // Log stats
     const stats = jobService.getStats();
     console.log("Loaded jobs:", stats);
+  }, []);
+
+  // Cleanup auto-pilot on unmount
+  useEffect(() => {
+    return () => {
+      if (autoPilotRef.current) {
+        clearInterval(autoPilotRef.current);
+      }
+    };
   }, []);
 
   const handleSwipeLeft = (job: LegacyJob) => {
@@ -295,51 +270,103 @@ export default function FeedScreen() {
     setShowProfileSelector(true);
   };
 
-  // Voice command handler
-  const handleVoiceCommand = async () => {
-    if (!voiceConfigured) {
-      Alert.alert(
-        "Voice Commands Not Configured",
-        "Please add your OpenAI API key to enable voice commands.\n\n" +
-        "Add EXPO_PUBLIC_OPENAI_API_KEY to your environment variables.",
-        [{ text: "OK" }]
-      );
-      return;
+  // Voice auto-pilot handler
+  const handleVoiceCommand = () => {
+    setShowVoiceOverlay(true);
+  };
+
+  // Handle parsed voice command
+  const handleVoiceCommandParsed = useCallback((command: ParsedVoiceCommand) => {
+    console.log("Voice command parsed:", command);
+
+    // Apply filters from voice command
+    if (command.filters) {
+      const newFilters: JobFilters = {
+        remoteOnly: command.filters.remote || false,
+        salaryMin: command.filters.minSalary,
+        salaryMax: undefined,
+        jobTypes: command.filters.jobTypes || [],
+        workModes: command.filters.remote ? ["remote"] : [],
+        country: undefined,
+        cities: command.filters.locations || [],
+      };
+
+      // Apply filters to job service
+      const jobTypesMap: Record<string, EmploymentType> = {
+        "full-time": "full_time",
+        "part-time": "part_time",
+        "contract": "contract",
+        "internship": "internship",
+        "freelance": "freelance",
+      };
+
+      const workModesMap: Record<string, WorkplaceType> = {
+        "remote": "remote",
+        "hybrid": "hybrid",
+        "on-site": "onsite",
+        "onsite": "onsite",
+      };
+
+      const searchFilters = {
+        remoteOnly: newFilters.remoteOnly,
+        salaryMin: newFilters.salaryMin,
+        salaryMax: newFilters.salaryMax,
+        jobTypes: newFilters.jobTypes.length > 0
+          ? newFilters.jobTypes.map(t => jobTypesMap[t.toLowerCase()] || null).filter(Boolean) as EmploymentType[]
+          : undefined,
+        workModes: newFilters.workModes.length > 0
+          ? newFilters.workModes.map(m => workModesMap[m.toLowerCase()] || null).filter(Boolean) as WorkplaceType[]
+          : undefined,
+        cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
+        keywords: command.filters.keywords,
+      };
+
+      const result = jobService.searchJobs(searchFilters);
+      console.log("Voice filter - found jobs:", result.total);
+      setJobs(result.jobs);
+      setCurrentJobIndex(0);
+      setFilters(newFilters);
     }
 
-    if (isListening) {
-      // Stop listening and process
-      setShowVoiceOverlay(false);
-      await stopListening();
-    } else {
-      // Start listening
-      setShowVoiceOverlay(true);
-      const started = await startListening();
-      if (!started) {
-        setShowVoiceOverlay(false);
-        Alert.alert(
-          "Microphone Access Required",
-          "Please allow microphone access to use voice commands.",
-          [{ text: "OK" }]
-        );
+    // Start auto-swipe if requested
+    if (command.autoSwipe) {
+      const { direction, count } = command.autoSwipe;
+      const swipeCount = count === "all" ? Math.min(jobs.length - currentJobIndex, 20) : Math.min(count, jobs.length - currentJobIndex);
+
+      if (swipeCount > 0) {
+        setIsAutoPilotActive(true);
+        setAutoPilotProgress({ current: 0, total: swipeCount });
+
+        let swiped = 0;
+        autoPilotRef.current = setInterval(() => {
+          if (swiped >= swipeCount) {
+            if (autoPilotRef.current) {
+              clearInterval(autoPilotRef.current);
+            }
+            setIsAutoPilotActive(false);
+            return;
+          }
+
+          if (direction === "right") {
+            swipeDeckRef.current?.swipeRight();
+          } else {
+            swipeDeckRef.current?.swipeLeft();
+          }
+
+          swiped++;
+          setAutoPilotProgress({ current: swiped, total: swipeCount });
+        }, 800); // Swipe every 800ms
       }
     }
-  };
+  }, [jobs.length, currentJobIndex]);
 
-  const handleCloseVoiceOverlay = async () => {
-    if (isListening) {
-      await cancelListening();
+  // Stop auto-pilot
+  const stopAutoPilot = useCallback(() => {
+    if (autoPilotRef.current) {
+      clearInterval(autoPilotRef.current);
     }
-    setShowVoiceOverlay(false);
-  };
-
-  const handleStopListening = async () => {
-    await stopListening();
-    // Keep overlay open briefly to show result
-    setTimeout(() => {
-      setShowVoiceOverlay(false);
-    }, 1500);
-  };
+    setIsAutoPilotActive(false);
+  }, []);
 
   const handleApplyFilters = (newFilters: JobFilters) => {
     setFilters(newFilters);
@@ -434,6 +461,20 @@ export default function FeedScreen() {
         </View>
       </View>
 
+      {/* Auto-pilot progress indicator */}
+      {isAutoPilotActive && (
+        <TouchableOpacity
+          style={[styles.autoPilotBanner, { backgroundColor: colors.primary }]}
+          onPress={stopAutoPilot}
+        >
+          <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
+          <Text style={styles.autoPilotText}>
+            Auto-pilot: {autoPilotProgress.current}/{autoPilotProgress.total}
+          </Text>
+          <Text style={styles.autoPilotStop}>Tap to stop</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Swipe Deck */}
       <View style={styles.deckContainer}>
         <SwipeDeck
@@ -502,39 +543,30 @@ export default function FeedScreen() {
           <Ionicons name="heart" size={36} color="#00C853" />
         </TouchableOpacity>
 
-        {/* Voice Command */}
+        {/* Voice Auto-Pilot */}
         <TouchableOpacity
           style={[
             styles.actionButton,
             styles.smallButton,
             {
-              backgroundColor: isListening ? colors.primary : colors.surface,
+              backgroundColor: isAutoPilotActive ? colors.primary : colors.surface,
             },
           ]}
-          onPress={handleVoiceCommand}
+          onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
         >
-          {isListening || isProcessing ? (
-            <VoiceActivityIcon
-              color={isListening ? "#FFFFFF" : colors.primary}
-            />
-          ) : (
-            <MaterialCommunityIcons
-              name="waveform"
-              size={24}
-              color={voiceConfigured ? colors.text : colors.textTertiary}
-            />
-          )}
+          <MaterialCommunityIcons
+            name={isAutoPilotActive ? "stop" : "robot-happy"}
+            size={24}
+            color={isAutoPilotActive ? "#FFFFFF" : colors.primary}
+          />
         </TouchableOpacity>
       </View>
 
-      {/* Voice Command Overlay */}
-      <VoiceCommandOverlay
+      {/* Voice Auto-Pilot Overlay */}
+      <VoiceAutoPilotOverlay
         visible={showVoiceOverlay}
-        isListening={isListening}
-        isProcessing={isProcessing}
-        suggestion={lastCommand?.suggestion}
-        onClose={handleCloseVoiceOverlay}
-        onStopListening={handleStopListening}
+        onClose={() => setShowVoiceOverlay(false)}
+        onCommandParsed={handleVoiceCommandParsed}
       />
 
       {/* Modals */}
@@ -605,6 +637,26 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+  },
+  autoPilotBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    marginHorizontal: spacing[6],
+    borderRadius: 12,
+    gap: 8,
+  },
+  autoPilotText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  autoPilotStop: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: 12,
+    marginLeft: 8,
   },
   deckContainer: {
     flex: 1,
