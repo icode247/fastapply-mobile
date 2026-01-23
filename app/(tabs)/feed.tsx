@@ -126,6 +126,9 @@ export default function FeedScreen() {
   // Card expanded state (full screen mode)
   const [isCardExpanded, setIsCardExpanded] = useState(false);
 
+  // Swiping state (hide action buttons while swiping)
+  const [isSwiping, setIsSwiping] = useState(false);
+
   // Set Android navigation bar color to match theme
   useEffect(() => {
     if (Platform.OS === "android") {
@@ -195,35 +198,14 @@ export default function FeedScreen() {
   // Convert jobs to legacy format for SwipeDeck
   const legacyJobs = useMemo(() => jobs.map(toLegacyJob), [jobs]);
 
-  // Automation hook - queues jobs on swipe right
+  // Automation hook - for stats display only (queue happens directly via service)
   const {
-    isReady: automationReady,
-    isProcessing: automationProcessing,
-    queueJob,
     queueStats,
     pendingCount,
-    lastError: automationError,
-    clearError: clearAutomationError,
   } = useAutomation({
     profileId: selectedProfileId,
     profileName: selectedProfile?.name,
-    onSuccess: (job, automationId) => {
-      console.log(
-        `Job queued successfully: ${job.title} -> automation ${automationId}`,
-      );
-    },
-    onError: (job, error) => {
-      console.error(`Failed to queue job: ${job.title}`, error);
-    },
   });
-
-  // Helper to find NormalizedJob from LegacyJob id
-  const getJobById = useCallback(
-    (id: string): NormalizedJob | undefined => {
-      return jobs.find((j) => j.id === id);
-    },
-    [jobs],
-  );
 
   // Load jobs on mount
   useEffect(() => {
@@ -249,34 +231,42 @@ export default function FeedScreen() {
     setCurrentJobIndex((prev) => prev + 1);
   };
 
-  const handleSwipeRight = async (job: LegacyJob) => {
+  const handleSwipeRight = (job: LegacyJob) => {
     console.log("Applied:", job.title);
     setCurrentJobIndex((prev) => prev + 1);
 
-    // Check if profiles are loaded and selected
-    if (profilesLoading) {
+    // Queue job directly to automation service - completely bypass React state
+    // This ensures swiping is never blocked by the queue operation
+    const profileId = selectedProfileId;
+    const profileName = selectedProfile?.name;
+    const normalizedJob = jobs.find((j) => j.id === job.id);
+
+    if (!profileId || !normalizedJob) {
       return;
     }
 
-    if (!selectedProfileId || profiles.length === 0) {
+    const jobUrl = normalizedJob.applyUrl || normalizedJob.listingUrl;
+    if (!jobUrl) {
       return;
     }
 
-    // Find the full normalized job to get the URL
-    const normalizedJob = getJobById(job.id);
-
-    if (!normalizedJob) {
-      console.error("Could not find job details for:", job.id);
-      return;
-    }
-
-    // Queue job to automation service silently
-    await queueJob(normalizedJob);
-
-    // Clear any errors silently
-    if (automationError) {
-      clearAutomationError();
-    }
+    // Fire and forget - call service directly without any React state updates
+    automationService.addJobToQueue(
+      profileId,
+      jobUrl,
+      {
+        title: normalizedJob.title,
+        company: normalizedJob.company,
+        platform: normalizedJob.source,
+      },
+      profileName
+    ).then((result) => {
+      if (result.success) {
+        console.log("Job queued:", normalizedJob.title);
+      }
+    }).catch((err) => {
+      console.error("Failed to queue job:", err);
+    });
   };
 
   const handleUndo = () => {
@@ -322,12 +312,14 @@ export default function FeedScreen() {
       if (command.filters) {
         const newFilters: JobFilters = {
           remoteOnly: command.filters.remote || false,
-          salaryMin: command.filters.minSalary,
+          salaryMin: command.filters.minSalary ?? 30000,
           salaryMax: 200000,
           jobTypes: command.filters.jobTypes || [],
           workModes: command.filters.remote ? ["remote"] : [],
-          country: undefined,
+          country: null,
           cities: command.filters.locations || [],
+          experienceLevels: [],
+          visaSponsorship: false,
         };
 
         // Apply filters to job service
@@ -497,21 +489,6 @@ export default function FeedScreen() {
             </Text>
           </View>
           <View style={styles.headerActions}>
-            {/* Queue indicator */}
-            {(automationProcessing || pendingCount > 0) && (
-              <View
-                style={[
-                  styles.queueIndicator,
-                  { backgroundColor: colors.surfaceSecondary },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="sync"
-                  size={Math.round(18 * uiScale)}
-                  color={colors.primary}
-                />
-              </View>
-            )}
             <TouchableOpacity
               style={[
                 styles.filterButton,
@@ -559,7 +536,7 @@ export default function FeedScreen() {
       <View
         style={[
           styles.deckContainer,
-          Platform.OS === "android" && { marginBottom: 20 },
+          Platform.OS === "android" && { marginBottom: -10 },
         ]}
       >
         <SwipeDeck
@@ -568,11 +545,12 @@ export default function FeedScreen() {
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
           onExpandChange={setIsCardExpanded}
+          onSwipingChange={setIsSwiping}
         />
       </View>
 
-      {/* Action Buttons - hide when card is expanded */}
-      {!isCardExpanded && (
+      {/* Action Buttons - hide when card is expanded or swiping */}
+      {!isCardExpanded && !isSwiping && (
         <View
           style={[
             styles.actionsContainer,
@@ -736,13 +714,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-  },
-  queueIndicator: {
-    width: Math.round(36 * uiScale),
-    height: Math.round(36 * uiScale),
-    borderRadius: Math.round(18 * uiScale),
-    justifyContent: "center",
-    alignItems: "center",
   },
   autoPilotBanner: {
     flexDirection: "row",

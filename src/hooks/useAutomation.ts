@@ -112,6 +112,7 @@ export function useAutomation(
 
   /**
    * Queue a job for automation (called on swipe right)
+   * Note: This runs in background and doesn't block the UI
    */
   const queueJob = useCallback(
     async (job: NormalizedJob): Promise<boolean> => {
@@ -119,7 +120,7 @@ export function useAutomation(
 
       if (!currentProfileId) {
         const errorMsg = "No profile selected";
-        setLastError(errorMsg);
+        console.warn("queueJob:", errorMsg);
         onError?.(job, errorMsg);
         return false;
       }
@@ -129,13 +130,12 @@ export function useAutomation(
 
       if (!jobUrl) {
         const errorMsg = "Job has no application URL";
-        setLastError(errorMsg);
+        console.warn("queueJob:", errorMsg);
         onError?.(job, errorMsg);
         return false;
       }
 
-      setIsProcessing(true);
-      setLastError(null);
+      // Don't set isProcessing - this runs in background and shouldn't block UI
 
       try {
         const result = await automationService.addJobToQueue(
@@ -150,7 +150,7 @@ export function useAutomation(
         );
 
         if (result.success) {
-          // Update state
+          // Update pending count in background (non-blocking)
           setPendingCount(automationService.getPendingUrlsCount());
 
           // Update automation reference if we don't have it
@@ -164,18 +164,16 @@ export function useAutomation(
           onSuccess?.(job, result.automationId!);
           return true;
         } else {
-          setLastError(result.error || "Failed to queue job");
+          console.warn("queueJob failed:", result.error);
           onError?.(job, result.error || "Failed to queue job");
           return false;
         }
       } catch (error) {
         const errorMsg =
           error instanceof Error ? error.message : "Failed to queue job";
-        setLastError(errorMsg);
+        console.error("queueJob error:", errorMsg);
         onError?.(job, errorMsg);
         return false;
-      } finally {
-        setIsProcessing(false);
       }
     },
     [currentAutomation, onSuccess, onError]

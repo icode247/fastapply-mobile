@@ -13,6 +13,8 @@ import {
   GestureHandlerRootView,
 } from "react-native-gesture-handler";
 import Animated, {
+  cancelAnimation,
+  Easing,
   interpolate,
   runOnJS,
   useAnimatedStyle,
@@ -36,6 +38,7 @@ interface SwipeDeckProps {
   onSwipeLeft: (job: Job) => void;
   onSwipeRight: (job: Job) => void;
   onExpandChange?: (expanded: boolean) => void;
+  onSwipingChange?: (isSwiping: boolean) => void;
 }
 
 export interface SwipeDeckRef {
@@ -46,7 +49,7 @@ export interface SwipeDeckRef {
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
-  ({ jobs, onSwipeLeft, onSwipeRight, onExpandChange }, ref) => {
+  ({ jobs, onSwipeLeft, onSwipeRight, onExpandChange, onSwipingChange }, ref) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [swipeHistory, setSwipeHistory] = useState<
       { job: Job; direction: "left" | "right" }[]
@@ -62,6 +65,8 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     // Animation values
     const translateX = useSharedValue(0);
     const rotate = useSharedValue(0);
+    // Track if swipe is from action button (1) or hand gesture (0)
+    const isProgrammaticSwipe = useSharedValue(0);
 
     // Pre-compute visible jobs (current + next 2 for smooth transitions)
     const visibleJobs = useMemo(() => {
@@ -81,37 +86,67 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       (direction: "left" | "right") => {
         const job = jobs[currentIndex];
 
-        // Save to history for undo
-        setSwipeHistory((prev) => [...prev, { job, direction }]);
-
-        if (direction === "left") {
-          onSwipeLeft(job);
-        } else {
-          onSwipeRight(job);
-        }
-
-        // Reset values immediately for next card
+        // Reset animation values FIRST on UI thread before any JS work
+        // This ensures the next card is immediately ready for interaction
+        cancelAnimation(translateX);
+        cancelAnimation(rotate);
         translateX.value = 0;
         rotate.value = 0;
-        setCurrentIndex((prev) => prev + 1);
+        isProgrammaticSwipe.value = 0;
+
+        // Defer state updates to next frame to prevent blocking gesture recognizer
+        // This is critical for allowing immediate re-swipe capability
+        requestAnimationFrame(() => {
+          setSwipeHistory((prev) => [...prev, { job, direction }]);
+          setCurrentIndex((prev) => prev + 1);
+
+          // Fire callbacks after index update to ensure correct job reference
+          if (direction === "left") {
+            onSwipeLeft(job);
+          } else {
+            onSwipeRight(job);
+          }
+        });
       },
-      [currentIndex, jobs, onSwipeLeft, onSwipeRight, translateX, rotate]
+      [currentIndex, jobs, onSwipeLeft, onSwipeRight, translateX, rotate, isProgrammaticSwipe]
     );
 
     const animateSwipe = useCallback(
       (direction: "left" | "right") => {
         if (currentIndex >= jobs.length) return;
 
+        // Cancel any ongoing animations first
+        cancelAnimation(translateX);
+        cancelAnimation(rotate);
+
+        // Reset animation values to ensure clean state
+        translateX.value = 0;
+        rotate.value = 0;
+
+        // Mark as programmatic swipe (from action button)
+        isProgrammaticSwipe.value = 1;
+
         const targetX =
           direction === "right" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
-        translateX.value = withTiming(targetX, { duration: 250 }, () => {
+
+        // Sweet, buttery smooth animation - matches hand swipe feel
+        // Low stiffness = graceful glide, feels luxurious
+        const springConfig = {
+          damping: 22,
+          stiffness: 90, // Same as hand swipe for consistency
+          velocity: direction === "right" ? 250 : -250, // Gentle initial push
+          overshootClamping: true,
+        };
+
+        translateX.value = withSpring(targetX, springConfig, () => {
           runOnJS(handleSwipeComplete)(direction);
         });
-        rotate.value = withTiming(direction === "right" ? 15 : -15, {
-          duration: 250,
+        rotate.value = withSpring(direction === "right" ? 12 : -12, {
+          damping: 22,
+          stiffness: 90,
         });
       },
-      [currentIndex, jobs.length, translateX, rotate, handleSwipeComplete]
+      [currentIndex, jobs.length, translateX, rotate, isProgrammaticSwipe, handleSwipeComplete]
     );
 
     const undo = useCallback(() => {
@@ -144,24 +179,58 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       [animateSwipe, undo, currentJob]
     );
 
+    const notifySwipingStart = () => {
+      onSwipingChange?.(true);
+    };
+
+    const notifySwipingEnd = () => {
+      onSwipingChange?.(false);
+    };
+
     const gesture = Gesture.Pan()
       .enabled(!isCardExpanded)
+      .onStart(() => {
+        // Ensure we're in hand gesture mode (not programmatic)
+        isProgrammaticSwipe.value = 0;
+        runOnJS(notifySwipingStart)();
+      })
       .onUpdate((event) => {
         translateX.value = event.translationX;
         rotate.value = (event.translationX / SCREEN_WIDTH) * 15;
       })
       .onEnd((event) => {
+        // Always notify swiping ended immediately when gesture ends
+        runOnJS(notifySwipingEnd)();
+
         if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
           const direction = event.translationX > 0 ? "right" : "left";
           const targetX =
             direction === "right" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
 
-          translateX.value = withSpring(targetX, { damping: 15, stiffness: 120 }, () => {
-            runOnJS(handleSwipeComplete)(direction);
+          // Sweet, buttery smooth animation
+          // Low stiffness = graceful glide, moderate damping = smooth deceleration
+          // Clamp velocity to prevent jarring fast swipes
+          const clampedVelocity = Math.max(-600, Math.min(600, event.velocityX * 0.4));
+          translateX.value = withSpring(
+            targetX,
+            {
+              damping: 22,
+              stiffness: 90, // Low stiffness = slow, elegant motion
+              velocity: clampedVelocity,
+              overshootClamping: true,
+            },
+            () => {
+              runOnJS(handleSwipeComplete)(direction);
+            }
+          );
+          rotate.value = withSpring(direction === "right" ? 12 : -12, {
+            damping: 22,
+            stiffness: 90,
           });
         } else {
-          translateX.value = withSpring(0, { damping: 15, stiffness: 150 });
-          rotate.value = withSpring(0, { damping: 15, stiffness: 150 });
+          // Gentle snap back - soft and inviting
+          translateX.value = withSpring(0, { damping: 20, stiffness: 180 });
+          rotate.value = withSpring(0, { damping: 20, stiffness: 180 });
         }
       });
 
@@ -174,8 +243,12 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       };
     });
 
-    // Heart icon style - shows when swiping right
+    // Heart icon style - shows when swiping right (hand gesture only)
     const heartIconStyle = useAnimatedStyle(() => {
+      // Only show for hand gestures (isProgrammaticSwipe === 0)
+      if (isProgrammaticSwipe.value === 1) {
+        return { opacity: 0, transform: [{ scale: 0 }] };
+      }
       const opacity = interpolate(
         translateX.value,
         [0, 50, 100],
@@ -194,8 +267,60 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       };
     });
 
-    // X icon style - shows when swiping left
+    // X icon style - shows when swiping left (hand gesture only)
     const xIconStyle = useAnimatedStyle(() => {
+      // Only show for hand gestures (isProgrammaticSwipe === 0)
+      if (isProgrammaticSwipe.value === 1) {
+        return { opacity: 0, transform: [{ scale: 0 }] };
+      }
+      const opacity = interpolate(
+        translateX.value,
+        [0, -50, -100],
+        [0, 0.5, 1],
+        'clamp'
+      );
+      const scale = interpolate(
+        translateX.value,
+        [0, -100],
+        [0.5, 1.2],
+        'clamp'
+      );
+      return {
+        opacity: translateX.value < -20 ? opacity : 0,
+        transform: [{ scale }],
+      };
+    });
+
+    // LIKE text style - shows when swiping right (action button only)
+    const likeTextStyle = useAnimatedStyle(() => {
+      // Only show for programmatic swipes (isProgrammaticSwipe === 1)
+      if (isProgrammaticSwipe.value === 0) {
+        return { opacity: 0, transform: [{ scale: 0 }] };
+      }
+      const opacity = interpolate(
+        translateX.value,
+        [0, 50, 100],
+        [0, 0.5, 1],
+        'clamp'
+      );
+      const scale = interpolate(
+        translateX.value,
+        [0, 100],
+        [0.5, 1.2],
+        'clamp'
+      );
+      return {
+        opacity: translateX.value > 20 ? opacity : 0,
+        transform: [{ scale }],
+      };
+    });
+
+    // NOPE text style - shows when swiping left (action button only)
+    const nopeTextStyle = useAnimatedStyle(() => {
+      // Only show for programmatic swipes (isProgrammaticSwipe === 1)
+      if (isProgrammaticSwipe.value === 0) {
+        return { opacity: 0, transform: [{ scale: 0 }] };
+      }
       const opacity = interpolate(
         translateX.value,
         [0, -50, -100],
@@ -272,17 +397,35 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
         {/* Foreground Card (Current Job) */}
         <GestureDetector gesture={gesture}>
           <Animated.View style={[styles.cardContainer, !isCardExpanded && cardStyle]}>
-            {/* Heart icon overlay - right swipe */}
+            {/* Heart icon overlay - right swipe (hand gesture) */}
             {!isCardExpanded && (
               <Animated.View style={[styles.iconOverlay, styles.heartOverlay, heartIconStyle]}>
                 <Ionicons name="heart" size={80} color="#00C853" />
               </Animated.View>
             )}
 
-            {/* X icon overlay - left swipe */}
+            {/* X icon overlay - left swipe (hand gesture) */}
             {!isCardExpanded && (
               <Animated.View style={[styles.iconOverlay, styles.xOverlay, xIconStyle]}>
                 <Ionicons name="close" size={80} color="#F72585" />
+              </Animated.View>
+            )}
+
+            {/* LIKE text overlay - right swipe (action button) */}
+            {!isCardExpanded && (
+              <Animated.View style={[styles.iconOverlay, styles.heartOverlay, likeTextStyle]}>
+                <View style={styles.likeContainer}>
+                  <Text style={styles.likeText}>LIKE</Text>
+                </View>
+              </Animated.View>
+            )}
+
+            {/* NOPE text overlay - left swipe (action button) */}
+            {!isCardExpanded && (
+              <Animated.View style={[styles.iconOverlay, styles.xOverlay, nopeTextStyle]}>
+                <View style={styles.nopeContainer}>
+                  <Text style={styles.nopeText}>NOPE</Text>
+                </View>
               </Animated.View>
             )}
 
@@ -336,5 +479,35 @@ const styles = StyleSheet.create({
   },
   xOverlay: {
     right: 40,
+  },
+  likeContainer: {
+    borderWidth: 4,
+    borderColor: "#00C853",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginBottom: 8,
+    transform: [{ rotate: "-15deg" }],
+  },
+  likeText: {
+    fontSize: Math.round(32 * fontScale),
+    fontWeight: "900",
+    color: "#00C853",
+    letterSpacing: 2,
+  },
+  nopeContainer: {
+    borderWidth: 4,
+    borderColor: "#F72585",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    marginBottom: 8,
+    transform: [{ rotate: "15deg" }],
+  },
+  nopeText: {
+    fontSize: Math.round(32 * fontScale),
+    fontWeight: "900",
+    color: "#F72585",
+    letterSpacing: 2,
   },
 });
