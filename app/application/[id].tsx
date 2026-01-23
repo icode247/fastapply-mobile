@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -288,15 +287,8 @@ export default function ApplicationDetailScreen() {
           />
         }
       >
-        {/* Header Gradient Section */}
+        {/* Header Section */}
         <View>
-          <LinearGradient
-            colors={[statusInfo.color + "20", colors.background]} // High opacity to fade
-            style={styles.gradientHeader}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-          />
-
           <View
             style={[styles.contentContainer, { paddingTop: insets.top + 60 }]}
           >
@@ -687,13 +679,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-  },
-  gradientHeader: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 400,
   },
   contentContainer: {
     paddingHorizontal: spacing[6],

@@ -87,8 +87,8 @@ export function useAutomation(
           setPendingCount(automationService.getPendingUrlsCount());
           setIsReady(true);
 
-          // Load queue stats if automation exists
-          if (automation) {
+          // Load queue stats if automation exists and has valid id
+          if (automation?.id) {
             const stats = await automationService.getQueueStats(automation.id);
             if (mounted && stats) {
               setQueueStats(stats);

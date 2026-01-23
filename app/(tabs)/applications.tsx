@@ -255,7 +255,7 @@ const ApplicationItem: React.FC<{
         <View style={styles.mainInfo}>
           <View style={styles.topRow}>
             <Text
-              style={[styles.companyName, { color: colors.text }]}
+              style={[styles.companyName, { color: colors.text, flex: 1 }]}
               numberOfLines={1}
             >
               {company}
@@ -263,7 +263,7 @@ const ApplicationItem: React.FC<{
             <View
               style={[
                 styles.statusBadge,
-                { backgroundColor: config.color + "20" },
+                { backgroundColor: config.color + "20", flexShrink: 0 },
               ]}
             >
               <Ionicons name={config.icon} size={12} color={config.color} />
@@ -279,30 +279,34 @@ const ApplicationItem: React.FC<{
             {position}
           </Text>
           <View style={styles.detailsRow}>
-            <View style={styles.detailItem}>
+            <View style={[styles.detailItem, { flex: 1 }]}>
               <Ionicons
                 name="location-outline"
                 size={14}
                 color={colors.textTertiary}
               />
               <Text
-                style={[styles.detailText, { color: colors.textSecondary }]}
+                style={[styles.detailText, { color: colors.textSecondary, flex: 1 }]}
+                numberOfLines={1}
               >
                 {location}
               </Text>
             </View>
-            <View style={styles.detailItem}>
-              <Ionicons
-                name="cash-outline"
-                size={14}
-                color={colors.textTertiary}
-              />
-              <Text
-                style={[styles.detailText, { color: colors.textSecondary }]}
-              >
-                {salary}
-              </Text>
-            </View>
+            {salary ? (
+              <View style={[styles.detailItem, { flex: 1 }]}>
+                <Ionicons
+                  name="cash-outline"
+                  size={14}
+                  color={colors.textTertiary}
+                />
+                <Text
+                  style={[styles.detailText, { color: colors.textSecondary, flex: 1 }]}
+                  numberOfLines={1}
+                >
+                  {salary}
+                </Text>
+              </View>
+            ) : null}
           </View>
           <Text style={[styles.appliedText, { color: colors.textTertiary }]}>
             Applied {appliedAt}
@@ -853,8 +857,9 @@ const styles = StyleSheet.create({
   },
   detailsRow: {
     flexDirection: "row",
-    gap: spacing[4],
+    gap: spacing[3],
     marginBottom: 4,
+    overflow: "hidden",
   },
   detailItem: {
     flexDirection: "row",

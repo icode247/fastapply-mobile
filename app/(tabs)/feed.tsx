@@ -555,9 +555,9 @@ export default function FeedScreen() {
           onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
         >
           <MaterialCommunityIcons
-            name={isAutoPilotActive ? "stop" : "robot-happy"}
+            name={isAutoPilotActive ? "stop" : "waveform"}
             size={24}
-            color={isAutoPilotActive ? "#FFFFFF" : colors.primary}
+            color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
           />
         </TouchableOpacity>
       </View>

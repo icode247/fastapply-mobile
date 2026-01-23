@@ -108,14 +108,15 @@ const CSS_ANIMATION = `
 `;
 
 // WebView-based Voice Orb with CSS animations
-const WebViewOrb: React.FC = () => {
+const WebViewOrb: React.FC<{ onLoad?: () => void; visible?: boolean }> = ({ onLoad, visible = true }) => {
   return (
-    <View style={orbStyles.container}>
+    <View style={[orbStyles.container, !visible && orbStyles.hidden]}>
       <WebView
         originWhitelist={["*"]}
         source={{ html: CSS_ANIMATION }}
         style={orbStyles.webview}
         scrollEnabled={false}
+        onLoadEnd={onLoad}
       />
     </View>
   );
@@ -130,15 +131,43 @@ const orbStyles = StyleSheet.create({
   webview: {
     backgroundColor: "transparent",
   },
+  hidden: {
+    position: "absolute",
+    opacity: 0,
+    pointerEvents: "none",
+  },
 });
 
-// Animated Voice Orb wrapper with touch
+// Animated Voice Orb wrapper with touch and preloading
 const AnimatedVoiceOrb: React.FC<{
   onTap: () => void;
-}> = ({ onTap }) => {
+  isVisible: boolean;
+}> = ({ onTap, isVisible }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  const handleLoad = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  // Fade in when visible and loaded
+  useEffect(() => {
+    if (isVisible && isLoaded) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else if (!isVisible) {
+      fadeAnim.setValue(0);
+    }
+  }, [isVisible, isLoaded, fadeAnim]);
+
   return (
     <TouchableOpacity activeOpacity={0.9} onPress={onTap} style={styles.orbTouchable}>
-      <WebViewOrb />
+      <Animated.View style={{ opacity: fadeAnim }}>
+        <WebViewOrb onLoad={handleLoad} visible={isVisible} />
+      </Animated.View>
     </TouchableOpacity>
   );
 };
@@ -322,7 +351,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   const renderListeningPhase = () => (
     <View style={styles.listeningContainer}>
       {/* Animated Voice Orb */}
-      <AnimatedVoiceOrb onTap={handleOrbTap} />
+      <AnimatedVoiceOrb onTap={handleOrbTap} isVisible={visible} />
 
       {/* Status text */}
       <Animated.Text

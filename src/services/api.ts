@@ -12,6 +12,17 @@ interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
+// Session expiration handler - will be set by auth store
+let onSessionExpired: (() => void) | null = null;
+
+/**
+ * Set the callback to be called when the session expires
+ * This should be called by the auth store on initialization
+ */
+export const setSessionExpiredHandler = (handler: () => void) => {
+  onSessionExpired = handler;
+};
+
 // Create axios instance
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -110,8 +121,11 @@ api.interceptors.response.use(
         // Clear tokens and redirect to login
         await storage.clearAll();
 
-        // You might want to dispatch an action here to update app state
-        // For now, we just reject the promise
+        // Notify the auth store that the session has expired
+        if (onSessionExpired) {
+          onSessionExpired();
+        }
+
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

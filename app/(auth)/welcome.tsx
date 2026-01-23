@@ -449,10 +449,45 @@ export default function WelcomeScreen() {
     ]).start();
   }, []);
 
+  // Auto-scroll slides - always sliding left (infinite carousel)
+  const slideIndexRef = useRef(0);
+
+  useEffect(() => {
+    const totalRealPages = 2;
+    const slideWidth = SCREEN_WIDTH - 44;
+
+    const interval = setInterval(() => {
+      slideIndexRef.current += 1;
+
+      // Scroll to next slide
+      scrollViewRef.current?.scrollTo({
+        x: slideIndexRef.current * slideWidth,
+        animated: true,
+      });
+
+      // Update indicator (always shows 0 or 1)
+      setCurrentPage(slideIndexRef.current % totalRealPages);
+
+      // After scrolling to the clone (index 2), instantly reset to real slide 1 (index 0)
+      if (slideIndexRef.current >= totalRealPages) {
+        setTimeout(() => {
+          slideIndexRef.current = 0;
+          scrollViewRef.current?.scrollTo({
+            x: 0,
+            animated: false,
+          });
+        }, 500); // Wait for animation to complete
+      }
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const page = Math.round(offsetX / (SCREEN_WIDTH - 44));
-    setCurrentPage(page);
+    // Only show indicator for real pages (0 or 1)
+    setCurrentPage(page % 2);
   };
 
   return (
@@ -464,9 +499,6 @@ export default function WelcomeScreen() {
         end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-
-      {/* Decorative circle in top-left */}
-      <View style={styles.decorativeCircle} />
 
       {/* Main Content */}
       <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
@@ -481,8 +513,8 @@ export default function WelcomeScreen() {
           ]}
         >
           <Image
-            source={require("../../assets/logo.png")}
-            style={styles.logo}
+            source={require("../../assets/icons/scout-icon.png")}
+            style={styles.logoIcon}
             resizeMode="contain"
           />
           <PageIndicator currentPage={currentPage} totalPages={2} />
@@ -507,6 +539,11 @@ export default function WelcomeScreen() {
           {/* Slide 2 */}
           <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
             <Slide2 cardAnimation={cardAnimation} />
+          </View>
+
+          {/* Clone of Slide 1 for infinite loop */}
+          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+            <Slide1 cardsAnimation={cardsAnimation} />
           </View>
         </ScrollView>
 
@@ -549,14 +586,9 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: SCREEN_HEIGHT,
   },
-  decorativeCircle: {
-    position: "absolute",
+  logoIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    top: 77,
-    left: 8,
   },
   content: {
     flex: 1,
@@ -568,10 +600,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 8,
-  },
-  logo: {
-    width: 73,
-    height: 32,
   },
   pageIndicator: {
     flexDirection: "row",
@@ -606,7 +634,6 @@ const styles = StyleSheet.create({
   // ============== SLIDE 1 STYLES ==============
   slide1TitleSection: {
     alignItems: "center",
-    marginTop: 36,
   },
   slide1Title: {
     fontSize: 40,

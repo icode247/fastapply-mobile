@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { authService, profileService } from "../services";
+import { setSessionExpiredHandler } from "../services/api";
 import { AuthTokens, JobProfile, User } from "../types";
 import { storage } from "../utils/storage";
 
@@ -42,6 +43,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   initialize: async () => {
     try {
       set({ isLoading: true });
+
+      // Register session expiration handler
+      setSessionExpiredHandler(() => {
+        console.log("Session expired, logging out...");
+        get().logout();
+      });
 
       const [accessToken, user, storedProfile] = await Promise.all([
         storage.getAccessToken(),

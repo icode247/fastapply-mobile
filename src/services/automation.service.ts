@@ -3,15 +3,12 @@
 
 import { ENDPOINTS } from "../constants/api";
 import {
-  AddUrlsDto,
   AddUrlsResponse,
   Automation,
   AutomationListResponse,
   AutomationQueueStats,
-  AutomationRun,
   AutomationRunsResponse,
   AutomationStats,
-  AutomationUrl,
   CreateAutomationDto,
   RescheduleUrlDto,
   UpdateAutomationDto,
@@ -85,7 +82,25 @@ class AutomationService {
       // Load cached profile-automation mappings
       const cachedMap = await storage.getItem(STORAGE_KEYS.PROFILE_AUTOMATION_MAP);
       if (cachedMap) {
-        this.profileAutomationMap = JSON.parse(cachedMap);
+        const parsed = JSON.parse(cachedMap);
+        // Clean up any invalid IDs (like "undefined" strings) from previous bugs
+        this.profileAutomationMap = {};
+        let hasInvalidEntries = false;
+        for (const [profileId, automationId] of Object.entries(parsed)) {
+          if (this.isValidIdStatic(automationId as string)) {
+            this.profileAutomationMap[profileId] = automationId as string;
+          } else {
+            console.warn(`Removing invalid cached automation ID for profile ${profileId}:`, automationId);
+            hasInvalidEntries = true;
+          }
+        }
+        // Save cleaned state if we found invalid entries
+        if (hasInvalidEntries) {
+          await storage.setItem(
+            STORAGE_KEYS.PROFILE_AUTOMATION_MAP,
+            JSON.stringify(this.profileAutomationMap)
+          );
+        }
       }
 
       // Load pending URLs that weren't synced
@@ -105,6 +120,13 @@ class AutomationService {
       // Continue without cached state
       this.initialized = true;
     }
+  }
+
+  /**
+   * Static version of isValidId for use before instance methods are available
+   */
+  private isValidIdStatic(id: string | null | undefined): boolean {
+    return Boolean(id && id !== "undefined" && id !== "null" && id.length > 0);
   }
 
   /**
@@ -129,6 +151,13 @@ class AutomationService {
   }
 
   /**
+   * Helper to check if a value is a valid UUID (not undefined/null/"undefined")
+   */
+  private isValidId(id: string | null | undefined): id is string {
+    return Boolean(id && id !== "undefined" && id !== "null" && id.length > 0);
+  }
+
+  /**
    * Get existing automation for a profile (does not create)
    */
   async getAutomationForProfile(
@@ -138,14 +167,18 @@ class AutomationService {
 
     // Check cache first
     const cachedAutomationId = this.profileAutomationMap[profileId];
-    if (cachedAutomationId) {
+    if (this.isValidId(cachedAutomationId)) {
       try {
         const automation = await this.getAutomation(cachedAutomationId);
-        if (automation) return automation;
+        if (automation && this.isValidId(automation.id)) return automation;
       } catch {
         // Cached automation might be deleted, continue to search
         delete this.profileAutomationMap[profileId];
       }
+    } else if (cachedAutomationId) {
+      // Invalid cached ID (e.g., "undefined" string), clean it up
+      delete this.profileAutomationMap[profileId];
+      await this.saveState();
     }
 
     // Search for existing direct_urls automation for this profile
@@ -227,23 +260,29 @@ class AutomationService {
       ? `${profileName} - Mobile Swipe Queue`
       : `Mobile Swipe Queue - ${new Date().toLocaleDateString()}`;
 
-    const newAutomation = await this.createAutomation({
+    const createPayload = {
       name: automationName,
       jobProfileId: profileId,
       applicationMode: "direct_urls",
       scheduleType: "daily",
-      scheduleConfig: {
-        time: "09:00", // Default to 9 AM
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      },
+      scheduleTime: "09:00", // Default to 9 AM
       isActive: true,
       maxApplicationsPerDay: 50,
       jobUrls: [initialUrl], // Must have at least 1 URL
-    });
+    };
 
-    if (newAutomation) {
+    // DEBUG: Log the create automation payload
+    console.log("=== SWIPE: Creating new automation ===");
+    console.log("CREATE AUTOMATION PAYLOAD:", JSON.stringify(createPayload, null, 2));
+
+    const newAutomation = await this.createAutomation(createPayload);
+
+    if (newAutomation && this.isValidId(newAutomation.id)) {
       this.profileAutomationMap[profileId] = newAutomation.id;
       await this.saveState();
+    } else if (newAutomation) {
+      console.error("Created automation has invalid ID:", newAutomation.id);
+      return null;
     }
 
     return newAutomation;
@@ -265,12 +304,21 @@ class AutomationService {
   ): Promise<{ success: boolean; error?: string; automationId?: string }> {
     await this.initialize();
 
+    // DEBUG: Log incoming parameters
+    console.log("=== SWIPE: addJobToQueue called ===");
+    console.log("profileId:", profileId);
+    console.log("jobUrl:", jobUrl);
+    console.log("jobDetails:", JSON.stringify(jobDetails, null, 2));
+    console.log("profileName:", profileName);
+
     const urlInput: UrlInput = {
       url: jobUrl,
       jobTitle: jobDetails?.title,
       company: jobDetails?.company,
       platform: jobDetails?.platform || this.detectPlatform(jobUrl),
     };
+
+    console.log("urlInput:", JSON.stringify(urlInput, null, 2));
 
     // Add to pending queue first (optimistic update)
     const pendingEntry: PendingUrlEntry = {
@@ -296,7 +344,7 @@ class AutomationService {
           profileName
         );
 
-        if (!automation) {
+        if (!automation || !this.isValidId(automation.id)) {
           return {
             success: false,
             error: "Failed to create automation. Please try again.",
@@ -312,6 +360,18 @@ class AutomationService {
         return {
           success: true,
           automationId: automation.id,
+        };
+      }
+
+      // Validate automation has a valid ID before proceeding
+      if (!this.isValidId(automation.id)) {
+        console.error("Retrieved automation has invalid ID:", automation.id);
+        // Clear invalid cache and retry by creating new automation
+        delete this.profileAutomationMap[profileId];
+        await this.saveState();
+        return {
+          success: false,
+          error: "Invalid automation state. Please try again.",
         };
       }
 
@@ -349,21 +409,39 @@ class AutomationService {
 
   /**
    * Add URLs with retry logic
+   * API expects: { jobUrls: string[] }
    */
   private async addUrlsWithRetry(
     automationId: string,
     urls: UrlInput[]
   ): Promise<{ success: boolean; error?: string; data?: AddUrlsResponse }> {
+    // Validate automation ID before making API call
+    if (!this.isValidId(automationId)) {
+      console.error("addUrlsWithRetry called with invalid automationId:", automationId);
+      return { success: false, error: "Invalid automation ID" };
+    }
+
+    // Extract just the URL strings for the API
+    const jobUrls = urls.map((u) => u.url);
+
+    // DEBUG: Log add URLs payload
+    const endpoint = ENDPOINTS.AUTOMATIONS.URLS(automationId);
+    console.log("=== API: POST addUrls ===");
+    console.log("Endpoint:", endpoint);
+    console.log("Request body:", JSON.stringify({ jobUrls }, null, 2));
+
     let lastError: string | undefined;
 
     for (let attempt = 0; attempt < RETRY_CONFIG.maxRetries; attempt++) {
       try {
         const response = await api.post<AddUrlsResponse>(
-          ENDPOINTS.AUTOMATIONS.URLS(automationId),
-          { urls }
+          endpoint,
+          { jobUrls }
         );
+        console.log("Response:", JSON.stringify(response.data, null, 2));
         return { success: true, data: response.data };
       } catch (error) {
+        console.error("API Error:", getApiErrorMessage(error));
         lastError = getApiErrorMessage(error);
 
         // Don't retry on client errors (4xx) except 429 (rate limit)
@@ -475,10 +553,22 @@ class AutomationService {
     data: CreateAutomationDto
   ): Promise<Automation | null> {
     try {
+      console.log("=== API: POST createAutomation ===");
+      console.log("Endpoint:", ENDPOINTS.AUTOMATIONS.BASE);
+      console.log("Request body:", JSON.stringify(data, null, 2));
+
       const response = await api.post<Automation>(
         ENDPOINTS.AUTOMATIONS.BASE,
         data
       );
+
+      console.log("Response:", JSON.stringify(response.data, null, 2));
+
+      // Validate the response has a valid ID
+      if (!this.isValidId(response.data?.id)) {
+        console.error("Created automation returned invalid ID:", response.data?.id);
+        return null;
+      }
       return response.data;
     } catch (error) {
       console.error("Failed to create automation:", getApiErrorMessage(error));
@@ -490,6 +580,10 @@ class AutomationService {
    * Get automation by ID
    */
   async getAutomation(id: string): Promise<Automation | null> {
+    if (!this.isValidId(id)) {
+      console.warn("getAutomation called with invalid id:", id);
+      return null;
+    }
     try {
       const response = await api.get<Automation>(
         ENDPOINTS.AUTOMATIONS.BY_ID(id)
@@ -529,11 +623,22 @@ class AutomationService {
     id: string,
     data: UpdateAutomationDto
   ): Promise<Automation | null> {
+    if (!this.isValidId(id)) {
+      console.warn("updateAutomation called with invalid id:", id);
+      return null;
+    }
     try {
+      const endpoint = ENDPOINTS.AUTOMATIONS.BY_ID(id);
+      console.log("=== API: PATCH updateAutomation ===");
+      console.log("Endpoint:", endpoint);
+      console.log("Request body:", JSON.stringify(data, null, 2));
+
       const response = await api.patch<Automation>(
-        ENDPOINTS.AUTOMATIONS.BY_ID(id),
+        endpoint,
         data
       );
+
+      console.log("Response:", JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error) {
       console.error("Failed to update automation:", getApiErrorMessage(error));
@@ -580,12 +685,13 @@ class AutomationService {
 
   /**
    * Add URLs to automation
+   * API expects: { jobUrls: string[] }
    */
-  async addUrls(id: string, data: AddUrlsDto): Promise<AddUrlsResponse | null> {
+  async addUrls(id: string, jobUrls: string[]): Promise<AddUrlsResponse | null> {
     try {
       const response = await api.post<AddUrlsResponse>(
         ENDPOINTS.AUTOMATIONS.URLS(id),
-        data
+        { jobUrls }
       );
       return response.data;
     } catch (error) {
@@ -617,6 +723,10 @@ class AutomationService {
    * Get queue statistics
    */
   async getQueueStats(id: string): Promise<AutomationQueueStats | null> {
+    if (!this.isValidId(id)) {
+      console.warn("getQueueStats called with invalid id:", id);
+      return null;
+    }
     try {
       const response = await api.get<AutomationQueueStats>(
         ENDPOINTS.AUTOMATIONS.QUEUE_STATS(id)

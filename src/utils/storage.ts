@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
 
@@ -10,10 +11,20 @@ const STORAGE_KEYS = {
   THEME: "fastapply_theme",
 } as const;
 
+// Keys that contain sensitive data and should use SecureStore (max 2048 bytes)
+const SECURE_KEYS = new Set<string>([
+  STORAGE_KEYS.ACCESS_TOKEN,
+  STORAGE_KEYS.REFRESH_TOKEN,
+]);
+
 // For web, use localStorage fallback
 const isWeb = Platform.OS === "web";
 
 export const storage = {
+  /**
+   * Set item - uses SecureStore for sensitive keys, AsyncStorage for others
+   * SecureStore has a 2048 byte limit, so non-sensitive large data uses AsyncStorage
+   */
   async setItem(key: string, value: string): Promise<void> {
     try {
       // Validate that value is a non-null string
@@ -25,8 +36,12 @@ export const storage = {
 
       if (isWeb) {
         localStorage.setItem(key, stringValue);
-      } else {
+      } else if (SECURE_KEYS.has(key)) {
+        // Sensitive data - use SecureStore (has 2048 byte limit)
         await SecureStore.setItemAsync(key, stringValue);
+      } else {
+        // Non-sensitive data - use AsyncStorage (no size limit)
+        await AsyncStorage.setItem(key, stringValue);
       }
     } catch (error) {
       console.error(`Error storing ${key}:`, error);
@@ -39,7 +54,10 @@ export const storage = {
       if (isWeb) {
         return localStorage.getItem(key);
       }
-      return await SecureStore.getItemAsync(key);
+      if (SECURE_KEYS.has(key)) {
+        return await SecureStore.getItemAsync(key);
+      }
+      return await AsyncStorage.getItem(key);
     } catch (error) {
       console.error(`Error retrieving ${key}:`, error);
       return null;
@@ -50,8 +68,10 @@ export const storage = {
     try {
       if (isWeb) {
         localStorage.removeItem(key);
-      } else {
+      } else if (SECURE_KEYS.has(key)) {
         await SecureStore.deleteItemAsync(key);
+      } else {
+        await AsyncStorage.removeItem(key);
       }
     } catch (error) {
       console.error(`Error removing ${key}:`, error);

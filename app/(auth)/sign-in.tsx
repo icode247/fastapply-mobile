@@ -29,6 +29,8 @@ const InputField: React.FC<{
   onChangeText: (text: string) => void;
   keyboardType?: "default" | "email-address";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
+  autoCorrect?: boolean;
+  textContentType?: "emailAddress" | "name" | "none";
 }> = ({
   label,
   placeholder,
@@ -36,6 +38,8 @@ const InputField: React.FC<{
   onChangeText,
   keyboardType = "default",
   autoCapitalize = "none",
+  autoCorrect = false,
+  textContentType = "none",
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -51,13 +55,20 @@ const InputField: React.FC<{
         <TextInput
           style={styles.input}
           placeholder={placeholder}
-          placeholderTextColor="rgba(255,255,255,0.5)"
+          placeholderTextColor="rgba(255,255,255,0.4)"
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          autoComplete={keyboardType === "email-address" ? "email" : "off"}
+          textContentType={textContentType}
+          selectionColor="rgba(255,255,255,0.5)"
+          cursorColor="#FFFFFF"
+          returnKeyType="done"
+          enablesReturnKeyAutomatically
         />
       </View>
     </View>
@@ -139,9 +150,6 @@ export default function SignInScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Decorative circle */}
-      <View style={styles.decorativeCircle} />
-
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -208,6 +216,7 @@ export default function SignInScreen() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              textContentType="emailAddress"
             />
           </Animated.View>
 
@@ -310,15 +319,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  decorativeCircle: {
-    position: "absolute",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    top: 77,
-    left: 8,
-  },
   keyboardView: {
     flex: 1,
   },
@@ -368,26 +368,29 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
-    color: "rgba(255,255,255,0.75)",
-    lineHeight: 24,
+    color: "rgba(255,255,255,0.8)",
+    lineHeight: 20,
   },
   inputContainer: {
-    backgroundColor: "rgba(255,255,255,0.2)",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "rgba(208,209,212,0.5)",
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.15)",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   inputContainerFocused: {
-    borderColor: "rgba(255,255,255,0.6)",
+    borderColor: "rgba(255,255,255,0.5)",
+    backgroundColor: "rgba(255,255,255,0.18)",
   },
   input: {
     fontSize: 16,
     color: "#FFFFFF",
-    lineHeight: 24,
+    lineHeight: 22,
+    padding: 0,
+    margin: 0,
   },
   // Spacer
   spacer: {

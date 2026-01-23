@@ -108,7 +108,8 @@ export interface CreateAutomationDto {
   jobProfileId: string;
   applicationMode: ApplicationMode;
   scheduleType: ScheduleType;
-  scheduleConfig?: ScheduleConfig;
+  scheduleTime?: string; // HH:MM format (e.g., "09:00")
+  scheduleDays?: number[]; // Days for weekly schedule (0=Sunday, 6=Saturday)
   maxApplicationsPerRun?: number;
   maxApplicationsPerDay?: number;
   isActive?: boolean;
@@ -119,13 +120,14 @@ export interface UpdateAutomationDto {
   name?: string;
   isActive?: boolean;
   scheduleType?: ScheduleType;
-  scheduleConfig?: ScheduleConfig;
+  scheduleTime?: string; // HH:MM format (e.g., "09:00")
+  scheduleDays?: number[]; // Days for weekly schedule (0=Sunday, 6=Saturday)
   maxApplicationsPerRun?: number;
   maxApplicationsPerDay?: number;
 }
 
 export interface AddUrlsDto {
-  urls: UrlInput[];
+  jobUrls: string[];
 }
 
 export interface UrlInput {
