@@ -1,11 +1,24 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import * as NavigationBar from "expo-navigation-bar";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import {
   JobFilters,
   JobFiltersModal,
@@ -22,8 +35,15 @@ import { useAutomation } from "../../src/hooks/useAutomation";
 import { automationService } from "../../src/services/automation.service";
 import { jobService } from "../../src/services/job.service";
 import { profileService } from "../../src/services/profile.service";
-import { EmploymentType, NormalizedJob, WorkplaceType } from "../../src/types/job.types";
+import {
+  EmploymentType,
+  NormalizedJob,
+  WorkplaceType,
+} from "../../src/types/job.types";
 import { JobProfile } from "../../src/types/profile.types";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Profile interface for ProfileSelectorModal
 interface Profile {
@@ -36,7 +56,11 @@ interface Profile {
 // Convert JobProfile to Profile format for modal
 function toProfile(profile: JobProfile): Profile {
   // Consider a profile complete if it has basic info filled
-  const hasBasicInfo = !!(profile.firstName && profile.lastName && profile.email);
+  const hasBasicInfo = !!(
+    profile.firstName &&
+    profile.lastName &&
+    profile.email
+  );
   return {
     id: profile.id,
     name: profile.name,
@@ -85,9 +109,7 @@ export default function FeedScreen() {
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
   // Actions container bottom offset
-  const actionsBottomOffset = Platform.OS === "ios"
-    ? insets.bottom - 10 
-    : 16;  
+  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 10 : 16;
 
   // Load jobs from service
   const [jobs, setJobs] = useState<NormalizedJob[]>([]);
@@ -95,7 +117,10 @@ export default function FeedScreen() {
 
   // Auto-pilot state
   const [isAutoPilotActive, setIsAutoPilotActive] = useState(false);
-  const [autoPilotProgress, setAutoPilotProgress] = useState({ current: 0, total: 0 });
+  const [autoPilotProgress, setAutoPilotProgress] = useState({
+    current: 0,
+    total: 0,
+  });
   const autoPilotRef = useRef<NodeJS.Timeout | null>(null);
 
   // Card expanded state (full screen mode)
@@ -106,9 +131,10 @@ export default function FeedScreen() {
     if (Platform.OS === "android") {
       NavigationBar.setBackgroundColorAsync(colors.background);
       NavigationBar.setButtonStyleAsync(
-        colors.background === "#FFFFFF" || colors.background.toLowerCase() === "#fff"
+        colors.background === "#FFFFFF" ||
+          colors.background.toLowerCase() === "#fff"
           ? "dark"
-          : "light"
+          : "light",
       );
     }
   }, [colors.background]);
@@ -122,7 +148,9 @@ export default function FeedScreen() {
   // Real profiles from backend
   const [profiles, setProfiles] = useState<JobProfile[]>([]);
   const [profilesLoading, setProfilesLoading] = useState(true);
-  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
+    null,
+  );
 
   // Fetch profiles on mount
   useEffect(() => {
@@ -133,7 +161,7 @@ export default function FeedScreen() {
         setProfiles(fetchedProfiles);
 
         // Select primary profile by default, or first profile
-        const primaryProfile = fetchedProfiles.find(p => p.isPrimary);
+        const primaryProfile = fetchedProfiles.find((p) => p.isPrimary);
         if (primaryProfile) {
           setSelectedProfileId(primaryProfile.id);
         } else if (fetchedProfiles.length > 0) {
@@ -143,7 +171,7 @@ export default function FeedScreen() {
         console.log("Loaded profiles:", fetchedProfiles.length);
 
         // Clean up any cached data for profiles that no longer exist
-        const validProfileIds = fetchedProfiles.map(p => p.id);
+        const validProfileIds = fetchedProfiles.map((p) => p.id);
         await automationService.cleanupInvalidProfiles(validProfileIds);
       } catch (error) {
         console.error("Failed to load profiles:", error);
@@ -158,14 +186,11 @@ export default function FeedScreen() {
   // Get selected profile
   const selectedProfile = useMemo(
     () => profiles.find((p) => p.id === selectedProfileId),
-    [profiles, selectedProfileId]
+    [profiles, selectedProfileId],
   );
 
   // Convert profiles to modal format
-  const modalProfiles = useMemo(
-    () => profiles.map(toProfile),
-    [profiles]
-  );
+  const modalProfiles = useMemo(() => profiles.map(toProfile), [profiles]);
 
   // Convert jobs to legacy format for SwipeDeck
   const legacyJobs = useMemo(() => jobs.map(toLegacyJob), [jobs]);
@@ -183,7 +208,9 @@ export default function FeedScreen() {
     profileId: selectedProfileId,
     profileName: selectedProfile?.name,
     onSuccess: (job, automationId) => {
-      console.log(`Job queued successfully: ${job.title} -> automation ${automationId}`);
+      console.log(
+        `Job queued successfully: ${job.title} -> automation ${automationId}`,
+      );
     },
     onError: (job, error) => {
       console.error(`Failed to queue job: ${job.title}`, error);
@@ -195,7 +222,7 @@ export default function FeedScreen() {
     (id: string): NormalizedJob | undefined => {
       return jobs.find((j) => j.id === id);
     },
-    [jobs]
+    [jobs],
   );
 
   // Load jobs on mount
@@ -274,7 +301,7 @@ export default function FeedScreen() {
       Alert.alert(
         "No Profiles Found",
         "Please create a job profile first to enable job automation.",
-        [{ text: "OK" }]
+        [{ text: "OK" }],
       );
       return;
     }
@@ -287,89 +314,101 @@ export default function FeedScreen() {
   };
 
   // Handle parsed voice command
-  const handleVoiceCommandParsed = useCallback((command: ParsedVoiceCommand) => {
-    console.log("Voice command parsed:", command);
+  const handleVoiceCommandParsed = useCallback(
+    (command: ParsedVoiceCommand) => {
+      console.log("Voice command parsed:", command);
 
-    // Apply filters from voice command
-    if (command.filters) {
-      const newFilters: JobFilters = {
-        remoteOnly: command.filters.remote || false,
-        salaryMin: command.filters.minSalary,
-        salaryMax: undefined,
-        jobTypes: command.filters.jobTypes || [],
-        workModes: command.filters.remote ? ["remote"] : [],
-        country: undefined,
-        cities: command.filters.locations || [],
-      };
+      // Apply filters from voice command
+      if (command.filters) {
+        const newFilters: JobFilters = {
+          remoteOnly: command.filters.remote || false,
+          salaryMin: command.filters.minSalary,
+          salaryMax: 200000,
+          jobTypes: command.filters.jobTypes || [],
+          workModes: command.filters.remote ? ["remote"] : [],
+          country: undefined,
+          cities: command.filters.locations || [],
+        };
 
-      // Apply filters to job service
-      const jobTypesMap: Record<string, EmploymentType> = {
-        "full-time": "full_time",
-        "part-time": "part_time",
-        "contract": "contract",
-        "internship": "internship",
-        "freelance": "freelance",
-      };
+        // Apply filters to job service
+        const jobTypesMap: Record<string, EmploymentType> = {
+          "full-time": "full_time",
+          "part-time": "part_time",
+          contract: "contract",
+          internship: "internship",
+          freelance: "freelance",
+        };
 
-      const workModesMap: Record<string, WorkplaceType> = {
-        "remote": "remote",
-        "hybrid": "hybrid",
-        "on-site": "onsite",
-        "onsite": "onsite",
-      };
+        const workModesMap: Record<string, WorkplaceType> = {
+          remote: "remote",
+          hybrid: "hybrid",
+          "on-site": "onsite",
+          onsite: "onsite",
+        };
 
-      const searchFilters = {
-        remoteOnly: newFilters.remoteOnly,
-        salaryMin: newFilters.salaryMin,
-        salaryMax: newFilters.salaryMax,
-        jobTypes: newFilters.jobTypes.length > 0
-          ? newFilters.jobTypes.map(t => jobTypesMap[t.toLowerCase()] || null).filter(Boolean) as EmploymentType[]
-          : undefined,
-        workModes: newFilters.workModes.length > 0
-          ? newFilters.workModes.map(m => workModesMap[m.toLowerCase()] || null).filter(Boolean) as WorkplaceType[]
-          : undefined,
-        cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
-        keywords: command.filters.keywords,
-      };
+        const searchFilters = {
+          remoteOnly: newFilters.remoteOnly,
+          salaryMin: newFilters.salaryMin,
+          salaryMax: newFilters.salaryMax,
+          jobTypes:
+            newFilters.jobTypes.length > 0
+              ? (newFilters.jobTypes
+                  .map((t) => jobTypesMap[t.toLowerCase()] || null)
+                  .filter(Boolean) as EmploymentType[])
+              : undefined,
+          workModes:
+            newFilters.workModes.length > 0
+              ? (newFilters.workModes
+                  .map((m) => workModesMap[m.toLowerCase()] || null)
+                  .filter(Boolean) as WorkplaceType[])
+              : undefined,
+          cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
+          keywords: command.filters.keywords,
+        };
 
-      const result = jobService.searchJobs(searchFilters);
-      console.log("Voice filter - found jobs:", result.total);
-      setJobs(result.jobs);
-      setCurrentJobIndex(0);
-      setFilters(newFilters);
-    }
-
-    // Start auto-swipe if requested
-    if (command.autoSwipe) {
-      const { direction, count } = command.autoSwipe;
-      const swipeCount = count === "all" ? Math.min(jobs.length - currentJobIndex, 20) : Math.min(count, jobs.length - currentJobIndex);
-
-      if (swipeCount > 0) {
-        setIsAutoPilotActive(true);
-        setAutoPilotProgress({ current: 0, total: swipeCount });
-
-        let swiped = 0;
-        autoPilotRef.current = setInterval(() => {
-          if (swiped >= swipeCount) {
-            if (autoPilotRef.current) {
-              clearInterval(autoPilotRef.current);
-            }
-            setIsAutoPilotActive(false);
-            return;
-          }
-
-          if (direction === "right") {
-            swipeDeckRef.current?.swipeRight();
-          } else {
-            swipeDeckRef.current?.swipeLeft();
-          }
-
-          swiped++;
-          setAutoPilotProgress({ current: swiped, total: swipeCount });
-        }, 800); // Swipe every 800ms
+        const result = jobService.searchJobs(searchFilters);
+        console.log("Voice filter - found jobs:", result.total);
+        setJobs(result.jobs);
+        setCurrentJobIndex(0);
+        setFilters(newFilters);
       }
-    }
-  }, [jobs.length, currentJobIndex]);
+
+      // Start auto-swipe if requested
+      if (command.autoSwipe) {
+        const { direction, count } = command.autoSwipe;
+        const swipeCount =
+          count === "all"
+            ? Math.min(jobs.length - currentJobIndex, 20)
+            : Math.min(count, jobs.length - currentJobIndex);
+
+        if (swipeCount > 0) {
+          setIsAutoPilotActive(true);
+          setAutoPilotProgress({ current: 0, total: swipeCount });
+
+          let swiped = 0;
+          autoPilotRef.current = setInterval(() => {
+            if (swiped >= swipeCount) {
+              if (autoPilotRef.current) {
+                clearInterval(autoPilotRef.current);
+              }
+              setIsAutoPilotActive(false);
+              return;
+            }
+
+            if (direction === "right") {
+              swipeDeckRef.current?.swipeRight();
+            } else {
+              swipeDeckRef.current?.swipeLeft();
+            }
+
+            swiped++;
+            setAutoPilotProgress({ current: swiped, total: swipeCount });
+          }, 800); // Swipe every 800ms
+        }
+      }
+    },
+    [jobs.length, currentJobIndex],
+  );
 
   // Stop auto-pilot
   const stopAutoPilot = useCallback(() => {
@@ -387,34 +426,45 @@ export default function FeedScreen() {
     const jobTypesMap: Record<string, EmploymentType> = {
       "full-time": "full_time",
       "part-time": "part_time",
-      "contract": "contract",
-      "internship": "internship",
-      "freelance": "freelance",
+      contract: "contract",
+      internship: "internship",
+      freelance: "freelance",
     };
 
     const workModesMap: Record<string, WorkplaceType> = {
-      "remote": "remote",
-      "hybrid": "hybrid",
+      remote: "remote",
+      hybrid: "hybrid",
       "on-site": "onsite",
-      "onsite": "onsite",
+      onsite: "onsite",
     };
 
     const searchFilters = {
       remoteOnly: newFilters.remoteOnly,
       salaryMin: newFilters.salaryMin,
       salaryMax: newFilters.salaryMax,
-      jobTypes: newFilters.jobTypes.length > 0
-        ? newFilters.jobTypes.map(t => jobTypesMap[t.toLowerCase()] || null).filter(Boolean) as EmploymentType[]
-        : undefined,
-      workModes: newFilters.workModes.length > 0
-        ? newFilters.workModes.map(m => workModesMap[m.toLowerCase()] || null).filter(Boolean) as WorkplaceType[]
-        : undefined,
+      jobTypes:
+        newFilters.jobTypes.length > 0
+          ? (newFilters.jobTypes
+              .map((t) => jobTypesMap[t.toLowerCase()] || null)
+              .filter(Boolean) as EmploymentType[])
+          : undefined,
+      workModes:
+        newFilters.workModes.length > 0
+          ? (newFilters.workModes
+              .map((m) => workModesMap[m.toLowerCase()] || null)
+              .filter(Boolean) as WorkplaceType[])
+          : undefined,
       countries: newFilters.country ? [newFilters.country] : undefined,
       cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
     };
 
     const result = jobService.searchJobs(searchFilters);
-    console.log("Filtered jobs:", result.total, "of", jobService.getAllJobs().length);
+    console.log(
+      "Filtered jobs:",
+      result.total,
+      "of",
+      jobService.getAllJobs().length,
+    );
     setJobs(result.jobs);
     setCurrentJobIndex(0);
   };
@@ -430,14 +480,20 @@ export default function FeedScreen() {
             <Text style={[styles.headerTitle, { color: colors.text }]}>
               Discover
             </Text>
-            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+            <Text
+              style={[styles.headerSubtitle, { color: colors.textSecondary }]}
+            >
               {jobs.length} jobs available
-              {profilesLoading ? " • Loading profiles..." :
-                profiles.length === 0 ? " • No profile" :
-                selectedProfile ? ` • ${selectedProfile.name}` : ""}
-              {queueStats && queueStats.pending > 0 && (
-                ` • ${queueStats.pending} queued`
-              )}
+              {profilesLoading
+                ? " • Loading profiles..."
+                : profiles.length === 0
+                  ? " • No profile"
+                  : selectedProfile
+                    ? ` • ${selectedProfile.name}`
+                    : ""}
+              {queueStats &&
+                queueStats.pending > 0 &&
+                ` • ${queueStats.pending} queued`}
             </Text>
           </View>
           <View style={styles.headerActions}>
@@ -463,10 +519,17 @@ export default function FeedScreen() {
               ]}
               onPress={() => setShowFilters(true)}
             >
-              <Ionicons name="options-outline" size={Math.round(22 * uiScale)} color={colors.text} />
+              <Ionicons
+                name="options-outline"
+                size={Math.round(22 * uiScale)}
+                color={colors.text}
+              />
               {filters && (
                 <View
-                  style={[styles.filterBadge, { backgroundColor: colors.primary }]}
+                  style={[
+                    styles.filterBadge,
+                    { backgroundColor: colors.primary },
+                  ]}
                 />
               )}
             </TouchableOpacity>
@@ -480,7 +543,11 @@ export default function FeedScreen() {
           style={[styles.autoPilotBanner, { backgroundColor: colors.primary }]}
           onPress={stopAutoPilot}
         >
-          <MaterialCommunityIcons name="robot" size={Math.round(20 * uiScale)} color="#FFFFFF" />
+          <MaterialCommunityIcons
+            name="robot"
+            size={Math.round(20 * uiScale)}
+            color="#FFFFFF"
+          />
           <Text style={styles.autoPilotText}>
             Auto-pilot: {autoPilotProgress.current}/{autoPilotProgress.total}
           </Text>
@@ -489,10 +556,12 @@ export default function FeedScreen() {
       )}
 
       {/* Swipe Deck */}
-      <View style={[
-        styles.deckContainer,
-        Platform.OS === "android" && { marginBottom: 20 }
-      ]}>
+      <View
+        style={[
+          styles.deckContainer,
+          Platform.OS === "android" && { marginBottom: 20 },
+        ]}
+      >
         <SwipeDeck
           ref={swipeDeckRef}
           jobs={legacyJobs}
@@ -504,81 +573,99 @@ export default function FeedScreen() {
 
       {/* Action Buttons - hide when card is expanded */}
       {!isCardExpanded && (
-      <View
-        style={[
-          styles.actionsContainer,
-          {
-            backgroundColor: colors.surfaceSecondary,
-            bottom: actionsBottomOffset,
-          },
-        ]}
-      >
-        {/* Undo */}
-        <TouchableOpacity
+        <View
           style={[
-            styles.actionButton,
-            styles.smallButton,
-            { backgroundColor: colors.surface },
-          ]}
-          onPress={handleUndo}
-        >
-          <Ionicons name="arrow-undo" size={Math.round(22 * uiScale)} color="#FBC02D" />
-        </TouchableOpacity>
-
-        {/* Reject */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.largeButton,
-            { backgroundColor: colors.surface },
-          ]}
-          onPress={handleReject}
-        >
-          <Ionicons name="close" size={Math.round(36 * uiScale)} color="#F72585" />
-        </TouchableOpacity>
-
-        {/* Select Profile */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.smallButton,
-            { backgroundColor: colors.surface },
-          ]}
-          onPress={handleSelectProfile}
-        >
-          <Ionicons name="person-circle-outline" size={Math.round(22 * uiScale)} color="#FF9800" />
-        </TouchableOpacity>
-
-        {/* Accept */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.largeButton,
-            { backgroundColor: colors.surface },
-          ]}
-          onPress={handleAccept}
-        >
-          <Ionicons name="heart" size={Math.round(36 * uiScale)} color="#00C853" />
-        </TouchableOpacity>
-
-        {/* Voice Auto-Pilot */}
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.smallButton,
+            styles.actionsContainer,
             {
-              backgroundColor: isAutoPilotActive ? colors.primary : colors.surface,
+              backgroundColor: colors.surfaceSecondary,
+              bottom: actionsBottomOffset,
             },
           ]}
-          onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
         >
-          <MaterialCommunityIcons
-            name={isAutoPilotActive ? "stop" : "waveform"}
-            size={Math.round(24 * uiScale)}
-            color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
-          />
-        </TouchableOpacity>
-      </View>
+          {/* Undo */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.smallButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleUndo}
+          >
+            <Ionicons
+              name="arrow-undo"
+              size={Math.round(22 * uiScale)}
+              color="#FBC02D"
+            />
+          </TouchableOpacity>
+
+          {/* Reject */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.largeButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleReject}
+          >
+            <Ionicons
+              name="close"
+              size={Math.round(36 * uiScale)}
+              color="#F72585"
+            />
+          </TouchableOpacity>
+
+          {/* Select Profile */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.smallButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleSelectProfile}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={Math.round(22 * uiScale)}
+              color="#FF9800"
+            />
+          </TouchableOpacity>
+
+          {/* Accept */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.largeButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleAccept}
+          >
+            <Ionicons
+              name="heart"
+              size={Math.round(36 * uiScale)}
+              color="#00C853"
+            />
+          </TouchableOpacity>
+
+          {/* Voice Auto-Pilot */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.smallButton,
+              {
+                backgroundColor: isAutoPilotActive
+                  ? colors.primary
+                  : colors.surface,
+              },
+            ]}
+            onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
+          >
+            <MaterialCommunityIcons
+              name={isAutoPilotActive ? "stop" : "waveform"}
+              size={Math.round(24 * uiScale)}
+              color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
+            />
+          </TouchableOpacity>
+        </View>
       )}
 
       {/* Voice Auto-Pilot Overlay */}
