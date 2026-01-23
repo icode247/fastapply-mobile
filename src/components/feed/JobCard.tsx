@@ -1,16 +1,50 @@
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useRef, useState } from "react";
+import {
+  Animated,
+  Image,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { Job } from "../../mocks/jobs";
 
+// Android renders fonts/icons larger, scale down for consistency
+const fontScale = Platform.OS === "android" ? 0.85 : 1;
+const iconSize = Math.round(18 * fontScale);
+const smallIconSize = Math.round(20 * fontScale);
+
 interface JobCardProps {
   job: Job;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job }) => {
+export const JobCard: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
   const { colors } = useTheme();
+  const [isExpanded, setIsExpanded] = useState(false);
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  const toggleExpand = () => {
+    const toValue = isExpanded ? 0 : 1;
+    const newExpanded = !isExpanded;
+    Animated.timing(rotateAnim, {
+      toValue,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+    setIsExpanded(newExpanded);
+    onExpandChange?.(newExpanded);
+  };
+
+  const arrowRotation = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["180deg", "0deg"],
+  });
 
   return (
     <View
@@ -18,8 +52,11 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
         styles.card,
         {
           backgroundColor: colors.surface,
-          borderColor: colors.border,
-          shadowColor: colors.text,
+          borderColor: isExpanded ? "transparent" : colors.border,
+          shadowColor: isExpanded ? "transparent" : colors.text,
+          borderRadius: isExpanded ? 0 : 32,
+          borderWidth: isExpanded ? 0 : 1,
+          elevation: isExpanded ? 0 : 8,
         },
       ]}
     >
@@ -28,14 +65,18 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
           <Text style={[styles.title, { color: colors.text }]}>
             {job.title}
           </Text>
-          <View
+          <TouchableOpacity
+            onPress={toggleExpand}
+            activeOpacity={0.7}
             style={[
               styles.iconButton,
               { backgroundColor: colors.surfaceSecondary },
             ]}
           >
-            <Ionicons name="arrow-up-outline" size={20} color={colors.text} />
-          </View>
+            <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
+              <Ionicons name="chevron-down" size={smallIconSize} color={colors.text} />
+            </Animated.View>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.companyRow}>
@@ -53,7 +94,10 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
 
       <ScrollView
         style={styles.contentScroll}
-        showsVerticalScrollIndicator={false}
+        contentContainerStyle={isExpanded ? styles.expandedContent : undefined}
+        showsVerticalScrollIndicator={isExpanded}
+        scrollEnabled={isExpanded}
+        bounces={isExpanded}
       >
         {/* Compensation */}
         <View style={styles.section}>
@@ -61,7 +105,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
             Compensation
           </Text>
           <View style={[styles.pill, { backgroundColor: "#FFF0E6" }]}>
-            <Ionicons name="wallet-outline" size={18} color="#FF5722" />
+            <Ionicons name="wallet-outline" size={iconSize} color="#FF5722" />
             <Text style={[styles.pillText, { color: "#FF5722" }]}>
               {job.salary}
             </Text>
@@ -75,7 +119,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
           </Text>
           <View style={styles.row}>
             <View style={[styles.pill, { backgroundColor: "#E0F2F1" }]}>
-              <Ionicons name="business-outline" size={18} color="#009688" />
+              <Ionicons name="business-outline" size={iconSize} color="#009688" />
               <Text style={[styles.pillText, { color: "#009688" }]}>
                 {job.workMode}
               </Text>
@@ -86,7 +130,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 { backgroundColor: "#F3E5F5", marginLeft: 8 },
               ]}
             >
-              <Ionicons name="time-outline" size={18} color="#9C27B0" />
+              <Ionicons name="time-outline" size={iconSize} color="#9C27B0" />
               <Text style={[styles.pillText, { color: "#9C27B0" }]}>
                 {job.type}
               </Text>
@@ -100,7 +144,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
             Experience level
           </Text>
           <View style={[styles.pill, { backgroundColor: "#FCE4EC" }]}>
-            <Ionicons name="trophy-outline" size={18} color="#E91E63" />
+            <Ionicons name="trophy-outline" size={iconSize} color="#E91E63" />
             <Text style={[styles.pillText, { color: "#E91E63" }]}>
               {job.experience}
             </Text>
@@ -114,7 +158,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job }) => {
           </Text>
           <Text
             style={[styles.description, { color: colors.text }]}
-            numberOfLines={6}
+            numberOfLines={isExpanded ? undefined : 6}
           >
             {job.description}
           </Text>
@@ -128,8 +172,6 @@ const styles = StyleSheet.create({
   card: {
     width: "100%",
     height: "100%",
-    borderRadius: 32,
-    borderWidth: 1,
     padding: spacing[6],
     shadowOffset: {
       width: 0,
@@ -137,7 +179,6 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 12,
-    elevation: 8,
   },
   cardHeader: {
     marginBottom: spacing[4],
@@ -149,16 +190,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   title: {
-    fontSize: 28,
+    fontSize: Math.round(28 * fontScale),
     fontWeight: "800",
     flex: 1,
     marginRight: spacing[2],
-    lineHeight: 34,
+    lineHeight: Math.round(34 * fontScale),
   },
   iconButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: Math.round(36 * fontScale),
+    height: Math.round(36 * fontScale),
+    borderRadius: Math.round(18 * fontScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -167,9 +208,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logo: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: Math.round(48 * fontScale),
+    height: Math.round(48 * fontScale),
+    borderRadius: Math.round(24 * fontScale),
     marginRight: spacing[3],
   },
   companyInfo: {
@@ -186,11 +227,14 @@ const styles = StyleSheet.create({
   contentScroll: {
     flex: 1,
   },
+  expandedContent: {
+    paddingBottom: 40,
+  },
   section: {
     marginBottom: spacing[5],
   },
   sectionLabel: {
-    fontSize: 13,
+    fontSize: Math.round(13 * fontScale),
     fontWeight: "600",
     marginBottom: spacing[2],
     textTransform: "none",
@@ -205,7 +249,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   pillText: {
-    fontSize: 15,
+    fontSize: Math.round(15 * fontScale),
     fontWeight: "600",
   },
   row: {
@@ -213,7 +257,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   description: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: Math.round(16 * fontScale),
+    lineHeight: Math.round(24 * fontScale),
   },
 });

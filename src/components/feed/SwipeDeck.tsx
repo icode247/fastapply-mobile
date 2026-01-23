@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useState,
 } from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
 import {
   Gesture,
   GestureDetector,
@@ -23,6 +23,9 @@ import { useTheme } from "../../hooks";
 import { Job } from "../../mocks/jobs";
 import { JobCard } from "./JobCard";
 
+// Android renders fonts larger, scale down for consistency
+const fontScale = Platform.OS === "android" ? 0.85 : 1;
+
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
@@ -30,6 +33,7 @@ interface SwipeDeckProps {
   jobs: Job[];
   onSwipeLeft: (job: Job) => void;
   onSwipeRight: (job: Job) => void;
+  onExpandChange?: (expanded: boolean) => void;
 }
 
 export interface SwipeDeckRef {
@@ -40,12 +44,18 @@ export interface SwipeDeckRef {
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
-  ({ jobs, onSwipeLeft, onSwipeRight }, ref) => {
+  ({ jobs, onSwipeLeft, onSwipeRight, onExpandChange }, ref) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [swipeHistory, setSwipeHistory] = useState<
       { job: Job; direction: "left" | "right" }[]
     >([]);
+    const [isCardExpanded, setIsCardExpanded] = useState(false);
     const { colors } = useTheme();
+
+    const handleExpandChange = (expanded: boolean) => {
+      setIsCardExpanded(expanded);
+      onExpandChange?.(expanded);
+    };
 
     // Animation values
     const translateX = useSharedValue(0);
@@ -122,6 +132,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     );
 
     const gesture = Gesture.Pan()
+      .enabled(!isCardExpanded)
       .onUpdate((event) => {
         translateX.value = event.translationX;
         rotate.value = (event.translationX / SCREEN_WIDTH) * 15;
@@ -185,8 +196,8 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
 
     return (
       <GestureHandlerRootView style={styles.container}>
-        {/* Background Card (Next Job) */}
-        {nextJob && (
+        {/* Background Card (Next Job) - hide when expanded */}
+        {nextJob && !isCardExpanded && (
           <View style={[styles.cardContainer, styles.nextCard]}>
             <JobCard job={nextJob} />
           </View>
@@ -194,20 +205,24 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
 
         {/* Foreground Card (Current Job) */}
         <GestureDetector gesture={gesture}>
-          <Animated.View style={[styles.cardContainer, cardStyle]}>
-            {/* Overlays */}
-            <Animated.View
-              style={[styles.overlay, styles.likeOverlay, likeStyle]}
-            >
-              <Text style={styles.overlayText}>LIKE</Text>
-            </Animated.View>
-            <Animated.View
-              style={[styles.overlay, styles.nopeOverlay, nopeStyle]}
-            >
-              <Text style={[styles.overlayText, styles.nopeText]}>NOPE</Text>
-            </Animated.View>
+          <Animated.View style={[styles.cardContainer, !isCardExpanded && cardStyle]}>
+            {/* Overlays - only show when not expanded */}
+            {!isCardExpanded && (
+              <>
+                <Animated.View
+                  style={[styles.overlay, styles.likeOverlay, likeStyle]}
+                >
+                  <Text style={styles.overlayText}>LIKE</Text>
+                </Animated.View>
+                <Animated.View
+                  style={[styles.overlay, styles.nopeOverlay, nopeStyle]}
+                >
+                  <Text style={[styles.overlayText, styles.nopeText]}>NOPE</Text>
+                </Animated.View>
+              </>
+            )}
 
-            <JobCard job={currentJob} />
+            <JobCard job={currentJob} onExpandChange={handleExpandChange} />
           </Animated.View>
         </GestureDetector>
       </GestureHandlerRootView>
@@ -237,13 +252,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     marginTop: spacing[4],
-    fontSize: 20,
+    fontSize: Math.round(20 * fontScale),
     fontWeight: "600",
     textAlign: "center",
   },
   emptySubtext: {
     marginTop: spacing[2],
-    fontSize: 14,
+    fontSize: Math.round(14 * fontScale),
     textAlign: "center",
   },
   overlay: {
@@ -266,7 +281,7 @@ const styles = StyleSheet.create({
     transform: [{ rotate: "15deg" }],
   },
   overlayText: {
-    fontSize: 32,
+    fontSize: Math.round(32 * fontScale),
     fontWeight: "bold",
     color: "#00C853",
     letterSpacing: 2,

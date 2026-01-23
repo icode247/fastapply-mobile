@@ -8,6 +8,7 @@ import {
   Dimensions,
   Easing,
   FlatList,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -18,6 +19,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing } from "../../src/constants/theme";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { useTheme } from "../../src/hooks";
 import { applicationService } from "../../src/services/application.service";
 import { Application } from "../../src/types";
@@ -266,7 +270,7 @@ const ApplicationItem: React.FC<{
                 { backgroundColor: config.color + "20", flexShrink: 0 },
               ]}
             >
-              <Ionicons name={config.icon} size={12} color={config.color} />
+              <Ionicons name={config.icon} size={Math.round(12 * uiScale)} color={config.color} />
               <Text style={[styles.statusText, { color: config.color }]}>
                 {config.label}
               </Text>
@@ -282,7 +286,7 @@ const ApplicationItem: React.FC<{
             <View style={[styles.detailItem, { flex: 1 }]}>
               <Ionicons
                 name="location-outline"
-                size={14}
+                size={Math.round(14 * uiScale)}
                 color={colors.textTertiary}
               />
               <Text
@@ -296,7 +300,7 @@ const ApplicationItem: React.FC<{
               <View style={[styles.detailItem, { flex: 1 }]}>
                 <Ionicons
                   name="cash-outline"
-                  size={14}
+                  size={Math.round(14 * uiScale)}
                   color={colors.textTertiary}
                 />
                 <Text
@@ -316,7 +320,7 @@ const ApplicationItem: React.FC<{
         {/* Arrow */}
         <Ionicons
           name="chevron-forward"
-          size={20}
+          size={Math.round(20 * uiScale)}
           color={colors.textTertiary}
         />
       </TouchableOpacity>
@@ -418,7 +422,7 @@ const ApplicationsHeader: React.FC<{
       >
         <Ionicons
           name="search-outline"
-          size={20}
+          size={Math.round(20 * uiScale)}
           color={colors.textSecondary}
         />
         <TextInput
@@ -432,7 +436,7 @@ const ApplicationsHeader: React.FC<{
           <TouchableOpacity onPress={() => setSearchQuery("")}>
             <Ionicons
               name="close-circle"
-              size={20}
+              size={Math.round(20 * uiScale)}
               color={colors.textSecondary}
             />
           </TouchableOpacity>
@@ -465,7 +469,7 @@ const ApplicationsHeader: React.FC<{
           {totalCount} applications
         </Text>
         <TouchableOpacity style={styles.sortButton}>
-          <Ionicons name="swap-vertical" size={18} color={colors.primary} />
+          <Ionicons name="swap-vertical" size={Math.round(18 * uiScale)} color={colors.primary} />
           <Text style={[styles.sortText, { color: colors.primary }]}>Sort</Text>
         </TouchableOpacity>
       </View>
@@ -602,7 +606,7 @@ export default function ApplicationsScreen() {
       >
         <Ionicons
           name="document-text-outline"
-          size={64}
+          size={Math.round(64 * uiScale)}
           color={colors.textTertiary}
         />
         <Text style={{ color: colors.textSecondary, marginTop: 16 }}>
@@ -709,7 +713,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   title: {
-    fontSize: 32,
+    fontSize: Math.round(32 * uiScale),
     fontWeight: "800",
     letterSpacing: -0.5,
     marginBottom: spacing[4],
@@ -723,11 +727,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: Math.round(24 * uiScale),
     fontWeight: "800",
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     marginTop: 2,
   },
   statDivider: {
@@ -745,7 +749,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     marginLeft: spacing[3],
   },
   filtersScroll: {
@@ -768,11 +772,11 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   filterChipText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
   },
   filterChipTextActive: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
   },
@@ -783,7 +787,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   resultsCount: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "500",
   },
   sortButton: {
@@ -792,7 +796,7 @@ const styles = StyleSheet.create({
     gap: spacing[1],
   },
   sortText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
   },
   applicationsList: {
@@ -812,14 +816,14 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   companyLogo: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: Math.round(52 * uiScale),
+    height: Math.round(52 * uiScale),
+    borderRadius: Math.round(16 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
   logoText: {
-    fontSize: 22,
+    fontSize: Math.round(22 * uiScale),
     fontWeight: "800",
   },
   mainInfo: {
@@ -834,7 +838,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   companyName: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     fontWeight: "600",
     opacity: 0.7,
   },
@@ -847,11 +851,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: Math.round(11 * uiScale),
     fontWeight: "700",
   },
   positionText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "700",
     marginBottom: 6,
   },
@@ -867,9 +871,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   detailText: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
   },
   appliedText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
   },
 });

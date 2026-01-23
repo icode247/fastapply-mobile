@@ -10,6 +10,7 @@ import {
   Dimensions,
   Easing,
   Image,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -21,6 +22,9 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Page indicator component
 const PageIndicator: React.FC<{ currentPage: number; totalPages: number }> = ({
@@ -115,7 +119,7 @@ const CompanyCard: React.FC<{
         </View>
         {company.hasCheck && (
           <View style={styles.checkBadge}>
-            <Ionicons name="checkmark" size={16} color="#10B981" />
+            <Ionicons name="checkmark" size={Math.round(16 * uiScale)} color="#10B981" />
           </View>
         )}
       </View>
@@ -189,14 +193,14 @@ const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({ cardsAnimation }
 // Arrow Left Icon
 const ArrowLeftIcon: React.FC = () => (
   <View style={styles.arrowIcon}>
-    <Ionicons name="chevron-back" size={12} color="rgba(255,255,255,0.5)" />
+    <Ionicons name="chevron-back" size={Math.round(12 * uiScale)} color="rgba(255,255,255,0.5)" />
   </View>
 );
 
 // Arrow Right Icon
 const ArrowRightIcon: React.FC = () => (
   <View style={styles.arrowIcon}>
-    <Ionicons name="chevron-forward" size={12} color="rgba(255,255,255,0.5)" />
+    <Ionicons name="chevron-forward" size={Math.round(12 * uiScale)} color="rgba(255,255,255,0.5)" />
   </View>
 );
 
@@ -273,11 +277,11 @@ const JobCard: React.FC<{
           <View style={styles.divider} />
           <View style={styles.detailsRow}>
             <View style={styles.detailItem}>
-              <Ionicons name="briefcase-outline" size={14} color="rgba(17,17,17,0.7)" />
+              <Ionicons name="briefcase-outline" size={Math.round(14 * uiScale)} color="rgba(17,17,17,0.7)" />
               <Text style={styles.detailText}>Full-time</Text>
             </View>
             <View style={styles.detailItem}>
-              <Ionicons name="cash-outline" size={14} color="rgba(17,17,17,0.7)" />
+              <Ionicons name="cash-outline" size={Math.round(14 * uiScale)} color="rgba(17,17,17,0.7)" />
               <Text style={styles.detailText}>120k - 150k</Text>
             </View>
           </View>
@@ -587,8 +591,8 @@ const styles = StyleSheet.create({
     minHeight: SCREEN_HEIGHT,
   },
   logoIcon: {
-    width: 56,
-    height: 56,
+    width: Math.round(56 * uiScale),
+    height: Math.round(56 * uiScale),
   },
   content: {
     flex: 1,
@@ -636,12 +640,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   slide1Title: {
-    fontSize: 40,
+    fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
     textAlign: "center",
-    lineHeight: 42,
-    width: 350,
+    lineHeight: Math.round(42 * uiScale),
+    width: Math.round(350 * uiScale),
     // Note: React Native doesn't support gradient text natively
     // The gradient effect (132deg, white to #B4DBE8) would need expo-linear-gradient with MaskedView
   },
@@ -651,24 +655,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   slide1Subtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.9)",
     textAlign: "center",
-    lineHeight: 22,
-    width: 326,
+    lineHeight: Math.round(22 * uiScale),
+    width: Math.round(326 * uiScale),
   },
   trustSection: {
     marginTop: 40,
     alignItems: "center",
   },
   trustLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "400",
     color: "rgba(255,255,255,0.5)",
     letterSpacing: 2,
     textAlign: "center",
     marginBottom: 48,
-    width: 297,
+    width: Math.round(297 * uiScale),
   },
   cardsContainer: {
     gap: 24,
@@ -690,36 +694,36 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.1)",
   },
   companyLogo: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(10 * uiScale),
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
   },
   companyLogoImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(10 * uiScale),
   },
   companyInfo: {
     flex: 1,
     marginLeft: 12,
   },
   companyName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
     color: "#FFFFFF",
     marginBottom: 2,
   },
   companyJobs: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     color: "rgba(255,255,255,0.6)",
   },
   checkBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: Math.round(28 * uiScale),
+    height: Math.round(28 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     backgroundColor: "rgba(16, 185, 129, 0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -733,21 +737,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mainTitle: {
-    fontSize: 40,
+    fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
     textAlign: "center",
-    lineHeight: 48,
+    lineHeight: Math.round(48 * uiScale),
     textShadowColor: "rgba(180,219,232,0.3)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.9)",
     textAlign: "center",
-    lineHeight: 22,
-    maxWidth: 326,
+    lineHeight: Math.round(22 * uiScale),
+    maxWidth: Math.round(326 * uiScale),
     marginTop: 8,
   },
   swipeSection: {
@@ -768,7 +772,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   swipeText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.5)",
     letterSpacing: 2,
     fontWeight: "400",
@@ -780,8 +784,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(217,217,217,0.8)",
   },
   arrowIcon: {
-    width: 16,
-    height: 16,
+    width: Math.round(16 * uiScale),
+    height: Math.round(16 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -863,10 +867,10 @@ const styles = StyleSheet.create({
     borderColor: "rgba(65,148,86,0.6)",
   },
   matchBadgeText: {
-    fontSize: 11,
+    fontSize: Math.round(11 * uiScale),
     fontWeight: "600",
     color: "#43A047",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   jobInfo: {
     gap: 0,
@@ -876,19 +880,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   jobTitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "700",
     color: "rgba(17,17,17,0.7)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   jobCompanyRow: {
     flexDirection: "row",
     alignItems: "center",
   },
   jobCompanyName: {
-    fontSize: 10,
+    fontSize: Math.round(10 * uiScale),
     color: "rgba(17,17,17,0.7)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   jobDetails: {
     gap: 12,
@@ -908,9 +912,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   detailText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     color: "rgba(17,17,17,0.7)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   remoteBadgeContainer: {
     alignItems: "center",
@@ -923,9 +927,9 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   remoteBadgeText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     color: "rgba(132,112,54,0.8)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   newJobsBadgeContainer: {
     position: "absolute",
@@ -943,10 +947,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   fireEmoji: {
-    fontSize: 12.5,
+    fontSize: Math.round(12.5 * uiScale),
   },
   newJobsText: {
-    fontSize: 10,
+    fontSize: Math.round(10 * uiScale),
     fontWeight: "500",
     color: "#FFFFFF",
   },
@@ -968,7 +972,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   getStartedText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
     color: "#0D4982",
   },
@@ -979,14 +983,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   signInLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.7)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   signInLink: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
     color: "#FFFFFF",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
 });

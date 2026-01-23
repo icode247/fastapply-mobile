@@ -6,6 +6,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { UpgradePrompt } from "../../src/components";
 import { borderRadius, spacing } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
@@ -128,7 +132,7 @@ const ProfileCard: React.FC<{
         >
           {isPrimary && (
             <View style={styles.primaryBadge}>
-              <Ionicons name="star" size={12} color="#FFF" />
+              <Ionicons name="star" size={Math.round(12 * uiScale)} color="#FFF" />
               <Text style={styles.primaryBadgeText}>Primary</Text>
             </View>
           )}
@@ -228,7 +232,7 @@ const ProfileCard: React.FC<{
               >
                 <Ionicons
                   name="star-outline"
-                  size={18}
+                  size={Math.round(18 * uiScale)}
                   color={colors.textSecondary}
                 />
                 <Text
@@ -245,7 +249,7 @@ const ProfileCard: React.FC<{
               ]}
               onPress={onEdit}
             >
-              <Ionicons name="create-outline" size={18} color={gradient[0]} />
+              <Ionicons name="create-outline" size={Math.round(18 * uiScale)} color={gradient[0]} />
               <Text style={[styles.actionText, { color: gradient[0] }]}>
                 Edit Profile
               </Text>
@@ -309,7 +313,7 @@ const ResumeCard: React.FC<{
         >
           <Ionicons
             name="document-text"
-            size={22}
+            size={Math.round(22 * uiScale)}
             color={isActive ? colors.primary : colors.textSecondary}
           />
         </View>
@@ -325,14 +329,14 @@ const ResumeCard: React.FC<{
           <View style={styles.activeBadge}>
             <Ionicons
               name="checkmark-circle"
-              size={20}
+              size={Math.round(20 * uiScale)}
               color={colors.primary}
             />
           </View>
         )}
         <Ionicons
           name="chevron-forward"
-          size={20}
+          size={Math.round(20 * uiScale)}
           color={colors.textTertiary}
         />
       </TouchableOpacity>
@@ -535,7 +539,7 @@ export default function ProfilesScreen() {
               colors={[colors.primary, colors.primaryDark]}
               style={styles.addButtonGradient}
             >
-              <Ionicons name="add" size={24} color="#FFF" />
+              <Ionicons name="add" size={Math.round(24 * uiScale)} color="#FFF" />
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -667,12 +671,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[8],
   },
   title: {
-    fontSize: 32,
+    fontSize: Math.round(32 * uiScale),
     fontWeight: "800",
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     marginTop: spacing[1],
   },
   addButton: {
@@ -685,8 +689,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   addButtonGradient: {
-    width: 48,
-    height: 48,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -700,12 +704,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * uiScale),
     fontWeight: "700",
     marginBottom: spacing[4],
   },
   uploadText: {
-    fontSize: 15,
+    fontSize: Math.round(15 * uiScale),
     color: "#0ea5e9",
     fontWeight: "600",
   },
@@ -738,16 +742,16 @@ const styles = StyleSheet.create({
   },
   primaryBadgeText: {
     color: "#FFF",
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     fontWeight: "700",
   },
   profileAvatarContainer: {
     marginBottom: spacing[3],
   },
   profileAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 24,
+    width: Math.round(72 * uiScale),
+    height: Math.round(72 * uiScale),
+    borderRadius: Math.round(24 * uiScale),
     backgroundColor: "rgba(255,255,255,0.25)",
     justifyContent: "center",
     alignItems: "center",
@@ -755,18 +759,18 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.4)",
   },
   profileAvatarText: {
-    fontSize: 28,
+    fontSize: Math.round(28 * uiScale),
     fontWeight: "800",
     color: "#FFF",
   },
   profileName: {
-    fontSize: 22,
+    fontSize: Math.round(22 * uiScale),
     fontWeight: "800",
     color: "#FFF",
     marginBottom: 4,
   },
   profileTitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.8)",
     marginBottom: spacing[4],
   },
@@ -779,12 +783,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   profileStatValue: {
-    fontSize: 20,
+    fontSize: Math.round(20 * uiScale),
     fontWeight: "800",
     color: "#FFF",
   },
   profileStatLabel: {
-    fontSize: 11,
+    fontSize: Math.round(11 * uiScale),
     color: "rgba(255,255,255,0.7)",
     marginTop: 2,
   },
@@ -800,7 +804,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   sectionLabel: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     fontWeight: "600",
     marginBottom: spacing[2],
     textTransform: "uppercase",
@@ -817,7 +821,7 @@ const styles = StyleSheet.create({
     borderRadius: borderRadius.full,
   },
   skillText: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     fontWeight: "600",
   },
   actionsRow: {
@@ -834,7 +838,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   actionText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
   },
   resumeCard: {
@@ -853,9 +857,9 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   resumeIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -864,11 +868,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[4],
   },
   resumeName: {
-    fontSize: 15,
+    fontSize: Math.round(15 * uiScale),
     fontWeight: "600",
   },
   resumeDate: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     marginTop: 2,
   },
   activeBadge: {

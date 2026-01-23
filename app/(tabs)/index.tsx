@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Platform,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -30,6 +31,9 @@ import {
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - spacing[6] * 2 - spacing[4]) / 2;
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Helper function to format relative time
 const getRelativeTime = (dateString: string): string => {
@@ -133,7 +137,7 @@ const StatsCard: React.FC<{
           style={styles.statsCardGradient}
         >
           <View style={styles.statsCardIcon}>
-            <Ionicons name={icon} size={24} color="rgba(255,255,255,0.9)" />
+            <Ionicons name={icon} size={Math.round(24 * uiScale)} color="rgba(255,255,255,0.9)" />
           </View>
           <AnimatedCounter value={value} />
           <Text style={styles.statTitle}>{title}</Text>
@@ -269,7 +273,7 @@ const ApplicationCard: React.FC<{
           <View style={[styles.statusDot, { backgroundColor: config.color }]} />
           <Ionicons
             name={config.icon as keyof typeof Ionicons.glyphMap}
-            size={16}
+            size={Math.round(16 * uiScale)}
             color={config.color}
           />
         </View>
@@ -331,14 +335,14 @@ const QuickAction: React.FC<{
         <View
           style={[styles.quickActionIcon, { backgroundColor: color + "20" }]}
         >
-          <Ionicons name={icon} size={22} color={color} />
+          <Ionicons name={icon} size={Math.round(22 * uiScale)} color={color} />
         </View>
         <Text style={[styles.quickActionLabel, { color: colors.text }]}>
           {label}
         </Text>
         <Ionicons
           name="chevron-forward"
-          size={18}
+          size={Math.round(18 * uiScale)}
           color={colors.textTertiary}
         />
       </TouchableOpacity>
@@ -645,7 +649,7 @@ export default function DashboardScreen() {
             >
               <Ionicons
                 name="notifications-outline"
-                size={22}
+                size={Math.round(22 * uiScale)}
                 color={colors.text}
               />
               <View style={[styles.notificationDot, { borderColor: colors.background }]} />
@@ -715,7 +719,7 @@ export default function DashboardScreen() {
                     style={styles.upgradeBtnGradient}
                   >
                     <Text style={styles.upgradeBtnText}>Upgrade Plan</Text>
-                    <Ionicons name="sparkles" size={16} color="#FFF" />
+                    <Ionicons name="sparkles" size={Math.round(16 * uiScale)} color="#FFF" />
                   </LinearGradient>
                 </TouchableOpacity>
               )}
@@ -802,11 +806,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing[8],
   },
   greeting: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "500",
   },
   userName: {
-    fontSize: 28,
+    fontSize: Math.round(28 * uiScale),
     fontWeight: "800",
     marginTop: spacing[1],
   },
@@ -815,9 +819,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   notificationBtnBlur: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
+    borderRadius: Math.round(16 * uiScale),
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
@@ -849,27 +853,27 @@ const styles = StyleSheet.create({
     minHeight: 140,
   },
   statsCardIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: spacing[3],
   },
   statValue: {
-    fontSize: 36,
+    fontSize: Math.round(36 * uiScale),
     fontWeight: "800",
     color: "#FFFFFF",
   },
   statTitle: {
-    fontSize: 15,
+    fontSize: Math.round(15 * uiScale),
     fontWeight: "600",
     color: "#FFFFFF",
     marginTop: spacing[1],
   },
   statSubtitle: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     color: "rgba(255,255,255,0.7)",
     marginTop: 2,
   },
@@ -883,11 +887,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: Math.round(20 * uiScale),
     fontWeight: "700",
   },
   seeAllText: {
-    fontSize: 15,
+    fontSize: Math.round(15 * uiScale),
     color: "#0ea5e9",
     fontWeight: "600",
   },
@@ -929,27 +933,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   creditValue: {
-    fontSize: 20,
+    fontSize: Math.round(20 * uiScale),
     fontWeight: "800",
   },
   creditLabel: {
-    fontSize: 11,
+    fontSize: Math.round(11 * uiScale),
     fontWeight: "500",
   },
   creditTitle: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     fontWeight: "600",
   },
   creditSubtitle: {
-    fontSize: 11,
+    fontSize: Math.round(11 * uiScale),
   },
   creditsInfo: {
     flex: 1,
     justifyContent: "center",
   },
   creditDescription: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: Math.round(14 * uiScale),
+    lineHeight: Math.round(20 * uiScale),
     marginTop: spacing[2],
     marginBottom: spacing[4],
   },
@@ -966,7 +970,7 @@ const styles = StyleSheet.create({
     gap: spacing[2],
   },
   upgradeBtnText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "700",
     color: "#FFF",
   },
@@ -987,14 +991,14 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   applicationLogo: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
   logoText: {
-    fontSize: 20,
+    fontSize: Math.round(20 * uiScale),
     fontWeight: "800",
   },
   applicationInfo: {
@@ -1002,15 +1006,15 @@ const styles = StyleSheet.create({
     marginLeft: spacing[4],
   },
   companyName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "700",
   },
   positionName: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     marginTop: 2,
   },
   applicationTime: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     marginTop: 4,
   },
   statusBadge: {
@@ -1031,16 +1035,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing[3],
   },
   quickActionIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     justifyContent: "center",
     alignItems: "center",
     marginRight: spacing[4],
   },
   quickActionLabel: {
     flex: 1,
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
   },
 });

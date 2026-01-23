@@ -7,6 +7,7 @@ import {
   Animated,
   Easing,
   Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -15,6 +16,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { ConfirmModal } from "../../src/components";
 import { getPlanDisplayName } from "../../src/constants/subscription-limits";
 import { borderRadius, spacing } from "../../src/constants/theme";
@@ -117,7 +121,7 @@ const SettingItem: React.FC<{
         <View
           style={[styles.settingIcon, { backgroundColor: iconColor + "20" }]}
         >
-          <Ionicons name={icon} size={20} color={iconColor} />
+          <Ionicons name={icon} size={Math.round(20 * uiScale)} color={iconColor} />
         </View>
         <View style={styles.settingContent}>
           <Text
@@ -150,7 +154,7 @@ const SettingItem: React.FC<{
         ) : (
           <Ionicons
             name="chevron-forward"
-            size={20}
+            size={Math.round(20 * uiScale)}
             color={colors.textTertiary}
           />
         )}
@@ -465,7 +469,7 @@ export default function SettingsScreen() {
                 >
                   <Ionicons
                     name={subscription?.tier === "free" ? "person" : "sparkles"}
-                    size={12}
+                    size={Math.round(12 * uiScale)}
                     color="#FFF"
                   />
                   <Text style={styles.planBadgeText}>{getPlanName()}</Text>
@@ -474,7 +478,7 @@ export default function SettingsScreen() {
             </View>
             <Ionicons
               name="chevron-forward"
-              size={22}
+              size={Math.round(22 * uiScale)}
               color={colors.textTertiary}
             />
           </TouchableOpacity>
@@ -495,7 +499,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.subscriptionContent}>
                   <View style={styles.subscriptionIcon}>
-                    <Ionicons name="sparkles" size={28} color="#FFF" />
+                    <Ionicons name="sparkles" size={Math.round(28 * uiScale)} color="#FFF" />
                   </View>
                   <View style={styles.subscriptionInfo}>
                     <Text style={styles.subscriptionTitle}>
@@ -506,7 +510,7 @@ export default function SettingsScreen() {
                     </Text>
                   </View>
                   <View style={styles.subscriptionArrow}>
-                    <Ionicons name="arrow-forward" size={20} color="#FFF" />
+                    <Ionicons name="arrow-forward" size={Math.round(20 * uiScale)} color="#FFF" />
                   </View>
                 </View>
               </LinearGradient>
@@ -713,7 +717,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   title: {
-    fontSize: 32,
+    fontSize: Math.round(32 * uiScale),
     fontWeight: "800",
     letterSpacing: -0.5,
   },
@@ -732,14 +736,14 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   profileAvatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 20,
+    width: Math.round(60 * uiScale),
+    height: Math.round(60 * uiScale),
+    borderRadius: Math.round(20 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
   avatarText: {
-    fontSize: 22,
+    fontSize: Math.round(22 * uiScale),
     fontWeight: "800",
     color: "#FFF",
   },
@@ -748,11 +752,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[4],
   },
   profileName: {
-    fontSize: 18,
+    fontSize: Math.round(18 * uiScale),
     fontWeight: "700",
   },
   profileEmail: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     marginTop: 2,
   },
   planBadge: {
@@ -768,7 +772,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   planBadgeText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     fontWeight: "700",
     color: "#FFF",
   },
@@ -787,9 +791,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   subscriptionIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: Math.round(52 * uiScale),
+    height: Math.round(52 * uiScale),
+    borderRadius: Math.round(16 * uiScale),
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -799,19 +803,19 @@ const styles = StyleSheet.create({
     marginLeft: spacing[4],
   },
   subscriptionTitle: {
-    fontSize: 18,
+    fontSize: Math.round(18 * uiScale),
     fontWeight: "800",
     color: "#FFF",
   },
   subscriptionDesc: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.8)",
     marginTop: 2,
   },
   subscriptionArrow: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: Math.round(36 * uiScale),
+    height: Math.round(36 * uiScale),
+    borderRadius: Math.round(12 * uiScale),
     backgroundColor: "rgba(255,255,255,0.2)",
     justifyContent: "center",
     alignItems: "center",
@@ -820,7 +824,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
     fontWeight: "700",
     letterSpacing: 1,
     marginBottom: spacing[3],
@@ -843,9 +847,9 @@ const styles = StyleSheet.create({
     padding: spacing[4],
   },
   settingIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -854,11 +858,11 @@ const styles = StyleSheet.create({
     marginLeft: spacing[4],
   },
   settingLabel: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
   },
   settingValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     marginTop: 2,
   },
   footer: {
@@ -866,11 +870,11 @@ const styles = StyleSheet.create({
     paddingTop: spacing[8],
   },
   versionText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "500",
   },
   copyrightText: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     marginTop: spacing[1],
   },
 });

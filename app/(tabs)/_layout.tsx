@@ -1,9 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
+import { Platform } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../src/hooks";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 export default function TabLayout() {
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+
+  // Calculate tab bar height based on platform and safe area
+  // iOS with home indicator needs more space, Android typically needs less
+  const tabBarPaddingBottom = Platform.OS === "ios"
+    ? Math.max(insets.bottom, 20) // iOS: use safe area or minimum 20
+    : Math.max(insets.bottom, 8);  // Android: use safe area or minimum 8
+
+  const tabBarHeight = 60 + tabBarPaddingBottom; // Base height + safe area
 
   return (
     <Tabs
@@ -11,16 +25,16 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textTertiary,
-        tabBarShowLabel: true, // Explicitly show labels
+        tabBarShowLabel: true,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
-          height: 90,
+          height: tabBarHeight,
           paddingTop: 8,
-          paddingBottom: 30,
+          paddingBottom: tabBarPaddingBottom,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
+          fontSize: Platform.OS === "android" ? 10 : 11,
           fontWeight: "600",
           marginTop: 4,
         },
@@ -39,20 +53,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="grid-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="applications"
         options={{
           title: "Applied",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="documents-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="grid-outline" size={size} color={color} />
           ),
         }}
       />

@@ -3,6 +3,9 @@ import * as NavigationBar from "expo-navigation-bar";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import {
   JobFilters,
   JobFiltersModal,
@@ -81,6 +84,11 @@ export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
+  // Actions container bottom offset
+  const actionsBottomOffset = Platform.OS === "ios"
+    ? insets.bottom - 10 
+    : 16;  
+
   // Load jobs from service
   const [jobs, setJobs] = useState<NormalizedJob[]>([]);
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
@@ -89,6 +97,9 @@ export default function FeedScreen() {
   const [isAutoPilotActive, setIsAutoPilotActive] = useState(false);
   const [autoPilotProgress, setAutoPilotProgress] = useState({ current: 0, total: 0 });
   const autoPilotRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Card expanded state (full screen mode)
+  const [isCardExpanded, setIsCardExpanded] = useState(false);
 
   // Set Android navigation bar color to match theme
   useEffect(() => {
@@ -412,62 +423,64 @@ export default function FeedScreen() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Discover
-          </Text>
-          <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-            {jobs.length} jobs available
-            {profilesLoading ? " • Loading profiles..." :
-              profiles.length === 0 ? " • No profile" :
-              selectedProfile ? ` • ${selectedProfile.name}` : ""}
-            {queueStats && queueStats.pending > 0 && (
-              ` • ${queueStats.pending} queued`
+      {/* Header - hide when card is expanded */}
+      {!isCardExpanded && (
+        <View style={styles.header}>
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              Discover
+            </Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
+              {jobs.length} jobs available
+              {profilesLoading ? " • Loading profiles..." :
+                profiles.length === 0 ? " • No profile" :
+                selectedProfile ? ` • ${selectedProfile.name}` : ""}
+              {queueStats && queueStats.pending > 0 && (
+                ` • ${queueStats.pending} queued`
+              )}
+            </Text>
+          </View>
+          <View style={styles.headerActions}>
+            {/* Queue indicator */}
+            {(automationProcessing || pendingCount > 0) && (
+              <View
+                style={[
+                  styles.queueIndicator,
+                  { backgroundColor: colors.surfaceSecondary },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="sync"
+                  size={Math.round(18 * uiScale)}
+                  color={colors.primary}
+                />
+              </View>
             )}
-          </Text>
-        </View>
-        <View style={styles.headerActions}>
-          {/* Queue indicator */}
-          {(automationProcessing || pendingCount > 0) && (
-            <View
+            <TouchableOpacity
               style={[
-                styles.queueIndicator,
+                styles.filterButton,
                 { backgroundColor: colors.surfaceSecondary },
               ]}
+              onPress={() => setShowFilters(true)}
             >
-              <MaterialCommunityIcons
-                name="sync"
-                size={18}
-                color={colors.primary}
-              />
-            </View>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.filterButton,
-              { backgroundColor: colors.surfaceSecondary },
-            ]}
-            onPress={() => setShowFilters(true)}
-          >
-            <Ionicons name="options-outline" size={22} color={colors.text} />
-            {filters && (
-              <View
-                style={[styles.filterBadge, { backgroundColor: colors.primary }]}
-              />
-            )}
-          </TouchableOpacity>
+              <Ionicons name="options-outline" size={Math.round(22 * uiScale)} color={colors.text} />
+              {filters && (
+                <View
+                  style={[styles.filterBadge, { backgroundColor: colors.primary }]}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
 
-      {/* Auto-pilot progress indicator */}
-      {isAutoPilotActive && (
+      {/* Auto-pilot progress indicator - hide when expanded */}
+      {isAutoPilotActive && !isCardExpanded && (
         <TouchableOpacity
           style={[styles.autoPilotBanner, { backgroundColor: colors.primary }]}
           onPress={stopAutoPilot}
         >
-          <MaterialCommunityIcons name="robot" size={20} color="#FFFFFF" />
+          <MaterialCommunityIcons name="robot" size={Math.round(20 * uiScale)} color="#FFFFFF" />
           <Text style={styles.autoPilotText}>
             Auto-pilot: {autoPilotProgress.current}/{autoPilotProgress.total}
           </Text>
@@ -476,22 +489,27 @@ export default function FeedScreen() {
       )}
 
       {/* Swipe Deck */}
-      <View style={styles.deckContainer}>
+      <View style={[
+        styles.deckContainer,
+        Platform.OS === "android" && { marginBottom: 20 }
+      ]}>
         <SwipeDeck
           ref={swipeDeckRef}
           jobs={legacyJobs}
           onSwipeLeft={handleSwipeLeft}
           onSwipeRight={handleSwipeRight}
+          onExpandChange={setIsCardExpanded}
         />
       </View>
 
-      {/* Action Buttons */}
+      {/* Action Buttons - hide when card is expanded */}
+      {!isCardExpanded && (
       <View
         style={[
           styles.actionsContainer,
           {
             backgroundColor: colors.surfaceSecondary,
-            bottom: insets.bottom - 10,
+            bottom: actionsBottomOffset,
           },
         ]}
       >
@@ -504,7 +522,7 @@ export default function FeedScreen() {
           ]}
           onPress={handleUndo}
         >
-          <Ionicons name="arrow-undo" size={22} color="#FBC02D" />
+          <Ionicons name="arrow-undo" size={Math.round(22 * uiScale)} color="#FBC02D" />
         </TouchableOpacity>
 
         {/* Reject */}
@@ -516,7 +534,7 @@ export default function FeedScreen() {
           ]}
           onPress={handleReject}
         >
-          <Ionicons name="close" size={36} color="#F72585" />
+          <Ionicons name="close" size={Math.round(36 * uiScale)} color="#F72585" />
         </TouchableOpacity>
 
         {/* Select Profile */}
@@ -528,7 +546,7 @@ export default function FeedScreen() {
           ]}
           onPress={handleSelectProfile}
         >
-          <Ionicons name="person-circle-outline" size={22} color="#FF9800" />
+          <Ionicons name="person-circle-outline" size={Math.round(22 * uiScale)} color="#FF9800" />
         </TouchableOpacity>
 
         {/* Accept */}
@@ -540,7 +558,7 @@ export default function FeedScreen() {
           ]}
           onPress={handleAccept}
         >
-          <Ionicons name="heart" size={36} color="#00C853" />
+          <Ionicons name="heart" size={Math.round(36 * uiScale)} color="#00C853" />
         </TouchableOpacity>
 
         {/* Voice Auto-Pilot */}
@@ -556,11 +574,12 @@ export default function FeedScreen() {
         >
           <MaterialCommunityIcons
             name={isAutoPilotActive ? "stop" : "waveform"}
-            size={24}
+            size={Math.round(24 * uiScale)}
             color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
           />
         </TouchableOpacity>
       </View>
+      )}
 
       {/* Voice Auto-Pilot Overlay */}
       <VoiceAutoPilotOverlay
@@ -612,9 +631,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   filterButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(22 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -632,9 +651,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   queueIndicator: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: Math.round(36 * uiScale),
+    height: Math.round(36 * uiScale),
+    borderRadius: Math.round(18 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -651,11 +670,11 @@ const styles = StyleSheet.create({
   autoPilotText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
   },
   autoPilotStop: {
     color: "rgba(255,255,255,0.7)",
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     marginLeft: 8,
   },
   deckContainer: {
@@ -691,13 +710,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   smallButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(22 * uiScale),
   },
   largeButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: Math.round(60 * uiScale),
+    height: Math.round(60 * uiScale),
+    borderRadius: Math.round(30 * uiScale),
   },
 });

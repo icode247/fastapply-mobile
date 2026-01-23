@@ -21,6 +21,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getApiErrorMessage } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
 
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
+
 // Input Field Component
 const InputField: React.FC<{
   label: string;
@@ -178,7 +181,7 @@ export default function SignInScreen() {
               onPress={() => router.back()}
               activeOpacity={0.7}
             >
-              <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+              <Ionicons name="arrow-back" size={Math.round(20 * uiScale)} color="#FFFFFF" />
             </TouchableOpacity>
           </Animated.View>
 
@@ -334,8 +337,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
     borderRadius: 1000,
     backgroundColor: "rgba(255,255,255,0.05)",
     justifyContent: "center",
@@ -346,15 +349,15 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    fontSize: 40,
+    fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
-    lineHeight: 48,
+    lineHeight: Math.round(48 * uiScale),
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "#FFFFFF",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
     marginTop: 8,
   },
   // Form Card
@@ -368,10 +371,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputLabel: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "500",
     color: "rgba(255,255,255,0.8)",
-    lineHeight: 20,
+    lineHeight: Math.round(20 * uiScale),
   },
   inputContainer: {
     backgroundColor: "rgba(255,255,255,0.12)",
@@ -386,9 +389,9 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.18)",
   },
   input: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     color: "#FFFFFF",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
     padding: 0,
     margin: 0,
   },
@@ -411,7 +414,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   signInButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "500",
     color: "#0D4982",
   },
@@ -431,8 +434,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   createAccountText: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: Math.round(14 * uiScale),
+    lineHeight: Math.round(22 * uiScale),
     textAlign: "center",
   },
   createAccountTextLight: {
@@ -456,9 +459,9 @@ const styles = StyleSheet.create({
     borderRadius: 1000,
   },
   dividerText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.2)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   // Google Button
   googleButton: {
@@ -473,13 +476,13 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
   },
   googleIcon: {
-    width: 40,
-    height: 40,
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
   },
   googleButtonText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
     color: "#FFFFFF",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
 });

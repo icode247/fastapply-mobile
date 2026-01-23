@@ -6,6 +6,7 @@ import {
   Animated,
   Dimensions,
   Linking,
+  Platform,
   RefreshControl,
   SafeAreaView,
   StatusBar,
@@ -15,6 +16,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// Android renders fonts/icons larger, scale down for consistency
+const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { Button, LoadingScreen } from "../../src/components";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
@@ -191,7 +195,7 @@ export default function ApplicationDetailScreen() {
         <View style={styles.errorContainer}>
           <Ionicons
             name="alert-circle-outline"
-            size={64}
+            size={Math.round(64 * uiScale)}
             color={colors.error}
           />
           <Text style={[styles.errorText, { color: colors.text }]}>
@@ -253,7 +257,7 @@ export default function ApplicationDetailScreen() {
             },
           ]}
         >
-          <Ionicons name="arrow-back" size={24} color={colors.text} />
+          <Ionicons name="arrow-back" size={Math.round(24 * uiScale)} color={colors.text} />
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
         <TouchableOpacity
@@ -267,7 +271,7 @@ export default function ApplicationDetailScreen() {
             },
           ]}
         >
-          <Ionicons name="trash-outline" size={22} color={colors.error} />
+          <Ionicons name="trash-outline" size={Math.round(22 * uiScale)} color={colors.error} />
         </TouchableOpacity>
       </View>
 
@@ -341,7 +345,7 @@ export default function ApplicationDetailScreen() {
                 >
                   <Ionicons
                     name={statusInfo.icon as any}
-                    size={16}
+                    size={Math.round(16 * uiScale)}
                     color={statusInfo.color}
                   />
                   <Text
@@ -365,7 +369,7 @@ export default function ApplicationDetailScreen() {
                       { backgroundColor: colors.primary },
                     ]}
                   >
-                    <Ionicons name="open-outline" size={20} color="#FFF" />
+                    <Ionicons name="open-outline" size={Math.round(20 * uiScale)} color="#FFF" />
                     <Text style={styles.actionBtnText}>View Job</Text>
                   </TouchableOpacity>
                 )}
@@ -377,7 +381,7 @@ export default function ApplicationDetailScreen() {
                       { backgroundColor: colors.error },
                     ]}
                   >
-                    <Ionicons name="refresh" size={20} color="#FFF" />
+                    <Ionicons name="refresh" size={Math.round(20 * uiScale)} color="#FFF" />
                     <Text style={styles.actionBtnText}>Retry</Text>
                   </TouchableOpacity>
                 )}
@@ -516,7 +520,7 @@ export default function ApplicationDetailScreen() {
                   ]}
                 >
                   <View style={styles.fileIcon}>
-                    <Ionicons name="document-text" size={28} color="#FFF" />
+                    <Ionicons name="document-text" size={Math.round(28 * uiScale)} color="#FFF" />
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.fileName, { color: colors.text }]}>
@@ -530,7 +534,7 @@ export default function ApplicationDetailScreen() {
                   </View>
                   <Ionicons
                     name="download-outline"
-                    size={24}
+                    size={Math.round(24 * uiScale)}
                     color={colors.textSecondary}
                   />
                 </TouchableOpacity>
@@ -601,7 +605,7 @@ export default function ApplicationDetailScreen() {
 const DetailItem = ({ label, value, icon, colors }: any) => (
   <View style={styles.detailItem}>
     <View style={[styles.detailIcon, { backgroundColor: colors.level1 }]}>
-      <Ionicons name={icon as any} size={18} color={colors.textSecondary} />
+      <Ionicons name={icon as any} size={Math.round(18 * uiScale)} color={colors.textSecondary} />
     </View>
     <View>
       <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
@@ -628,7 +632,7 @@ const TimelineRow = ({
 }: any) => (
   <View style={styles.timelineRow}>
     <View style={styles.timelineLeft}>
-      <Ionicons name={icon as any} size={24} color={color} />
+      <Ionicons name={icon as any} size={Math.round(24 * uiScale)} color={color} />
       {!isLast && (
         <View
           style={[styles.timelineLine, { backgroundColor: colors.border }]}
@@ -674,9 +678,9 @@ const styles = StyleSheet.create({
     height: 100, // Match header height area approx
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
+    borderRadius: Math.round(20 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
@@ -700,9 +704,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing[6],
   },
   companyLogoLarge: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
+    width: Math.round(80 * uiScale),
+    height: Math.round(80 * uiScale),
+    borderRadius: Math.round(24 * uiScale),
     justifyContent: "center",
     alignItems: "center",
     marginBottom: spacing[4],
@@ -712,18 +716,18 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   companyInitialLarge: {
-    fontSize: 32,
+    fontSize: Math.round(32 * uiScale),
     fontWeight: "bold",
   },
   titleLarge: {
-    fontSize: 24,
+    fontSize: Math.round(24 * uiScale),
     fontWeight: "800", // heavy
     textAlign: "center",
     marginBottom: spacing[1],
-    lineHeight: 32,
+    lineHeight: Math.round(32 * uiScale),
   },
   companyLarge: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     textAlign: "center",
     marginBottom: spacing[4],
   },
@@ -737,7 +741,7 @@ const styles = StyleSheet.create({
   },
   statusTextLarge: {
     fontWeight: "600",
-    fontSize: 15,
+    fontSize: Math.round(15 * uiScale),
   },
   actionRow: {
     flexDirection: "row",
@@ -759,13 +763,13 @@ const styles = StyleSheet.create({
   actionBtnText: {
     color: "#FFF",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
   },
   section: {
     marginBottom: spacing[6],
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: Math.round(18 * uiScale),
     fontWeight: "700",
     marginBottom: spacing[4],
     marginLeft: spacing[1],
@@ -786,18 +790,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing[2],
   },
   detailIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: Math.round(36 * uiScale),
+    height: Math.round(36 * uiScale),
+    borderRadius: Math.round(12 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: Math.round(12 * uiScale),
     marginBottom: 2,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     fontWeight: "600",
   },
   card: {
@@ -822,12 +826,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   timelineTitle: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
     marginBottom: 2,
   },
   timelineDate: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
   },
   resumeCard: {
     flexDirection: "row",
@@ -838,20 +842,20 @@ const styles = StyleSheet.create({
     gap: spacing[4],
   },
   fileIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
+    borderRadius: Math.round(14 * uiScale),
     backgroundColor: "#ea580c", // Orange
     justifyContent: "center",
     alignItems: "center",
   },
   fileName: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
     marginBottom: 2,
   },
   fileSub: {
-    fontSize: 13,
+    fontSize: Math.round(13 * uiScale),
   },
   qaItem: {
     padding: spacing[5],
@@ -860,17 +864,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   qaQuestion: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "600",
     marginBottom: spacing[3],
-    lineHeight: 24,
+    lineHeight: Math.round(24 * uiScale),
   },
   qaAnswerBox: {
     padding: spacing[4],
     borderRadius: 12,
   },
   qaAnswer: {
-    fontSize: 15,
-    lineHeight: 22,
+    fontSize: Math.round(15 * uiScale),
+    lineHeight: Math.round(22 * uiScale),
   },
 });

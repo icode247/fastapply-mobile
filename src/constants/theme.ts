@@ -1,3 +1,8 @@
+import { Platform } from "react-native";
+
+// Android renders fonts larger, so we scale them down
+const fontScale = Platform.OS === "android" ? 0.85 : 1;
+
 // Typography scale
 export const typography = {
   // Font families
@@ -8,17 +13,17 @@ export const typography = {
     bold: "System",
   },
 
-  // Font sizes
+  // Font sizes (scaled for platform)
   fontSize: {
-    xs: 12,
-    sm: 14,
-    base: 16,
-    lg: 18,
-    xl: 20,
-    "2xl": 24,
-    "3xl": 30,
-    "4xl": 36,
-    "5xl": 48,
+    xs: Math.round(12 * fontScale),
+    sm: Math.round(14 * fontScale),
+    base: Math.round(16 * fontScale),
+    lg: Math.round(18 * fontScale),
+    xl: Math.round(20 * fontScale),
+    "2xl": Math.round(24 * fontScale),
+    "3xl": Math.round(30 * fontScale),
+    "4xl": Math.round(36 * fontScale),
+    "5xl": Math.round(48 * fontScale),
   },
 
   // Line heights
