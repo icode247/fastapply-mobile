@@ -1,4 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import * as NavigationBar from "expo-navigation-bar";
 import React, {
   useCallback,
@@ -8,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Platform,
   StyleSheet,
@@ -104,7 +106,7 @@ function toLegacyJob(job: NormalizedJob): LegacyJob {
 }
 
 export default function FeedScreen() {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
@@ -515,18 +517,75 @@ export default function FeedScreen() {
       {/* Auto-pilot progress indicator - hide when expanded */}
       {isAutoPilotActive && !isCardExpanded && (
         <TouchableOpacity
-          style={[styles.autoPilotBanner, { backgroundColor: colors.primary }]}
+          style={[
+            styles.glassBannerContainer,
+            { top: insets.top + spacing[16] },
+          ]}
           onPress={stopAutoPilot}
+          activeOpacity={0.8}
         >
-          <MaterialCommunityIcons
-            name="robot"
-            size={Math.round(20 * uiScale)}
-            color="#FFFFFF"
-          />
-          <Text style={styles.autoPilotText}>
-            Auto-pilot: {autoPilotProgress.current}/{autoPilotProgress.total}
-          </Text>
-          <Text style={styles.autoPilotStop}>Tap to stop</Text>
+          <BlurView
+            intensity={Platform.OS === "ios" ? 80 : 100}
+            tint={colors.background === "#FFFFFF" ? "light" : "dark"}
+            style={[
+              styles.glassBanner,
+              {
+                borderColor: colors.border,
+                backgroundColor: isDark
+                  ? "rgba(30,30,30,0.5)"
+                  : "rgba(255,255,255,0.5)",
+              },
+            ]}
+          >
+            <View style={styles.bannerContent}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: colors.primary + "20" },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="robot-happy-outline"
+                  size={Math.round(24 * uiScale)}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={[styles.bannerTitle, { color: colors.text }]}>
+                  Auto-Pilot Active
+                </Text>
+                <Text
+                  style={[
+                    styles.bannerSubtitle,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  Processing {autoPilotProgress.current} of{" "}
+                  {autoPilotProgress.total}
+                </Text>
+              </View>
+              <View style={styles.stopContainer}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={[styles.stopText, { color: colors.textTertiary }]}>
+                  STOP
+                </Text>
+              </View>
+            </View>
+            {/* Progress Bar Line */}
+            <View
+              style={[styles.progressBar, { backgroundColor: colors.border }]}
+            >
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: colors.primary,
+                    width: `${Math.min((autoPilotProgress.current / autoPilotProgress.total) * 100, 100)}%`,
+                  },
+                ]}
+              />
+            </View>
+          </BlurView>
         </TouchableOpacity>
       )}
 
@@ -778,5 +837,58 @@ const styles = StyleSheet.create({
     width: Math.round(66 * uiScale),
     height: Math.round(66 * uiScale),
     borderRadius: Math.round(33 * uiScale),
+  },
+  glassBannerContainer: {
+    position: "absolute",
+    left: spacing[4],
+    right: spacing[4],
+    zIndex: 200,
+    alignItems: "center",
+  },
+  glassBanner: {
+    borderRadius: 20,
+    overflow: "hidden",
+    width: "100%",
+    borderWidth: 1,
+  },
+  bannerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: spacing[3],
+    gap: spacing[3],
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  textContainer: {
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+  },
+  stopContainer: {
+    alignItems: "center",
+    gap: 4,
+  },
+  stopText: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+  },
+  progressBar: {
+    height: 2,
+    width: "100%",
+  },
+  progressFill: {
+    height: "100%",
   },
 });
