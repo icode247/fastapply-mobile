@@ -321,18 +321,13 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   }, []);
 
   const startRecordingSession = useCallback(async () => {
-    // Play start sound
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("../../../assets/sounds/listen_on.mp3"),
-      );
-      await sound.playAsync();
-    } catch (e) {
-      // Ignore sound errors
-    }
+    // Haptic feedback FIRST - fires immediately, no waiting
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
-    // Stronger Haptic Feedback
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Play start sound (async, don't block)
+    Audio.Sound.createAsync(require("../../../assets/sounds/listen_on.mp3"))
+      .then(({ sound }) => sound.playAsync())
+      .catch(() => {});
 
     const started = await voiceRecordingService.startRecording({
       onSilenceDetected: () => {

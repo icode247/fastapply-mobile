@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
 import React, {
   forwardRef,
   useCallback,
@@ -59,35 +60,24 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     // UI thread index - tracks which card is active
     const activeCardIndex = useSharedValue(0);
 
-    // Command to trigger programmatic swipes
-    // index: which card to swipe
-    // direction: which way to go
     const swipeCommand = useSharedValue<{
       index: number;
       direction: "left" | "right" | null;
       previousDirection?: "left" | "right";
     }>({ index: -1, direction: null });
 
-    // Track active card's X translation to drive the *next* card's scale/opacity
-    // This allows the "stack" effect to work while gestures are decoupled
     const activeTranslateX = useSharedValue(0);
 
-    // Track card expanded state as shared value for UI thread access
     const isCardExpandedShared = useSharedValue(false);
-
-    // Get the current and next 3 jobs
-    // We keep currentIndex - 1 to allow it to finish animating out or be undone
     const visibleJobs = useMemo(() => {
       const result: { job: Job; index: number }[] = [];
       const startIdx = Math.max(0, currentIndex - 1);
-      // Render slightly more cards to ensure smooth rapid changes
       for (let i = startIdx; i < Math.min(jobs.length, currentIndex + 5); i++) {
         result.push({ job: jobs[i], index: i });
       }
       return result;
     }, [jobs, currentIndex]);
 
-    // Pre-fetch logos
     React.useEffect(() => {
       const prefetchCount = 5;
       for (let i = 0; i < prefetchCount; i++) {
@@ -100,17 +90,16 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
 
     const currentJob = jobs[currentIndex];
 
-    // Callbacks for card events
     const handleSwipe = useCallback(
       (direction: "left" | "right", job: Job) => {
-        // Update history and index state
-        // We do this immediately to allow rapid firing
         setSwipeHistory((prev) => [...prev, { job, direction }]);
         setCurrentIndex((prev) => prev + 1);
 
         if (direction === "left") {
           onSwipeLeft(job);
         } else {
+          // Success haptic when applying
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           onSwipeRight(job);
         }
       },
@@ -130,13 +119,11 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       (direction: "left" | "right") => {
         if (currentIndexRef.current >= jobs.length) return;
 
-        // Trigger the command for the specific card index
         swipeCommand.value = {
           index: currentIndexRef.current,
           direction,
         };
 
-        // Advance visual index immediately
         activeCardIndex.value = activeCardIndex.value + 1;
 
         // Reset the "next card" scaler since the new active card starts at 0
@@ -154,14 +141,12 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       const lastSwipe = swipeHistory[swipeHistory.length - 1];
       const previousIndex = currentIndex - 1;
 
-      // Trigger command to bring it back (handled in CardRenderer)
       swipeCommand.value = {
         index: previousIndex,
-        direction: null, // null direction implies "reset/undo"
+        direction: null,
         previousDirection: lastSwipe.direction,
       };
 
-      // Decrement visible index
       activeCardIndex.value = previousIndex;
       activeTranslateX.value = 0;
 
@@ -243,7 +228,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cardContainer: {
-    width: SCREEN_WIDTH * 0.95,
+    width: SCREEN_WIDTH * 1.95,
     height: "100%",
     position: "absolute",
   },
