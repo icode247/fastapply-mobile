@@ -1,3 +1,8 @@
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as NavigationBar from "expo-navigation-bar";
 import * as Notifications from "expo-notifications";
@@ -30,10 +35,10 @@ function RootLayoutNav() {
   const { colors } = useTheme();
 
   const notificationListener = useRef<Notifications.Subscription | undefined>(
-    undefined
+    undefined,
   );
   const responseListener = useRef<Notifications.Subscription | undefined>(
-    undefined
+    undefined,
   );
 
   // Initialize stores on mount
@@ -48,7 +53,9 @@ function RootLayoutNav() {
   useEffect(() => {
     if (Platform.OS === "android") {
       NavigationBar.setBackgroundColorAsync(colors.background);
-      NavigationBar.setButtonStyleAsync(activeTheme === "dark" ? "light" : "dark");
+      NavigationBar.setButtonStyleAsync(
+        activeTheme === "dark" ? "light" : "dark",
+      );
     }
   }, [colors.background, activeTheme]);
 
@@ -110,7 +117,7 @@ function RootLayoutNav() {
           if (data?.url) {
             router.push((data as any).url);
           }
-        }
+        },
       );
 
     return () => {
@@ -131,19 +138,45 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style={activeTheme === "dark" ? "light" : "dark"} />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="application/[id]"
-          options={{ headerShown: true, title: "Application Details" }}
-        />
-        <Stack.Screen
-          name="profile/[id]"
-          options={{ headerShown: true, title: "Edit Profile" }}
-        />
-      </Stack>
+      <ThemeProvider value={activeTheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: colors.background,
+            },
+            headerTintColor: colors.text,
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+            contentStyle: {
+              backgroundColor: colors.background,
+            },
+          }}
+        >
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="application/[id]"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="profile/[id]"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="profile/edit/[id]"
+            options={{
+              headerShown: false,
+            }}
+          />
+        </Stack>
+      </ThemeProvider>
     </>
   );
 }

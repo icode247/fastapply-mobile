@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  KeyboardAvoidingView,
   Modal,
   Platform,
   ScrollView,
@@ -440,7 +441,10 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       animationType="none"
       onRequestClose={onClose}
     >
-      <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
         {/* Glass Background */}
         <BlurView
           intensity={Platform.OS === "ios" ? 40 : 100}
@@ -465,7 +469,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
         >
           {phase === "confirming" ? renderConfirming() : renderListening()}
         </Animated.View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
