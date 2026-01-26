@@ -569,7 +569,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="arrow-undo"
-              size={Math.round(22 * uiScale)}
+              size={Math.round(26 * uiScale)}
               color="#FBC02D"
             />
           </TouchableOpacity>
@@ -585,24 +585,28 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="close"
-              size={Math.round(36 * uiScale)}
+              size={Math.round(42 * uiScale)}
               color="#F72585"
             />
           </TouchableOpacity>
 
-          {/* Select Profile */}
+          {/* Voice Auto-Pilot (Center, Largest) */}
           <TouchableOpacity
             style={[
               styles.actionButton,
-              styles.smallButton,
-              { backgroundColor: colors.surface },
+              styles.xlButton,
+              {
+                backgroundColor: isAutoPilotActive
+                  ? colors.primary
+                  : colors.surface,
+              },
             ]}
-            onPress={handleSelectProfile}
+            onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
           >
-            <Ionicons
-              name="person-circle-outline"
-              size={Math.round(22 * uiScale)}
-              color="#FF9800"
+            <MaterialCommunityIcons
+              name={isAutoPilotActive ? "stop" : "waveform"}
+              size={Math.round(48 * uiScale)}
+              color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
             />
           </TouchableOpacity>
 
@@ -617,28 +621,24 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="heart"
-              size={Math.round(36 * uiScale)}
+              size={Math.round(42 * uiScale)}
               color="#00C853"
             />
           </TouchableOpacity>
 
-          {/* Voice Auto-Pilot */}
+          {/* Select Profile */}
           <TouchableOpacity
             style={[
               styles.actionButton,
               styles.smallButton,
-              {
-                backgroundColor: isAutoPilotActive
-                  ? colors.primary
-                  : colors.surface,
-              },
+              { backgroundColor: colors.surface },
             ]}
-            onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
+            onPress={handleSelectProfile}
           >
-            <MaterialCommunityIcons
-              name={isAutoPilotActive ? "stop" : "waveform"}
-              size={Math.round(24 * uiScale)}
-              color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
+            <Ionicons
+              name="person-circle-outline"
+              size={Math.round(26 * uiScale)}
+              color="#FF9800"
             />
           </TouchableOpacity>
         </View>
@@ -774,5 +774,10 @@ const styles = StyleSheet.create({
     width: Math.round(60 * uiScale),
     height: Math.round(60 * uiScale),
     borderRadius: Math.round(30 * uiScale),
+  },
+  xlButton: {
+    width: Math.round(72 * uiScale),
+    height: Math.round(72 * uiScale),
+    borderRadius: Math.round(36 * uiScale),
   },
 });
