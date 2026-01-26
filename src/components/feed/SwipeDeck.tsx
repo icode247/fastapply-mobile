@@ -65,6 +65,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     const swipeCommand = useSharedValue<{
       index: number;
       direction: "left" | "right" | null;
+      previousDirection?: "left" | "right";
     }>({ index: -1, direction: null });
 
     // Track active card's X translation to drive the *next* card's scale/opacity
@@ -157,6 +158,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       swipeCommand.value = {
         index: previousIndex,
         direction: null, // null direction implies "reset/undo"
+        previousDirection: lastSwipe.direction,
       };
 
       // Decrement visible index

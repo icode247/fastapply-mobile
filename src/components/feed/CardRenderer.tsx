@@ -42,6 +42,7 @@ export interface CardRendererProps {
   swipeCommand: SharedValue<{
     index: number;
     direction: "left" | "right" | null;
+    previousDirection?: "left" | "right";
   }>;
   isCardExpandedShared: SharedValue<boolean>;
   onExpandChange: (expanded: boolean) => void;
@@ -81,6 +82,18 @@ export const CardRenderer = memo(
         if (command.index === jobIndex) {
           if (command.direction === null) {
             // Undo / Reset
+            // If we are undoing, we need to start from where we left to animate IN
+            if (command.previousDirection) {
+              const startX =
+                command.previousDirection === "right"
+                  ? SCREEN_WIDTH * 1.5
+                  : -SCREEN_WIDTH * 1.5;
+              const startRotate =
+                command.previousDirection === "right" ? 10 : -10;
+              translateX.value = startX;
+              rotate.value = startRotate;
+            }
+
             translateX.value = withSpring(0, { damping: 20, stiffness: 100 });
             translateY.value = withSpring(0);
             rotate.value = withSpring(0);
@@ -99,7 +112,7 @@ export const CardRenderer = memo(
           translateX.value = withSpring(targetX, {
             damping: 28,
             stiffness: 65,
-            velocity: command.direction === "right" ? 350 : -350,
+            velocity: command.direction === "right" ? 800 : -800,
           });
           rotate.value = withSpring(rotateTarget);
         }
@@ -172,6 +185,7 @@ export const CardRenderer = memo(
         isCardExpandedShared,
         activeTranslateX,
         activeCardIndex,
+        currentIndex, // Crucial: Re-create gesture when index advances so .enabled() is re-evaluated
       ],
     );
 
@@ -179,6 +193,7 @@ export const CardRenderer = memo(
       // If this is the active card, use local physics
       if (isActive.value) {
         return {
+          zIndex: 1000, // Force active card to top
           opacity: 1,
           transform: [
             { translateX: translateX.value },
@@ -189,13 +204,14 @@ export const CardRenderer = memo(
         };
       }
 
+      const diff = jobIndex - activeCardIndex.value;
+
       // If this card is "swiped" (index < active), it should be animating out or gone
       if (jobIndex < activeCardIndex.value) {
-        // We rely on the local translateX to keep rendering until we go far enough?
-        // Actually, if we've been swiped, we keep the last known position until unmount.
-        // But since we use SharedValues, distinct for this component instance,
-        // they retain their value even if activeCardIndex changes!
+        // If it still has significant translation, keep it on top (it's effectively "active" in animation)
+        const isExiting = Math.abs(translateX.value) > 10;
         return {
+          zIndex: isExiting ? 1000 : 100 - diff, // Maintain stacking order for swiped cards
           opacity: 1, // Keep visible while animating out
           transform: [
             { translateX: translateX.value },
@@ -222,6 +238,7 @@ export const CardRenderer = memo(
           "clamp",
         );
         return {
+          zIndex: 100 - diff,
           opacity,
           transform: [
             { translateX: 0 },
@@ -234,12 +251,17 @@ export const CardRenderer = memo(
 
       // Cards further back
       return {
+        zIndex: 100 - diff,
         opacity: 0,
         transform: [{ scale: 0.96 }],
       };
     });
 
     const heartIconStyle = useAnimatedStyle(() => {
+      // Button click = show icon, Hand swipe = hide icon
+      if (isProgrammaticSwipe.value === 0)
+        return { opacity: 0, transform: [{ scale: 0 }] };
+
       const x = translateX.value;
       if (x > 20) {
         return {
@@ -251,6 +273,10 @@ export const CardRenderer = memo(
     });
 
     const xIconStyle = useAnimatedStyle(() => {
+      // Button click = show icon, Hand swipe = hide icon
+      if (isProgrammaticSwipe.value === 0)
+        return { opacity: 0, transform: [{ scale: 0 }] };
+
       const x = translateX.value;
       if (x < -20) {
         return {
@@ -264,6 +290,10 @@ export const CardRenderer = memo(
     });
 
     const likeTextStyle = useAnimatedStyle(() => {
+      // Hand swipe = show text, Button click = hide text
+      if (isProgrammaticSwipe.value === 1)
+        return { opacity: 0, transform: [{ scale: 0 }] };
+
       const x = translateX.value;
       if (x > 20) {
         return {
@@ -275,6 +305,10 @@ export const CardRenderer = memo(
     });
 
     const nopeTextStyle = useAnimatedStyle(() => {
+      // Hand swipe = show text, Button click = hide text
+      if (isProgrammaticSwipe.value === 1)
+        return { opacity: 0, transform: [{ scale: 0 }] };
+
       const x = translateX.value;
       if (x < -20) {
         return {
@@ -295,13 +329,7 @@ export const CardRenderer = memo(
 
     return (
       <GestureDetector gesture={gesture}>
-        <Animated.View
-          style={[
-            styles.cardContainer,
-            cardStyle,
-            { zIndex: 100 - stackPosition },
-          ]}
-        >
+        <Animated.View style={[styles.cardContainer, cardStyle]}>
           {/* Overlays */}
           <Animated.View
             style={[styles.iconOverlay, styles.heartOverlay, heartIconStyle]}
