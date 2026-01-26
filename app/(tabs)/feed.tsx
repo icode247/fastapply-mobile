@@ -109,7 +109,7 @@ export default function FeedScreen() {
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
   // Actions container bottom offset
-  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 10 : 16;
+  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 23 : 100;
 
   // Load jobs from service
   const [jobs, setJobs] = useState<NormalizedJob[]>([]);
@@ -569,7 +569,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="arrow-undo"
-              size={Math.round(26 * uiScale)}
+              size={Math.round(20 * uiScale)}
               color="#FBC02D"
             />
           </TouchableOpacity>
@@ -585,7 +585,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="close"
-              size={Math.round(42 * uiScale)}
+              size={Math.round(30 * uiScale)}
               color="#F72585"
             />
           </TouchableOpacity>
@@ -605,7 +605,7 @@ export default function FeedScreen() {
           >
             <MaterialCommunityIcons
               name={isAutoPilotActive ? "stop" : "waveform"}
-              size={Math.round(48 * uiScale)}
+              size={Math.round(36 * uiScale)}
               color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
             />
           </TouchableOpacity>
@@ -621,7 +621,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="heart"
-              size={Math.round(42 * uiScale)}
+              size={Math.round(30 * uiScale)}
               color="#00C853"
             />
           </TouchableOpacity>
@@ -637,7 +637,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="person-circle-outline"
-              size={Math.round(26 * uiScale)}
+              size={Math.round(20 * uiScale)}
               color="#FF9800"
             />
           </TouchableOpacity>
@@ -745,9 +745,8 @@ const styles = StyleSheet.create({
     width: "85%",
     alignSelf: "center",
     paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
+    paddingVertical: spacing[1],
     position: "absolute",
-    // bottom is set dynamically with safe area insets
     zIndex: 100,
     borderRadius: 40,
     shadowColor: "#000",
@@ -766,18 +765,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   smallButton: {
-    width: Math.round(44 * uiScale),
-    height: Math.round(44 * uiScale),
-    borderRadius: Math.round(22 * uiScale),
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
+    borderRadius: Math.round(20 * uiScale),
   },
   largeButton: {
-    width: Math.round(60 * uiScale),
-    height: Math.round(60 * uiScale),
-    borderRadius: Math.round(30 * uiScale),
+    width: Math.round(54 * uiScale),
+    height: Math.round(54 * uiScale),
+    borderRadius: Math.round(27 * uiScale),
   },
   xlButton: {
-    width: Math.round(72 * uiScale),
-    height: Math.round(72 * uiScale),
-    borderRadius: Math.round(36 * uiScale),
+    width: Math.round(66 * uiScale),
+    height: Math.round(66 * uiScale),
+    borderRadius: Math.round(33 * uiScale),
   },
 });
