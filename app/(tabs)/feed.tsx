@@ -121,7 +121,7 @@ export default function FeedScreen() {
     current: 0,
     total: 0,
   });
-  const autoPilotRef = useRef<NodeJS.Timeout | null>(null);
+  const autoPilotRef = useRef<number | null>(null);
 
   // Card expanded state (full screen mode)
   const [isCardExpanded, setIsCardExpanded] = useState(false);
@@ -199,10 +199,7 @@ export default function FeedScreen() {
   const legacyJobs = useMemo(() => jobs.map(toLegacyJob), [jobs]);
 
   // Automation hook - for stats display only (queue happens directly via service)
-  const {
-    queueStats,
-    pendingCount,
-  } = useAutomation({
+  const { queueStats, pendingCount } = useAutomation({
     profileId: selectedProfileId,
     profileName: selectedProfile?.name,
   });
@@ -233,40 +230,41 @@ export default function FeedScreen() {
 
   const handleSwipeRight = (job: LegacyJob) => {
     console.log("Applied:", job.title);
-    setCurrentJobIndex((prev) => prev + 1);
+    // setCurrentJobIndex((prev) => prev + 1);
 
-    // Queue job directly to automation service - completely bypass React state
-    // This ensures swiping is never blocked by the queue operation
-    const profileId = selectedProfileId;
-    const profileName = selectedProfile?.name;
-    const normalizedJob = jobs.find((j) => j.id === job.id);
+    // TODO: Queue code commented out for testing
+    // // Queue job directly to automation service - completely bypass React state
+    // // This ensures swiping is never blocked by the queue operation
+    // const profileId = selectedProfileId;
+    // const profileName = selectedProfile?.name;
+    // const normalizedJob = jobs.find((j) => j.id === job.id);
 
-    if (!profileId || !normalizedJob) {
-      return;
-    }
+    // if (!profileId || !normalizedJob) {
+    //   return;
+    // }
 
-    const jobUrl = normalizedJob.applyUrl || normalizedJob.listingUrl;
-    if (!jobUrl) {
-      return;
-    }
+    // const jobUrl = normalizedJob.applyUrl || normalizedJob.listingUrl;
+    // if (!jobUrl) {
+    //   return;
+    // }
 
-    // Fire and forget - call service directly without any React state updates
-    automationService.addJobToQueue(
-      profileId,
-      jobUrl,
-      {
-        title: normalizedJob.title,
-        company: normalizedJob.company,
-        platform: normalizedJob.source,
-      },
-      profileName
-    ).then((result) => {
-      if (result.success) {
-        console.log("Job queued:", normalizedJob.title);
-      }
-    }).catch((err) => {
-      console.error("Failed to queue job:", err);
-    });
+    // // Fire and forget - call service directly without any React state updates
+    // automationService.addJobToQueue(
+    //   profileId,
+    //   jobUrl,
+    //   {
+    //     title: normalizedJob.title,
+    //     company: normalizedJob.company,
+    //     platform: normalizedJob.source,
+    //   },
+    //   profileName
+    // ).then((result) => {
+    //   if (result.success) {
+    //     console.log("Job queued:", normalizedJob.title);
+    //   }
+    // }).catch((err) => {
+    //   console.error("Failed to queue job:", err);
+    // });
   };
 
   const handleUndo = () => {

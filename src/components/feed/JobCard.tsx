@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useRef, useState } from "react";
+import React, { memo, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -24,7 +24,7 @@ interface JobCardProps {
   onExpandChange?: (expanded: boolean) => void;
 }
 
-export const JobCard: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
+const JobCardComponent: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
   const { colors } = useTheme();
   const [isExpanded, setIsExpanded] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -80,7 +80,14 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
         </View>
 
         <View style={styles.companyRow}>
-          <Image source={{ uri: job.logo }} style={styles.logo} />
+          {/* Logo container with fixed dimensions and placeholder to prevent CLS */}
+          <View style={[styles.logoContainer, { backgroundColor: colors.surfaceSecondary }]}>
+            <Image
+              source={{ uri: job.logo, cache: 'force-cache' }}
+              style={styles.logo}
+              fadeDuration={0}
+            />
+          </View>
           <View style={styles.companyInfo}>
             <Text style={[styles.company, { color: colors.text }]} numberOfLines={1}>
               {job.company}
@@ -98,6 +105,7 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
         showsVerticalScrollIndicator={isExpanded}
         scrollEnabled={isExpanded}
         bounces={isExpanded}
+        removeClippedSubviews={!isExpanded} // Optimize off-screen content
       >
         {/* Compensation */}
         <View style={styles.section}>
@@ -168,6 +176,12 @@ export const JobCard: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
   );
 };
 
+// Memoize to prevent re-renders when parent re-renders
+// Only re-render if job.id changes
+export const JobCard = memo(JobCardComponent, (prevProps, nextProps) => {
+  return prevProps.job.id === nextProps.job.id;
+});
+
 const styles = StyleSheet.create({
   card: {
     width: "100%",
@@ -207,11 +221,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  logo: {
+  logoContainer: {
     width: Math.round(48 * fontScale),
     height: Math.round(48 * fontScale),
     borderRadius: Math.round(24 * fontScale),
     marginRight: spacing[3],
+    overflow: "hidden",
+  },
+  logo: {
+    width: "100%",
+    height: "100%",
   },
   companyInfo: {
     flex: 1,

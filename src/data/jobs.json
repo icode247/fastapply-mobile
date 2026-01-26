@@ -1,1293 +1,1295 @@
-[{
-  "id": "2f14a31a-53e6-4129-8671-dd8741872523",
-  "title": "Product Support Manager",
-  "company.name": "Anthropic",
-  "listing_url": "https://job-boards.greenhouse.io/anthropic/jobs/4983655008",
-  "apply_url": "https://boards.greenhouse.io/anthropic/jobs/4983655008#app",
-  "locations": [
-    {
-      "location": "San Francisco, CA | New York City, NY | Seattle, WA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": {
-    "min": 165000,
-    "max": 210000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$165,000 - $210,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-12T16:48:41Z",
-  "is_remote": false
-},
-{
-  "id": "2bb4edbc-6986-42ea-850e-0685d8ee50d7",
-  "title": "Senior Software Engineering Support",
-  "company.name": "Rockstar Games",
-  "listing_url": "https://job-boards.greenhouse.io/rockstargames/jobs/6982014003",
-  "apply_url": "https://boards.greenhouse.io/rockstargames/jobs/6982014003#app",
-  "locations": [
-    {
-      "location": "Manhattan, New York, United States",
-      "city": "Manhattan",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.78343,
-      "longitude": -73.96625
-    }
-  ],
-  "compensation": {
-    "min": 85700,
-    "max": 126860,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$85,700 - $126,860 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-09-10T13:30:47Z",
-  "is_remote": false
-},
-{
-  "id": "3dbc3629-f05b-4e8b-b942-e1083dc186bd",
-  "title": "Software Engineer, Support Platform",
-  "company.name": "Vercel",
-  "listing_url": "https://boards.greenhouse.io/vercel/jobs/5611527004#app",
-  "apply_url": "https://boards.greenhouse.io/vercel/jobs/5611527004#app",
-  "locations": [
-    {
-      "location": "Hybrid - San Francisco",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-08-05T22:14:28Z",
-  "is_remote": false
-},
-{
-  "id": "de98cb14-27bf-4d56-829a-1b73988a7aba",
-  "title": "Software Engineer - Billing Support Systems",
-  "company.name": "MetTel",
-  "listing_url": "https://job-boards.greenhouse.io/mettel/jobs/4596690006",
-  "apply_url": "https://boards.greenhouse.io/mettel/jobs/4596690006#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-08-29T14:31:44Z",
-  "is_remote": false
-},
-{
-  "id": "f0064cb4-9fc1-4d76-8379-7e5f16a3d376",
-  "title": "Software Engineer II - Active Support",
-  "company.name": "StubHub",
-  "listing_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4736929101#app",
-  "apply_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4736929101#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": {
-    "min": 180000,
-    "max": 200000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$180,000 - $200,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-12-15T16:23:37Z",
-  "is_remote": false
-},
-{
-  "id": "ba4bedf3-0ebd-4e13-abc4-3b49ed93900f",
-  "title": "Senior Software Engineer - Active Support",
-  "company.name": "StubHub",
-  "listing_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4737944101#app",
-  "apply_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4737944101#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": {
-    "min": 200000,
-    "max": 250000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$200,000 - $250,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-12-15T17:04:29Z",
-  "is_remote": false
-},
-{
-  "id": "dbce6f56-10ad-4cdf-8ac2-3fe75f9ba39c",
-  "title": "Software Engineer",
-  "company.name": "Coolbet",
-  "listing_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
-  "apply_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
-  "locations": [
-    {
-      "location": "San Francisco, CA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": "full_time",
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2016-12-01T00:00:00Z",
-  "is_remote": false
-},
-{
-  "id": "2d28e590-0648-4c39-9d2d-9e120e4f39ef",
-  "title": "Software Engineer",
-  "company.name": "Plaid",
-  "listing_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
-  "apply_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": {
-    "min": 148800,
-    "max": 223200,
-    "currency": "USD",
-    "period": null,
-    "raw_text": "$148,800 - $223,200 per per-year-salary",
-    "is_estimated": false
-  },
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-06-06T17:21:41.679Z",
-  "is_remote": false
-},
-{
-  "id": "2635b26b-dc5a-403f-ba9b-1a13971cb281",
-  "title": "Software Engineer",
-  "company.name": "Plaid",
-  "listing_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
-  "apply_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
-  "locations": [
-    {
-      "location": "San Francisco",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": {
-    "min": 148800,
-    "max": 223200,
-    "currency": "USD",
-    "period": null,
-    "raw_text": "$148,800 - $223,200 per per-year-salary",
-    "is_estimated": false
-  },
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2024-08-28T18:46:03.809Z",
-  "is_remote": false
-},
-{
-  "id": "7b6b0c92-f6dd-4706-901d-53e6525825ea",
-  "title": "Software Engineer",
-  "company.name": "LogRocket",
-  "listing_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
-  "apply_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
-  "locations": [
-    {
-      "location": "Boston or NYC",
-      "city": "Boston",
-      "state": "Massachusetts",
-      "country": "United States",
-      "latitude": 42.35843,
-      "longitude": -71.05977
+[
+  {
+    "id": "2f14a31a-53e6-4129-8671-dd8741872523",
+    "title": "Product Support Manager",
+    "company.name": "Anthropic",
+    "listing_url": "https://job-boards.greenhouse.io/anthropic/jobs/4983655008",
+    "apply_url": "https://boards.greenhouse.io/anthropic/jobs/4983655008#app",
+    "locations": [
+      {
+        "location": "San Francisco, CA | New York City, NY | Seattle, WA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": {
+      "min": 165000,
+      "max": 210000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$165,000 - $210,000 USD per year",
+      "is_estimated": false
     },
-    {
-      "location": "Boston or NYC",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": {
-    "min": 100000,
-    "max": 145000,
-    "currency": "USD",
-    "period": null,
-    "raw_text": "$100,000 - $145,000 per per-year-salary",
-    "is_estimated": false
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-12T16:48:41Z",
+    "is_remote": false
   },
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-10-10T14:50:22.323Z",
-  "is_remote": false
-},
-{
-  "id": "df47e1d2-4600-48e0-b7cf-85aac9ec3598",
-  "title": "Software Engineer",
-  "company.name": "Merge API",
-  "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592473004",
-  "apply_url": "https://boards.greenhouse.io/merge/jobs/5592473004#app",
-  "locations": [
-    {
-      "location": "New York City, NY",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-07-18T19:21:59Z",
-  "is_remote": false
-},
-{
-  "id": "b8361728-ca3c-47fc-8bd2-cef2e11061d0",
-  "title": "Software Engineer",
-  "company.name": "Merge API",
-  "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592469004",
-  "apply_url": "https://boards.greenhouse.io/merge/jobs/5592469004#app",
-  "locations": [
-    {
-      "location": "San Francisco, CA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-07-18T19:22:08Z",
-  "is_remote": false
-},
-{
-  "id": "f848ea98-536f-42ff-a8f5-2dfda4c1f71a",
-  "title": "Software Engineer",
-  "company.name": "Quantcast",
-  "listing_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
-  "apply_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
-  "locations": [
-    {
-      "location": "San Francisco, CA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-04-24T19:25:41.315Z",
-  "is_remote": false
-},
-{
-  "id": "98f7300c-6144-441c-88ea-aee2b176bf32",
-  "title": "Software Engineer",
-  "company.name": "WalkMe",
-  "listing_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
-  "apply_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
-  "locations": [
-    {
-      "location": "New York City",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-03-12T17:17:08.868Z",
-  "is_remote": false
-},
-{
-  "id": "0da35765-8f74-ca2a-e742-441df906572d",
-  "title": "Software Engineer",
-  "company.name": "Twitch",
-  "listing_url": "https://job-boards.greenhouse.io/twitch/jobs/8345959002",
-  "apply_url": "https://boards.greenhouse.io/twitch/jobs/8345959002#app",
-  "locations": [
-    {
-      "location": "San Francisco, CA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": {
-    "min": 99500,
-    "max": 185000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$99,500 - $185,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-12-18T22:17:01Z",
-  "is_remote": false
-},
-{
-  "id": "8fcf77cc-3652-7424-60f9-dae0d000ce2b",
-  "title": "Software Engineer",
-  "company.name": "V2 Strategic Advisors",
-  "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/7381166",
-  "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/7381166#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-18T18:59:31Z",
-  "is_remote": false
-},
-{
-  "id": "32f5f9d9-8edf-47f5-a453-a1747b40e8b8",
-  "title": "Software Engineer",
-  "company.name": "Aquatic Capital Management",
-  "listing_url": "https://job-boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002",
-  "apply_url": "https://boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002#app",
-  "locations": [
-    {
-      "location": "Chicago, New York, London",
-      "city": null,
-      "state": null,
-      "country": null,
-      "latitude": null,
-      "longitude": null
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2024-07-11T18:37:04Z",
-  "is_remote": false
-},
-{
-  "id": "cfb12032-eb13-edcb-eac2-698ba8921848",
-  "title": "Software Engineer",
-  "company.name": "Highnote",
-  "listing_url": "https://job-boards.greenhouse.io/highnote/jobs/7576326003",
-  "apply_url": "https://boards.greenhouse.io/highnote/jobs/7576326003#app",
-  "locations": [
-    {
-      "location": "San Francisco",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-02T17:32:34Z",
-  "is_remote": false
-},
-{
-  "id": "7ba05422-79d0-4104-a835-6df02f0e5c40",
-  "title": "Software Engineer",
-  "company.name": "Literati",
-  "listing_url": "https://job-boards.greenhouse.io/liberate/jobs/4969408008",
-  "apply_url": "https://boards.greenhouse.io/liberate/jobs/4969408008#app",
-  "locations": [
-    {
-      "location": "San Francisco, CA",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-10-28T23:22:19Z",
-  "is_remote": false
-},
-{
-  "id": "157642d1-45a5-4631-b9c4-6873508793d8",
-  "title": "Software Engineer",
-  "company.name": "Outschool",
-  "listing_url": "https://job-boards.greenhouse.io/outschool/jobs/4607423006",
-  "apply_url": "https://boards.greenhouse.io/outschool/jobs/4607423006#app",
-  "locations": [
-    {
-      "location": "San Francisco (Hybrid)",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-10-07T22:30:40Z",
-  "is_remote": false
-},
-{
-  "id": "0c54d767-b861-6392-dbfb-652d355c90d4",
-  "title": "Software Engineer",
-  "company.name": "V2 Strategic Advisors",
-  "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/6964474",
-  "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/6964474#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-06-09T21:59:31Z",
-  "is_remote": false
-},
-{
-  "id": "224a2092-f802-2de3-f745-ba13c45aa73f",
-  "title": "Software Engineer",
-  "company.name": "Flip",
-  "listing_url": "https://job-boards.greenhouse.io/flip/jobs/4592556008",
-  "apply_url": "https://boards.greenhouse.io/flip/jobs/4592556008#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": {
-    "min": 110000,
-    "max": 150000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$110,000 - $150,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-03-21T18:30:22Z",
-  "is_remote": false
-},
-{
-  "id": "2a3a77cb-d3b8-417c-9e1e-ea9389fc3cca",
-  "title": "Software Engineer",
-  "company.name": "Octaura",
-  "listing_url": "https://job-boards.greenhouse.io/octaura/jobs/4624477007",
-  "apply_url": "https://boards.greenhouse.io/octaura/jobs/4624477007#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-01-24T13:17:43Z",
-  "is_remote": false
-},
-{
-  "id": "66f1da9d-0efa-4954-a808-5c8612286b65",
-  "title": "Software Engineer",
-  "company.name": "PDT Partners",
-  "listing_url": "https://job-boards.greenhouse.io/pdtpartners/jobs/3914106",
-  "apply_url": "https://boards.greenhouse.io/pdtpartners/jobs/3914106#app",
-  "locations": [
-    {
-      "location": "New York, NY",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2022-02-11T18:58:43Z",
-  "is_remote": false
-},
-{
-  "id": "0ee4f37a-5d22-580a-7c5d-bdd7eb7384b2",
-  "title": "Software Engineer",
-  "company.name": "Morgan & Morgan, P.A.",
-  "listing_url": "https://job-boards.greenhouse.io/morganmorganjobsapplynow/jobs/5748180004",
-  "apply_url": "https://boards.greenhouse.io/morganmorganjobsapplynow/jobs/5748180004#app",
-  "locations": [
-    {
-      "location": "Brooklyn, New York, United States",
-      "city": "Brooklyn",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.6501,
-      "longitude": -73.94958
-    }
-  ],
-  "compensation": {
-    "min": 145000,
-    "max": 165000,
-    "currency": "USD",
-    "period": "year",
-    "raw_text": "$145,000 - $165,000 USD per year",
-    "is_estimated": false
-  },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T15:34:24Z",
-  "is_remote": false
-},
-{
-  "id": "544a3dd2-b286-4647-bcc4-7a0d7467b818",
-  "title": "Software Engineer",
-  "company.name": "Ascend",
-  "listing_url": "https://job-boards.greenhouse.io/ascend21/jobs/4575263008",
-  "apply_url": "https://boards.greenhouse.io/ascend21/jobs/4575263008#app",
-  "locations": [
-    {
-      "location": "San Francisco",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-03-10T16:09:10Z",
-  "is_remote": false
-},
-{
-  "id": "00f9a64c-12d3-4536-bc92-7a09e997b872",
-  "title": "Software Engineer",
-  "company.name": "Jane Street",
-  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8046410002",
-  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8046410002#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-07-07T08:39:32Z",
-  "is_remote": false
-},
-{
-  "id": "a03376c5-2ae4-616d-5e2c-94142c911976",
-  "title": "Software Engineer",
-  "company.name": "Beacon Software",
-  "listing_url": "https://job-boards.greenhouse.io/beaconsoftware/jobs/4974799008",
-  "apply_url": "https://boards.greenhouse.io/beaconsoftware/jobs/4974799008#app",
-  "locations": [
-    {
-      "location": "San Francisco, California, United States",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-04T04:50:56Z",
-  "is_remote": false
-},
-{
-  "id": "f4fac660-0980-7c1d-bb4d-71e9a2e1d41c",
-  "title": "Software Engineer",
-  "company.name": "Beacon Software",
-  "listing_url": "https://job-boards.greenhouse.io/beaconsoftware/jobs/4974798008",
-  "apply_url": "https://boards.greenhouse.io/beaconsoftware/jobs/4974798008#app",
-  "locations": [
-    {
-      "location": "New York City, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-04T04:50:28Z",
-  "is_remote": false
-},
-{
-  "id": "acf60dd5-010a-424b-9740-0e5d4ab74d99",
-  "title": "Software Engineer",
-  "company.name": "Chalk",
-  "listing_url": "https://job-boards.greenhouse.io/chalkinc/jobs/4031707005",
-  "apply_url": "https://boards.greenhouse.io/chalkinc/jobs/4031707005#app",
-  "locations": [
-    {
-      "location": "NY or SF",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
+  {
+    "id": "2bb4edbc-6986-42ea-850e-0685d8ee50d7",
+    "title": "Senior Software Engineering Support",
+    "company.name": "Rockstar Games",
+    "listing_url": "https://job-boards.greenhouse.io/rockstargames/jobs/6982014003",
+    "apply_url": "https://boards.greenhouse.io/rockstargames/jobs/6982014003#app",
+    "locations": [
+      {
+        "location": "Manhattan, New York, United States",
+        "city": "Manhattan",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.78343,
+        "longitude": -73.96625
+      }
+    ],
+    "compensation": {
+      "min": 85700,
+      "max": 126860,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$85,700 - $126,860 USD per year",
+      "is_estimated": false
     },
-    {
-      "location": "NY or SF",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2022-06-17T20:12:59Z",
-  "is_remote": false
-},
-{
-  "id": "d6a767d6-bd16-4a8b-bd1d-f582943b8003",
-  "title": "Software Engineer",
-  "company.name": "Arena AI",
-  "listing_url": "https://job-boards.eu.greenhouse.io/arenaai/jobs/4593097101",
-  "apply_url": "https://boards.eu.greenhouse.io/arenaai/jobs/4593097101#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-05-21T03:02:05Z",
-  "is_remote": false
-},
-{
-  "id": "cd55536a-af6a-4b07-b306-812297dc0ca5",
-  "title": "Software Engineer",
-  "company.name": "Lever Implementation Training Environment",
-  "listing_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
-  "apply_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
-  "locations": [
-    {
-      "location": "San Francisco, California",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": "full_time",
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2019-08-30T16:22:16.31Z",
-  "is_remote": false
-},
-{
-  "id": "1f64a220-2932-8033-673b-2c38dec8817d",
-  "title": "Software Engineer",
-  "company.name": "DV Trading",
-  "listing_url": "https://job-boards.greenhouse.io/dvtrading/jobs/4644966005",
-  "apply_url": "https://boards.greenhouse.io/dvtrading/jobs/4644966005#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-06T19:45:19Z",
-  "is_remote": false
-},
-{
-  "id": "eaed3d72-09da-4a47-8068-594fe675a472",
-  "title": "Software Engineer",
-  "company.name": "Jane Street",
-  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/4274288002",
-  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/4274288002#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2019-05-06T19:18:54Z",
-  "is_remote": false
-},
-{
-  "id": "3b0aa130-5de2-4a28-a9d0-1ae0d241e3d3",
-  "title": "Software Engineer",
-  "company.name": "Jane Street",
-  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8040547002",
-  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8040547002#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-07-10T13:33:56Z",
-  "is_remote": false
-},
-{
-  "id": "02932051-85b6-4ea8-87b3-89fc17c6294e",
-  "title": "Software Engineer",
-  "company.name": "super{set} Hive Community ",
-  "listing_url": "https://job-boards.greenhouse.io/superset/jobs/4990626008",
-  "apply_url": "https://boards.greenhouse.io/superset/jobs/4990626008#app",
-  "locations": [
-    {
-      "location": "San Francisco, California",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-12-11T01:09:45Z",
-  "is_remote": false
-},
-{
-  "id": "6876c99b-1eed-448e-a2b2-acf6201e0c64",
-  "title": "Software Engineer",
-  "company.name": "Jane Street",
-  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8160791002",
-  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8160791002#app",
-  "locations": [
-    {
-      "location": "New York, New York, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-03T15:53:10Z",
-  "is_remote": false
-},
-{
-  "id": "dec7dbcd-6374-1236-7256-64c2ed51526c",
-  "title": "Product Manager",
-  "company.name": "Traversal",
-  "listing_url": "https://job-boards.greenhouse.io/traversal/jobs/4622045008",
-  "apply_url": "https://boards.greenhouse.io/traversal/jobs/4622045008#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-02T16:20:13Z",
-  "is_remote": false
-},
-{
-  "id": "a5c9c47e-3c2e-4219-8520-37415d37b6ab",
-  "title": "Software Engineer",
-  "company.name": "Ivo",
-  "listing_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
-  "apply_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
-  "locations": [
-    {
-      "location": "San Francisco, California",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": "onsite",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-01-27T05:35:18.639Z",
-  "is_remote": false
-},
-{
-  "id": "3d5d105a-82af-4e41-99db-f6519fd73c1a",
-  "title": "Product Manager",
-  "company.name": "Lever Implementation Training Environment",
-  "listing_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
-  "apply_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
-  "locations": [
-    {
-      "location": "San Francisco, California",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2019-08-05T18:40:53.56Z",
-  "is_remote": false
-},
-{
-  "id": "e380eeb4-4c3d-4551-9894-5b01799ab932",
-  "title": "Product Manager",
-  "company.name": "Lemurian Labs",
-  "listing_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
-  "apply_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
-  "locations": [
-    {
-      "location": "SF Bay Area",
-      "city": "San Francisco",
-      "state": "California",
-      "country": "United States",
-      "latitude": 37.77493,
-      "longitude": -122.41942
-    }
-  ],
-  "compensation": null,
-  "employment_type": "full_time",
-  "workplace_type": "hybrid",
-  "experience_level": null,
-  "source": "lever_co",
-  "date_posted": "2025-10-31T19:10:00.542Z",
-  "is_remote": false
-},
-{
-  "id": "758a6967-4676-43a8-8c0c-2e0d101e3c93",
-  "title": "Software Engineer",
-  "company.name": "Gyde",
-  "listing_url": "https://job-boards.greenhouse.io/gyde/jobs/4064296009",
-  "apply_url": "https://boards.greenhouse.io/gyde/jobs/4064296009#app",
-  "locations": [
-    {
-      "location": "Austin, Texas, United States, New York, New York, United States",
-      "city": "Austin",
-      "state": "Texas",
-      "country": "United States",
-      "latitude": 30.26715,
-      "longitude": -97.74306
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-19T18:16:04Z",
-  "is_remote": false
-},
-{
-  "id": "e3608a20-956f-9e05-d3ea-cb9b07a44d5f",
-  "title": "Product Manager",
-  "company.name": "Clear Street",
-  "listing_url": "https://job-boards.greenhouse.io/clearstreet/jobs/7493713",
-  "apply_url": "https://boards.greenhouse.io/clearstreet/jobs/7493713#app",
-  "locations": [
-    {
-      "location": "New York, NY",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-12-23T18:31:32Z",
-  "is_remote": false
-},
-{
-  "id": "60e1c03b-6b78-418a-b5a3-067de3ead3d3",
-  "title": "Product Manager",
-  "company.name": "Sixfold",
-  "listing_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
-  "apply_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
-  "locations": [
-    {
-      "location": "New York, New York",
-      "city": "New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2025-11-17T21:43:32Z",
-  "is_remote": false
-},
-{
-  "id": "87632d2b-eb0b-430f-8c43-5e2d4a116af2",
-  "title": "Software Engineer",
-  "company.name": "MadeiraMadeira",
-  "listing_url": "https://job-boards.greenhouse.io/examplecorpsandbox/jobs/4178792",
-  "apply_url": "https://boards.greenhouse.io/examplecorpsandbox/jobs/4178792#app",
-  "locations": [
-    {
-      "location": "New York, NY, United States",
-      "city": "New City",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 41.1476,
-      "longitude": -73.98931
-    }
-  ],
-  "compensation": {
-    "min": 60,
-    "max": 80,
-    "currency": "EUR",
-    "period": "year",
-    "raw_text": "€60.000 - €80.000 EUR per year",
-    "is_estimated": false
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-09-10T13:30:47Z",
+    "is_remote": false
   },
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2022-04-29T10:36:53Z",
-  "is_remote": false
-},
-{
-  "id": "3b76872d-46e4-f19e-7baf-0c4f38a35bf8",
-  "title": "Software Engineer",
-  "company.name": "Fun, Inc.",
-  "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/26790",
-  "apply_url": "https://boards.greenhouse.io/funinc/jobs/26790#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T22:34:23.619Z",
-  "is_remote": false
-},
-{
-  "id": "f395fa68-cb5d-0d54-b753-e05ceece22c1",
-  "title": "Software Engineer",
-  "company.name": "Fun, Inc.",
-  "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/28165",
-  "apply_url": "https://boards.greenhouse.io/funinc/jobs/28165#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T22:34:23.619Z",
-  "is_remote": false
-},
-{
-  "id": "7784eccf-bd8b-47d4-ac8c-daff0a2f435f",
-  "title": "Software Engineer",
-  "company.name": "Fun, Inc.",
-  "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/76154",
-  "apply_url": "https://boards.greenhouse.io/funinc/jobs/76154#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T22:34:23.619Z",
-  "is_remote": false
-},
-{
-  "id": "85b884f4-e5f7-28f5-8635-b5f56ce09223",
-  "title": "Software Engineer",
-  "company.name": "Fun, Inc.",
-  "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/26690",
-  "apply_url": "https://boards.greenhouse.io/funinc/jobs/26690#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T22:34:23.619Z",
-  "is_remote": false
-},
-{
-  "id": "d5d5bf74-191e-bda8-2141-39025cb719ad",
-  "title": "Software Engineer",
-  "company.name": "Fun, Inc.",
-  "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/41507",
-  "apply_url": "https://boards.greenhouse.io/funinc/jobs/41507#app",
-  "locations": [
-    {
-      "location": "New York",
-      "city": "East New York",
-      "state": "New York",
-      "country": "United States",
-      "latitude": 40.66677,
-      "longitude": -73.88236
-    }
-  ],
-  "compensation": null,
-  "employment_type": null,
-  "workplace_type": null,
-  "experience_level": null,
-  "source": "greenhouse",
-  "date_posted": "2026-01-05T22:34:23.619Z",
-  "is_remote": false
-}]
+  {
+    "id": "3dbc3629-f05b-4e8b-b942-e1083dc186bd",
+    "title": "Software Engineer, Support Platform",
+    "company.name": "Vercel",
+    "listing_url": "https://boards.greenhouse.io/vercel/jobs/5611527004#app",
+    "apply_url": "https://boards.greenhouse.io/vercel/jobs/5611527004#app",
+    "locations": [
+      {
+        "location": "Hybrid - San Francisco",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-08-05T22:14:28Z",
+    "is_remote": false
+  },
+  {
+    "id": "de98cb14-27bf-4d56-829a-1b73988a7aba",
+    "title": "Software Engineer - Billing Support Systems",
+    "company.name": "MetTel",
+    "listing_url": "https://job-boards.greenhouse.io/mettel/jobs/4596690006",
+    "apply_url": "https://boards.greenhouse.io/mettel/jobs/4596690006#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-08-29T14:31:44Z",
+    "is_remote": false
+  },
+  {
+    "id": "f0064cb4-9fc1-4d76-8379-7e5f16a3d376",
+    "title": "Software Engineer II - Active Support",
+    "company.name": "StubHub",
+    "listing_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4736929101#app",
+    "apply_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4736929101#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": {
+      "min": 180000,
+      "max": 200000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$180,000 - $200,000 USD per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-12-15T16:23:37Z",
+    "is_remote": false
+  },
+  {
+    "id": "ba4bedf3-0ebd-4e13-abc4-3b49ed93900f",
+    "title": "Senior Software Engineer - Active Support",
+    "company.name": "StubHub",
+    "listing_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4737944101#app",
+    "apply_url": "https://boards.eu.greenhouse.io/stubhubinc/jobs/4737944101#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": {
+      "min": 200000,
+      "max": 250000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$200,000 - $250,000 USD per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-12-15T17:04:29Z",
+    "is_remote": false
+  },
+  {
+    "id": "dbce6f56-10ad-4cdf-8ac2-3fe75f9ba39c",
+    "title": "Software Engineer",
+    "company.name": "Coolbet",
+    "listing_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
+    "apply_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
+    "locations": [
+      {
+        "location": "San Francisco, CA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": "full_time",
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2016-12-01T00:00:00Z",
+    "is_remote": false
+  },
+  {
+    "id": "2d28e590-0648-4c39-9d2d-9e120e4f39ef",
+    "title": "Software Engineer",
+    "company.name": "Plaid",
+    "listing_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
+    "apply_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": {
+      "min": 148800,
+      "max": 223200,
+      "currency": "USD",
+      "period": null,
+      "raw_text": "$148,800 - $223,200 per per-year-salary",
+      "is_estimated": false
+    },
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-06-06T17:21:41.679Z",
+    "is_remote": false
+  },
+  {
+    "id": "2635b26b-dc5a-403f-ba9b-1a13971cb281",
+    "title": "Software Engineer",
+    "company.name": "Plaid",
+    "listing_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
+    "apply_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
+    "locations": [
+      {
+        "location": "San Francisco",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": {
+      "min": 148800,
+      "max": 223200,
+      "currency": "USD",
+      "period": null,
+      "raw_text": "$148,800 - $223,200 per per-year-salary",
+      "is_estimated": false
+    },
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2024-08-28T18:46:03.809Z",
+    "is_remote": false
+  },
+  {
+    "id": "7b6b0c92-f6dd-4706-901d-53e6525825ea",
+    "title": "Software Engineer",
+    "company.name": "LogRocket",
+    "listing_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
+    "apply_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
+    "locations": [
+      {
+        "location": "Boston or NYC",
+        "city": "Boston",
+        "state": "Massachusetts",
+        "country": "United States",
+        "latitude": 42.35843,
+        "longitude": -71.05977
+      },
+      {
+        "location": "Boston or NYC",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": {
+      "min": 100000,
+      "max": 145000,
+      "currency": "USD",
+      "period": null,
+      "raw_text": "$100,000 - $145,000 per per-year-salary",
+      "is_estimated": false
+    },
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-10-10T14:50:22.323Z",
+    "is_remote": false
+  },
+  {
+    "id": "df47e1d2-4600-48e0-b7cf-85aac9ec3598",
+    "title": "Software Engineer",
+    "company.name": "Merge API",
+    "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592473004",
+    "apply_url": "https://boards.greenhouse.io/merge/jobs/5592473004#app",
+    "locations": [
+      {
+        "location": "New York City, NY",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-07-18T19:21:59Z",
+    "is_remote": false
+  },
+  {
+    "id": "b8361728-ca3c-47fc-8bd2-cef2e11061d0",
+    "title": "Software Engineer",
+    "company.name": "Merge API",
+    "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592469004",
+    "apply_url": "https://boards.greenhouse.io/merge/jobs/5592469004#app",
+    "locations": [
+      {
+        "location": "San Francisco, CA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-07-18T19:22:08Z",
+    "is_remote": false
+  },
+  {
+    "id": "f848ea98-536f-42ff-a8f5-2dfda4c1f71a",
+    "title": "Software Engineer",
+    "company.name": "Quantcast",
+    "listing_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
+    "apply_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
+    "locations": [
+      {
+        "location": "San Francisco, CA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-04-24T19:25:41.315Z",
+    "is_remote": false
+  },
+  {
+    "id": "98f7300c-6144-441c-88ea-aee2b176bf32",
+    "title": "Software Engineer",
+    "company.name": "WalkMe",
+    "listing_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
+    "apply_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
+    "locations": [
+      {
+        "location": "New York City",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-03-12T17:17:08.868Z",
+    "is_remote": false
+  },
+  {
+    "id": "0da35765-8f74-ca2a-e742-441df906572d",
+    "title": "Software Engineer",
+    "company.name": "Twitch",
+    "listing_url": "https://job-boards.greenhouse.io/twitch/jobs/8345959002",
+    "apply_url": "https://boards.greenhouse.io/twitch/jobs/8345959002#app",
+    "locations": [
+      {
+        "location": "San Francisco, CA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": {
+      "min": 99500,
+      "max": 185000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$99,500 - $185,000 USD per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-12-18T22:17:01Z",
+    "is_remote": false
+  },
+  {
+    "id": "8fcf77cc-3652-7424-60f9-dae0d000ce2b",
+    "title": "Software Engineer",
+    "company.name": "V2 Strategic Advisors",
+    "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/7381166",
+    "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/7381166#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-18T18:59:31Z",
+    "is_remote": false
+  },
+  {
+    "id": "32f5f9d9-8edf-47f5-a453-a1747b40e8b8",
+    "title": "Software Engineer",
+    "company.name": "Aquatic Capital Management",
+    "listing_url": "https://job-boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002",
+    "apply_url": "https://boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002#app",
+    "locations": [
+      {
+        "location": "Chicago, New York, London",
+        "city": null,
+        "state": null,
+        "country": null,
+        "latitude": null,
+        "longitude": null
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2024-07-11T18:37:04Z",
+    "is_remote": false
+  },
+  {
+    "id": "cfb12032-eb13-edcb-eac2-698ba8921848",
+    "title": "Software Engineer",
+    "company.name": "Highnote",
+    "listing_url": "https://job-boards.greenhouse.io/highnote/jobs/7576326003",
+    "apply_url": "https://boards.greenhouse.io/highnote/jobs/7576326003#app",
+    "locations": [
+      {
+        "location": "San Francisco",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-02T17:32:34Z",
+    "is_remote": false
+  },
+  {
+    "id": "7ba05422-79d0-4104-a835-6df02f0e5c40",
+    "title": "Software Engineer",
+    "company.name": "Literati",
+    "listing_url": "https://job-boards.greenhouse.io/liberate/jobs/4969408008",
+    "apply_url": "https://boards.greenhouse.io/liberate/jobs/4969408008#app",
+    "locations": [
+      {
+        "location": "San Francisco, CA",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-10-28T23:22:19Z",
+    "is_remote": false
+  },
+  {
+    "id": "157642d1-45a5-4631-b9c4-6873508793d8",
+    "title": "Software Engineer",
+    "company.name": "Outschool",
+    "listing_url": "https://job-boards.greenhouse.io/outschool/jobs/4607423006",
+    "apply_url": "https://boards.greenhouse.io/outschool/jobs/4607423006#app",
+    "locations": [
+      {
+        "location": "San Francisco (Hybrid)",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-10-07T22:30:40Z",
+    "is_remote": false
+  },
+  {
+    "id": "0c54d767-b861-6392-dbfb-652d355c90d4",
+    "title": "Software Engineer",
+    "company.name": "V2 Strategic Advisors",
+    "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/6964474",
+    "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/6964474#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-06-09T21:59:31Z",
+    "is_remote": false
+  },
+  {
+    "id": "224a2092-f802-2de3-f745-ba13c45aa73f",
+    "title": "Software Engineer",
+    "company.name": "Flip",
+    "listing_url": "https://job-boards.greenhouse.io/flip/jobs/4592556008",
+    "apply_url": "https://boards.greenhouse.io/flip/jobs/4592556008#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": {
+      "min": 110000,
+      "max": 150000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$110,000 - $150,000 USD per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-03-21T18:30:22Z",
+    "is_remote": false
+  },
+  {
+    "id": "2a3a77cb-d3b8-417c-9e1e-ea9389fc3cca",
+    "title": "Software Engineer",
+    "company.name": "Octaura",
+    "listing_url": "https://job-boards.greenhouse.io/octaura/jobs/4624477007",
+    "apply_url": "https://boards.greenhouse.io/octaura/jobs/4624477007#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-01-24T13:17:43Z",
+    "is_remote": false
+  },
+  {
+    "id": "66f1da9d-0efa-4954-a808-5c8612286b65",
+    "title": "Software Engineer",
+    "company.name": "PDT Partners",
+    "listing_url": "https://job-boards.greenhouse.io/pdtpartners/jobs/3914106",
+    "apply_url": "https://boards.greenhouse.io/pdtpartners/jobs/3914106#app",
+    "locations": [
+      {
+        "location": "New York, NY",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2022-02-11T18:58:43Z",
+    "is_remote": false
+  },
+  {
+    "id": "0ee4f37a-5d22-580a-7c5d-bdd7eb7384b2",
+    "title": "Software Engineer",
+    "company.name": "Morgan & Morgan, P.A.",
+    "listing_url": "https://job-boards.greenhouse.io/morganmorganjobsapplynow/jobs/5748180004",
+    "apply_url": "https://boards.greenhouse.io/morganmorganjobsapplynow/jobs/5748180004#app",
+    "locations": [
+      {
+        "location": "Brooklyn, New York, United States",
+        "city": "Brooklyn",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.6501,
+        "longitude": -73.94958
+      }
+    ],
+    "compensation": {
+      "min": 145000,
+      "max": 165000,
+      "currency": "USD",
+      "period": "year",
+      "raw_text": "$145,000 - $165,000 USD per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T15:34:24Z",
+    "is_remote": false
+  },
+  {
+    "id": "544a3dd2-b286-4647-bcc4-7a0d7467b818",
+    "title": "Software Engineer",
+    "company.name": "Ascend",
+    "listing_url": "https://job-boards.greenhouse.io/ascend21/jobs/4575263008",
+    "apply_url": "https://boards.greenhouse.io/ascend21/jobs/4575263008#app",
+    "locations": [
+      {
+        "location": "San Francisco",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-03-10T16:09:10Z",
+    "is_remote": false
+  },
+  {
+    "id": "00f9a64c-12d3-4536-bc92-7a09e997b872",
+    "title": "Software Engineer",
+    "company.name": "Jane Street",
+    "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8046410002",
+    "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8046410002#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-07-07T08:39:32Z",
+    "is_remote": false
+  },
+  {
+    "id": "a03376c5-2ae4-616d-5e2c-94142c911976",
+    "title": "Software Engineer",
+    "company.name": "Beacon Software",
+    "listing_url": "https://job-boards.greenhouse.io/beaconsoftware/jobs/4974799008",
+    "apply_url": "https://boards.greenhouse.io/beaconsoftware/jobs/4974799008#app",
+    "locations": [
+      {
+        "location": "San Francisco, California, United States",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-04T04:50:56Z",
+    "is_remote": false
+  },
+  {
+    "id": "f4fac660-0980-7c1d-bb4d-71e9a2e1d41c",
+    "title": "Software Engineer",
+    "company.name": "Beacon Software",
+    "listing_url": "https://job-boards.greenhouse.io/beaconsoftware/jobs/4974798008",
+    "apply_url": "https://boards.greenhouse.io/beaconsoftware/jobs/4974798008#app",
+    "locations": [
+      {
+        "location": "New York City, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-04T04:50:28Z",
+    "is_remote": false
+  },
+  {
+    "id": "acf60dd5-010a-424b-9740-0e5d4ab74d99",
+    "title": "Software Engineer",
+    "company.name": "Chalk",
+    "listing_url": "https://job-boards.greenhouse.io/chalkinc/jobs/4031707005",
+    "apply_url": "https://boards.greenhouse.io/chalkinc/jobs/4031707005#app",
+    "locations": [
+      {
+        "location": "NY or SF",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      },
+      {
+        "location": "NY or SF",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2022-06-17T20:12:59Z",
+    "is_remote": false
+  },
+  {
+    "id": "d6a767d6-bd16-4a8b-bd1d-f582943b8003",
+    "title": "Software Engineer",
+    "company.name": "Arena AI",
+    "listing_url": "https://job-boards.eu.greenhouse.io/arenaai/jobs/4593097101",
+    "apply_url": "https://boards.eu.greenhouse.io/arenaai/jobs/4593097101#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-05-21T03:02:05Z",
+    "is_remote": false
+  },
+  {
+    "id": "cd55536a-af6a-4b07-b306-812297dc0ca5",
+    "title": "Software Engineer",
+    "company.name": "Lever Implementation Training Environment",
+    "listing_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
+    "apply_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
+    "locations": [
+      {
+        "location": "San Francisco, California",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": "full_time",
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2019-08-30T16:22:16.31Z",
+    "is_remote": false
+  },
+  {
+    "id": "1f64a220-2932-8033-673b-2c38dec8817d",
+    "title": "Software Engineer",
+    "company.name": "DV Trading",
+    "listing_url": "https://job-boards.greenhouse.io/dvtrading/jobs/4644966005",
+    "apply_url": "https://boards.greenhouse.io/dvtrading/jobs/4644966005#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-06T19:45:19Z",
+    "is_remote": false
+  },
+  {
+    "id": "eaed3d72-09da-4a47-8068-594fe675a472",
+    "title": "Software Engineer",
+    "company.name": "Jane Street",
+    "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/4274288002",
+    "apply_url": "https://boards.greenhouse.io/janestreet/jobs/4274288002#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2019-05-06T19:18:54Z",
+    "is_remote": false
+  },
+  {
+    "id": "3b0aa130-5de2-4a28-a9d0-1ae0d241e3d3",
+    "title": "Software Engineer",
+    "company.name": "Jane Street",
+    "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8040547002",
+    "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8040547002#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-07-10T13:33:56Z",
+    "is_remote": false
+  },
+  {
+    "id": "02932051-85b6-4ea8-87b3-89fc17c6294e",
+    "title": "Software Engineer",
+    "company.name": "super{set} Hive Community ",
+    "listing_url": "https://job-boards.greenhouse.io/superset/jobs/4990626008",
+    "apply_url": "https://boards.greenhouse.io/superset/jobs/4990626008#app",
+    "locations": [
+      {
+        "location": "San Francisco, California",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-12-11T01:09:45Z",
+    "is_remote": false
+  },
+  {
+    "id": "6876c99b-1eed-448e-a2b2-acf6201e0c64",
+    "title": "Software Engineer",
+    "company.name": "Jane Street",
+    "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8160791002",
+    "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8160791002#app",
+    "locations": [
+      {
+        "location": "New York, New York, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-03T15:53:10Z",
+    "is_remote": false
+  },
+  {
+    "id": "dec7dbcd-6374-1236-7256-64c2ed51526c",
+    "title": "Product Manager",
+    "company.name": "Traversal",
+    "listing_url": "https://job-boards.greenhouse.io/traversal/jobs/4622045008",
+    "apply_url": "https://boards.greenhouse.io/traversal/jobs/4622045008#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-02T16:20:13Z",
+    "is_remote": false
+  },
+  {
+    "id": "a5c9c47e-3c2e-4219-8520-37415d37b6ab",
+    "title": "Software Engineer",
+    "company.name": "Ivo",
+    "listing_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
+    "apply_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
+    "locations": [
+      {
+        "location": "San Francisco, California",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": "onsite",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-01-27T05:35:18.639Z",
+    "is_remote": false
+  },
+  {
+    "id": "3d5d105a-82af-4e41-99db-f6519fd73c1a",
+    "title": "Product Manager",
+    "company.name": "Lever Implementation Training Environment",
+    "listing_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
+    "apply_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
+    "locations": [
+      {
+        "location": "San Francisco, California",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2019-08-05T18:40:53.56Z",
+    "is_remote": false
+  },
+  {
+    "id": "e380eeb4-4c3d-4551-9894-5b01799ab932",
+    "title": "Product Manager",
+    "company.name": "Lemurian Labs",
+    "listing_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
+    "apply_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
+    "locations": [
+      {
+        "location": "SF Bay Area",
+        "city": "San Francisco",
+        "state": "California",
+        "country": "United States",
+        "latitude": 37.77493,
+        "longitude": -122.41942
+      }
+    ],
+    "compensation": null,
+    "employment_type": "full_time",
+    "workplace_type": "hybrid",
+    "experience_level": null,
+    "source": "lever_co",
+    "date_posted": "2025-10-31T19:10:00.542Z",
+    "is_remote": false
+  },
+  {
+    "id": "758a6967-4676-43a8-8c0c-2e0d101e3c93",
+    "title": "Software Engineer",
+    "company.name": "Gyde",
+    "listing_url": "https://job-boards.greenhouse.io/gyde/jobs/4064296009",
+    "apply_url": "https://boards.greenhouse.io/gyde/jobs/4064296009#app",
+    "locations": [
+      {
+        "location": "Austin, Texas, United States, New York, New York, United States",
+        "city": "Austin",
+        "state": "Texas",
+        "country": "United States",
+        "latitude": 30.26715,
+        "longitude": -97.74306
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-19T18:16:04Z",
+    "is_remote": false
+  },
+  {
+    "id": "e3608a20-956f-9e05-d3ea-cb9b07a44d5f",
+    "title": "Product Manager",
+    "company.name": "Clear Street",
+    "listing_url": "https://job-boards.greenhouse.io/clearstreet/jobs/7493713",
+    "apply_url": "https://boards.greenhouse.io/clearstreet/jobs/7493713#app",
+    "locations": [
+      {
+        "location": "New York, NY",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-12-23T18:31:32Z",
+    "is_remote": false
+  },
+  {
+    "id": "60e1c03b-6b78-418a-b5a3-067de3ead3d3",
+    "title": "Product Manager",
+    "company.name": "Sixfold",
+    "listing_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
+    "apply_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
+    "locations": [
+      {
+        "location": "New York, New York",
+        "city": "New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2025-11-17T21:43:32Z",
+    "is_remote": false
+  },
+  {
+    "id": "87632d2b-eb0b-430f-8c43-5e2d4a116af2",
+    "title": "Software Engineer",
+    "company.name": "MadeiraMadeira",
+    "listing_url": "https://job-boards.greenhouse.io/examplecorpsandbox/jobs/4178792",
+    "apply_url": "https://boards.greenhouse.io/examplecorpsandbox/jobs/4178792#app",
+    "locations": [
+      {
+        "location": "New York, NY, United States",
+        "city": "New City",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 41.1476,
+        "longitude": -73.98931
+      }
+    ],
+    "compensation": {
+      "min": 60,
+      "max": 80,
+      "currency": "EUR",
+      "period": "year",
+      "raw_text": "€60.000 - €80.000 EUR per year",
+      "is_estimated": false
+    },
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2022-04-29T10:36:53Z",
+    "is_remote": false
+  },
+  {
+    "id": "3b76872d-46e4-f19e-7baf-0c4f38a35bf8",
+    "title": "Software Engineer",
+    "company.name": "Fun, Inc.",
+    "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/26790",
+    "apply_url": "https://boards.greenhouse.io/funinc/jobs/26790#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T22:34:23.619Z",
+    "is_remote": false
+  },
+  {
+    "id": "f395fa68-cb5d-0d54-b753-e05ceece22c1",
+    "title": "Software Engineer",
+    "company.name": "Fun, Inc.",
+    "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/28165",
+    "apply_url": "https://boards.greenhouse.io/funinc/jobs/28165#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T22:34:23.619Z",
+    "is_remote": false
+  },
+  {
+    "id": "7784eccf-bd8b-47d4-ac8c-daff0a2f435f",
+    "title": "Software Engineer",
+    "company.name": "Fun, Inc.",
+    "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/76154",
+    "apply_url": "https://boards.greenhouse.io/funinc/jobs/76154#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T22:34:23.619Z",
+    "is_remote": false
+  },
+  {
+    "id": "85b884f4-e5f7-28f5-8635-b5f56ce09223",
+    "title": "Software Engineer",
+    "company.name": "Fun, Inc.",
+    "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/26690",
+    "apply_url": "https://boards.greenhouse.io/funinc/jobs/26690#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T22:34:23.619Z",
+    "is_remote": false
+  },
+  {
+    "id": "d5d5bf74-191e-bda8-2141-39025cb719ad",
+    "title": "Software Engineer",
+    "company.name": "Fun, Inc.",
+    "listing_url": "https://job-boards.greenhouse.io/funinc/jobs/41507",
+    "apply_url": "https://boards.greenhouse.io/funinc/jobs/41507#app",
+    "locations": [
+      {
+        "location": "New York",
+        "city": "East New York",
+        "state": "New York",
+        "country": "United States",
+        "latitude": 40.66677,
+        "longitude": -73.88236
+      }
+    ],
+    "compensation": null,
+    "employment_type": null,
+    "workplace_type": null,
+    "experience_level": null,
+    "source": "greenhouse",
+    "date_posted": "2026-01-05T22:34:23.619Z",
+    "is_remote": false
+  }
+]
