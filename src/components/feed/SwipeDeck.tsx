@@ -15,8 +15,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
-import { runOnJS, useSharedValue, withSpring } from "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useSharedValue } from "react-native-reanimated";
 import { spacing } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { Job } from "../../mocks/jobs";
@@ -56,41 +56,37 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     const currentIndexRef = useRef(currentIndex);
     currentIndexRef.current = currentIndex;
 
-    // Refs for callbacks to keep gesture stable
-    const handleSwipeCompleteRef = useRef<
-      (direction: "left" | "right") => void
-    >(() => {});
-    const notifySwipingStartRef = useRef<() => void>(() => {});
-    const notifySwipingEndRef = useRef<() => void>(() => {});
-
-    // Animation values
-    const translateX = useSharedValue(0);
-    const translateY = useSharedValue(0);
-    const rotate = useSharedValue(0);
-    const isProgrammaticSwipe = useSharedValue(0);
-
-    // UI thread index - tracks which card is active, updates BEFORE React state
+    // UI thread index - tracks which card is active
     const activeCardIndex = useSharedValue(0);
 
-    // Tracks which card index is currently being animated (for swipe animations)
-    // -1 means no swipe in progress
-    const swipingCardIndex = useSharedValue(-1);
+    // Command to trigger programmatic swipes
+    // index: which card to swipe
+    // direction: which way to go
+    const swipeCommand = useSharedValue<{
+      index: number;
+      direction: "left" | "right" | null;
+    }>({ index: -1, direction: null });
+
+    // Track active card's X translation to drive the *next* card's scale/opacity
+    // This allows the "stack" effect to work while gestures are decoupled
+    const activeTranslateX = useSharedValue(0);
 
     // Track card expanded state as shared value for UI thread access
     const isCardExpandedShared = useSharedValue(false);
 
-    // Get the current and next 3 jobs (one extra for smoother transitions)
+    // Get the current and next 3 jobs
+    // We keep currentIndex - 1 to allow it to finish animating out or be undone
     const visibleJobs = useMemo(() => {
       const result: { job: Job; index: number }[] = [];
-      // Include one card BEFORE current (for undo) and 3 after
       const startIdx = Math.max(0, currentIndex - 1);
-      for (let i = startIdx; i < Math.min(jobs.length, currentIndex + 4); i++) {
+      // Render slightly more cards to ensure smooth rapid changes
+      for (let i = startIdx; i < Math.min(jobs.length, currentIndex + 5); i++) {
         result.push({ job: jobs[i], index: i });
       }
       return result;
     }, [jobs, currentIndex]);
 
-    // Pre-fetch logos for upcoming cards (next 5) to prevent CLS
+    // Pre-fetch logos
     React.useEffect(() => {
       const prefetchCount = 5;
       for (let i = 0; i < prefetchCount; i++) {
@@ -101,10 +97,24 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       }
     }, [currentIndex, jobs]);
 
-    // Note: activeCardIndex is now updated in handleSwipeComplete before React state changes
-    // This ensures proper ordering: reset translateX → advance index → update React state
-
     const currentJob = jobs[currentIndex];
+
+    // Callbacks for card events
+    const handleSwipe = useCallback(
+      (direction: "left" | "right", job: Job) => {
+        // Update history and index state
+        // We do this immediately to allow rapid firing
+        setSwipeHistory((prev) => [...prev, { job, direction }]);
+        setCurrentIndex((prev) => prev + 1);
+
+        if (direction === "left") {
+          onSwipeLeft(job);
+        } else {
+          onSwipeRight(job);
+        }
+      },
+      [onSwipeLeft, onSwipeRight],
+    );
 
     const handleExpandChange = useCallback(
       (expanded: boolean) => {
@@ -115,81 +125,26 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       [onExpandChange, isCardExpandedShared],
     );
 
-    const handleSwipeComplete = useCallback(
-      (direction: "left" | "right") => {
-        const idx = currentIndexRef.current;
-        const job = jobs[idx];
-
-        // Reset animation values FIRST while the old card is still "active"
-        // This ensures clean state before transitioning
-        translateX.value = 0;
-        translateY.value = 0;
-        rotate.value = 0;
-        isProgrammaticSwipe.value = 0;
-        swipingCardIndex.value = -1;
-
-        // NOW advance the index - new card becomes active and sees clean values
-        activeCardIndex.value = activeCardIndex.value + 1;
-
-        // Update React state last - this is just for component re-renders
-        setSwipeHistory((prev) => [...prev, { job, direction }]);
-        setCurrentIndex((prev) => prev + 1);
-
-        if (direction === "left") {
-          onSwipeLeft(job);
-        } else {
-          onSwipeRight(job);
-        }
-      },
-      [
-        jobs,
-        onSwipeLeft,
-        onSwipeRight,
-        translateX,
-        rotate,
-        isProgrammaticSwipe,
-        activeCardIndex,
-        swipingCardIndex,
-      ],
-    );
-    handleSwipeCompleteRef.current = handleSwipeComplete;
-
     const animateSwipe = useCallback(
       (direction: "left" | "right") => {
         if (currentIndexRef.current >= jobs.length) return;
 
-        isProgrammaticSwipe.value = 1;
-        swipingCardIndex.value = currentIndexRef.current;
-        const targetX =
-          direction === "right" ? SCREEN_WIDTH * 1.5 : -SCREEN_WIDTH * 1.5;
+        // Trigger the command for the specific card index
+        swipeCommand.value = {
+          index: currentIndexRef.current,
+          direction,
+        };
 
-        translateX.value = withSpring(
-          targetX,
-          {
-            damping: 28,
-            stiffness: 65,
-            velocity: direction === "right" ? 350 : -350,
-            overshootClamping: true,
-          },
-          (finished) => {
-            if (finished) {
-              runOnJS(handleSwipeComplete)(direction);
-            }
-          },
-        );
-        rotate.value = withSpring(direction === "right" ? 10 : -10, {
-          damping: 28,
-          stiffness: 65,
-        });
+        // Advance visual index immediately
+        activeCardIndex.value = activeCardIndex.value + 1;
+
+        // Reset the "next card" scaler since the new active card starts at 0
+        activeTranslateX.value = 0;
+
+        // Process logic
+        handleSwipe(direction, jobs[currentIndexRef.current]);
       },
-      [
-        jobs.length,
-        translateX,
-        rotate,
-        isProgrammaticSwipe,
-        handleSwipeComplete,
-        swipingCardIndex,
-      ],
+      [jobs, handleSwipe, activeCardIndex, swipeCommand, activeTranslateX],
     );
 
     const undo = useCallback(() => {
@@ -198,44 +153,24 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       const lastSwipe = swipeHistory[swipeHistory.length - 1];
       const previousIndex = currentIndex - 1;
 
-      // Set the card we're undoing to as being "swiped" so it can animate
-      swipingCardIndex.value = previousIndex;
+      // Trigger command to bring it back (handled in CardRenderer)
+      swipeCommand.value = {
+        index: previousIndex,
+        direction: null, // null direction implies "reset/undo"
+      };
 
-      // Decrement active index first
+      // Decrement visible index
       activeCardIndex.value = previousIndex;
+      activeTranslateX.value = 0;
 
       setSwipeHistory((prev) => prev.slice(0, -1));
       setCurrentIndex((prev) => prev - 1);
-
-      const fromX =
-        lastSwipe.direction === "right"
-          ? SCREEN_WIDTH * 1.5
-          : -SCREEN_WIDTH * 1.5;
-      translateX.value = fromX;
-      translateY.value = 0;
-      rotate.value = lastSwipe.direction === "right" ? 10 : -10;
-
-      translateX.value = withSpring(
-        0,
-        {
-          damping: 22,
-          stiffness: 120,
-          velocity: lastSwipe.direction === "right" ? -300 : 300,
-        },
-        () => {
-          // Animation complete, clear swiping state
-          swipingCardIndex.value = -1;
-        },
-      );
-      rotate.value = withSpring(0, { damping: 22, stiffness: 120 });
     }, [
       swipeHistory,
       currentIndex,
-      translateX,
-      rotate,
       activeCardIndex,
-      swipingCardIndex,
-      translateY,
+      swipeCommand,
+      activeTranslateX,
     ]);
 
     useImperativeHandle(
@@ -247,120 +182,6 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
         getCurrentJob: () => currentJob || null,
       }),
       [animateSwipe, undo, currentJob],
-    );
-
-    const notifySwipingStart = useCallback(() => {
-      onSwipingChange?.(true);
-    }, [onSwipingChange]);
-    notifySwipingStartRef.current = notifySwipingStart;
-
-    const notifySwipingEnd = useCallback(() => {
-      onSwipingChange?.(false);
-    }, [onSwipingChange]);
-    notifySwipingEndRef.current = notifySwipingEnd;
-
-    // Wrapper functions that call through refs - allows gesture to stay stable
-    const callSwipingStart = useCallback(() => {
-      notifySwipingStartRef.current();
-    }, []);
-
-    const callSwipingEnd = useCallback(() => {
-      notifySwipingEndRef.current();
-    }, []);
-
-    const callSwipeComplete = useCallback((direction: "left" | "right") => {
-      handleSwipeCompleteRef.current(direction);
-    }, []);
-
-    // Gesture handler - stable reference, uses shared values for all dynamic state
-    // This prevents Reanimated warning about modifying gesture handlerTag
-    const gesture = useMemo(
-      () =>
-        Gesture.Pan()
-          .onStart(() => {
-            // Check if card is expanded on UI thread - if so, ignore gesture
-            if (isCardExpandedShared.value) return;
-            isProgrammaticSwipe.value = 0;
-            swipingCardIndex.value = activeCardIndex.value;
-            runOnJS(callSwipingStart)();
-          })
-          .onUpdate((event) => {
-            // Skip if card is expanded
-            if (isCardExpandedShared.value) return;
-            translateX.value = event.translationX * 0.92;
-            translateY.value = event.translationY;
-            rotate.value = (event.translationX / SCREEN_WIDTH) * 12;
-          })
-          .onEnd((event) => {
-            // Skip if card is expanded
-            if (isCardExpandedShared.value) return;
-            runOnJS(callSwipingEnd)();
-
-            if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
-              const direction = event.translationX > 0 ? "right" : "left";
-              const targetX =
-                direction === "right"
-                  ? SCREEN_WIDTH * 1.5
-                  : -SCREEN_WIDTH * 1.5;
-              const velocityFactor = Math.min(
-                Math.abs(event.velocityX) / 1000,
-                1,
-              );
-              const smoothVelocity =
-                (direction === "right" ? 400 : -400) *
-                (0.5 + velocityFactor * 0.5);
-
-              translateX.value = withSpring(
-                targetX,
-                {
-                  damping: 28,
-                  stiffness: 65,
-                  velocity: smoothVelocity,
-                  overshootClamping: true,
-                },
-                (finished) => {
-                  if (finished) {
-                    runOnJS(callSwipeComplete)(direction);
-                  }
-                },
-              );
-              // Spring back translateY to 0 when swiping out
-              translateY.value = withSpring(0, {
-                damping: 28,
-                stiffness: 65,
-              });
-              rotate.value = withSpring(direction === "right" ? 10 : -10, {
-                damping: 28,
-                stiffness: 65,
-              });
-            } else {
-              // Snap back - clear swiping state
-              swipingCardIndex.value = -1;
-              translateX.value = withSpring(0, {
-                damping: 15,
-                stiffness: 200,
-                velocity: -event.velocityX * 0.3,
-              });
-              translateY.value = withSpring(0, {
-                damping: 15,
-                stiffness: 200,
-                velocity: -event.velocityY * 0.3,
-              });
-              rotate.value = withSpring(0, { damping: 15, stiffness: 200 });
-            }
-          }),
-      [
-        isCardExpandedShared,
-        isProgrammaticSwipe,
-        translateX,
-        translateY,
-        rotate,
-        callSwipingStart,
-        callSwipingEnd,
-        callSwipeComplete,
-        swipingCardIndex,
-        activeCardIndex,
-      ],
     );
 
     // Empty state
@@ -394,15 +215,14 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
                 key={job.id}
                 job={job}
                 jobIndex={index}
-                currentIndex={currentIndex}
+                currentIndex={currentIndex} // Keep passing for prop calculation if needed, though mostly using shared values now
                 activeCardIndex={activeCardIndex}
-                swipingCardIndex={swipingCardIndex}
-                translateX={translateX}
-                translateY={translateY}
-                rotate={rotate}
-                isProgrammaticSwipe={isProgrammaticSwipe}
-                gesture={gesture}
+                activeTranslateX={activeTranslateX}
+                swipeCommand={swipeCommand}
+                isCardExpandedShared={isCardExpandedShared}
                 onExpandChange={handleExpandChange}
+                onSwipe={handleSwipe}
+                onSwipingChange={onSwipingChange}
               />
             ))}
       </GestureHandlerRootView>

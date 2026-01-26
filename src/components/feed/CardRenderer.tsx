@@ -1,18 +1,23 @@
 import { Ionicons } from "@expo/vector-icons";
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   SharedValue,
   interpolate,
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
+  useSharedValue,
+  withSpring,
 } from "react-native-reanimated";
 import { Job } from "../../mocks/jobs";
 import { JobCard } from "./JobCard";
 
 const fontScale = Platform.OS === "android" ? 0.85 : 1;
 const SCREEN_WIDTH = Dimensions.get("window").width;
+const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
 // Reuse the MemoizedJobCard logic here
 const MemoizedJobCard = memo(
@@ -33,14 +38,15 @@ export interface CardRendererProps {
   jobIndex: number;
   currentIndex: number;
   activeCardIndex: SharedValue<number>;
-  swipingCardIndex: SharedValue<number>;
-  translateX: SharedValue<number>;
-  translateY: SharedValue<number>;
-  rotate: SharedValue<number>;
-  isProgrammaticSwipe: SharedValue<number>;
-  gesture: ReturnType<typeof Gesture.Pan>;
-
+  activeTranslateX: SharedValue<number>;
+  swipeCommand: SharedValue<{
+    index: number;
+    direction: "left" | "right" | null;
+  }>;
+  isCardExpandedShared: SharedValue<boolean>;
   onExpandChange: (expanded: boolean) => void;
+  onSwipe: (direction: "left" | "right", job: Job) => void;
+  onSwipingChange?: (isSwiping: boolean) => void;
 }
 
 export const CardRenderer = memo(
@@ -49,85 +55,160 @@ export const CardRenderer = memo(
     jobIndex,
     currentIndex,
     activeCardIndex,
-    swipingCardIndex,
-    translateX,
-    translateY,
-    rotate,
-    isProgrammaticSwipe,
-    gesture,
+    activeTranslateX,
+    swipeCommand,
+    isCardExpandedShared,
     onExpandChange,
+    onSwipe,
+    onSwipingChange,
   }: CardRendererProps) => {
-    // Don't use React state for top card determination - use shared value instead
-    // This prevents re-renders when the card becomes active
+    // Local animation state (independent for each card)
+    const translateX = useSharedValue(0);
+    const translateY = useSharedValue(0);
+    const rotate = useSharedValue(0);
+    const isProgrammaticSwipe = useSharedValue(0);
+
     const stackPosition = jobIndex - currentIndex;
+    const isActive = useDerivedValue(
+      () => activeCardIndex.value === jobIndex,
+      [jobIndex],
+    );
 
-    // Unified card style - handles both active and next card states
-    // All transitions happen via shared values on UI thread, no React re-renders
-    const cardStyle = useAnimatedStyle(() => {
-      const diff = jobIndex - activeCardIndex.value;
-      const isBeingSwiped = swipingCardIndex.value === jobIndex;
+    // Handle programmatic swipes (buttons)
+    useAnimatedReaction(
+      () => swipeCommand.value,
+      (command) => {
+        if (command.index === jobIndex) {
+          if (command.direction === null) {
+            // Undo / Reset
+            translateX.value = withSpring(0, { damping: 20, stiffness: 100 });
+            translateY.value = withSpring(0);
+            rotate.value = withSpring(0);
+            isProgrammaticSwipe.value = 0;
+            return;
+          }
 
-      // Card is swiped away (behind active) - hide it
-      if (diff < 0) {
-        return {
-          opacity: 0,
-          transform: [
-            { translateX: 0 },
-            { translateY: 0 },
-            { rotate: "0deg" },
-            { scale: 1 },
-          ],
-        };
-      }
+          // Trigger swipe out
+          isProgrammaticSwipe.value = 1;
+          const targetX =
+            command.direction === "right"
+              ? SCREEN_WIDTH * 1.5
+              : -SCREEN_WIDTH * 1.5;
+          const rotateTarget = command.direction === "right" ? 10 : -10;
 
-      // This is the active card (diff === 0)
-      if (diff === 0) {
-        // Apply transforms only when this specific card is being swiped
-        if (isBeingSwiped) {
-          return {
-            opacity: 1,
-            transform: [
-              { translateX: translateX.value },
-              { translateY: translateY.value },
-              { rotate: `${rotate.value}deg` },
-              { scale: 1 },
-            ],
-          };
+          translateX.value = withSpring(targetX, {
+            damping: 28,
+            stiffness: 65,
+            velocity: command.direction === "right" ? 350 : -350,
+          });
+          rotate.value = withSpring(rotateTarget);
         }
-        // Card just became active - show at rest position immediately
+      },
+    );
+
+    // Gesture Handler
+    const gesture = useMemo(
+      () =>
+        Gesture.Pan()
+          .enabled(stackPosition === 0) // Only top card is swipeable
+          .onStart(() => {
+            if (isCardExpandedShared.value) return;
+            if (!isActive.value) return;
+            isProgrammaticSwipe.value = 0;
+            if (onSwipingChange) runOnJS(onSwipingChange)(true);
+          })
+          .onUpdate((event) => {
+            if (isCardExpandedShared.value) return;
+            if (!isActive.value) return;
+
+            translateX.value = event.translationX * 0.92;
+            translateY.value = event.translationY;
+            rotate.value = (event.translationX / SCREEN_WIDTH) * 12;
+
+            // Sync with parent for stack animation
+            activeTranslateX.value = event.translationX;
+          })
+          .onEnd((event) => {
+            if (isCardExpandedShared.value) return;
+            if (!isActive.value) return;
+
+            if (onSwipingChange) runOnJS(onSwipingChange)(false);
+
+            if (Math.abs(event.translationX) > SWIPE_THRESHOLD) {
+              const direction = event.translationX > 0 ? "right" : "left";
+              const targetX =
+                direction === "right"
+                  ? SCREEN_WIDTH * 1.5
+                  : -SCREEN_WIDTH * 1.5;
+
+              // Optimistically update UI state immediately
+              runOnJS(onSwipe)(direction, job);
+
+              // Animate off screen
+              translateX.value = withSpring(targetX, {
+                velocity: event.velocityX,
+                damping: 28,
+                stiffness: 65,
+              });
+
+              // Reset parent immediately so next card snaps to center
+              activeTranslateX.value = 0;
+
+              // Animate actual index update for next card access
+              activeCardIndex.value = activeCardIndex.value + 1;
+            } else {
+              // Reset / Snap back
+              translateX.value = withSpring(0);
+              translateY.value = withSpring(0);
+              rotate.value = withSpring(0);
+              activeTranslateX.value = withSpring(0);
+            }
+          }),
+      [
+        job,
+        jobIndex,
+        onSwipe,
+        isActive,
+        isCardExpandedShared,
+        activeTranslateX,
+        activeCardIndex,
+      ],
+    );
+
+    const cardStyle = useAnimatedStyle(() => {
+      // If this is the active card, use local physics
+      if (isActive.value) {
         return {
           opacity: 1,
           transform: [
-            { translateX: 0 },
-            { translateY: 0 },
-            { rotate: "0deg" },
+            { translateX: translateX.value },
+            { translateY: translateY.value },
+            { rotate: `${rotate.value}deg` },
             { scale: 1 },
           ],
         };
       }
 
-      // This is the next card (diff === 1)
-      if (diff === 1) {
-        // Only animate scale/opacity when the ACTIVE card is being swiped
-        const activeIsBeingSwiped =
-          swipingCardIndex.value === activeCardIndex.value;
+      // If this card is "swiped" (index < active), it should be animating out or gone
+      if (jobIndex < activeCardIndex.value) {
+        // We rely on the local translateX to keep rendering until we go far enough?
+        // Actually, if we've been swiped, we keep the last known position until unmount.
+        // But since we use SharedValues, distinct for this component instance,
+        // they retain their value even if activeCardIndex changes!
+        return {
+          opacity: 1, // Keep visible while animating out
+          transform: [
+            { translateX: translateX.value },
+            { translateY: translateY.value },
+            { rotate: `${rotate.value}deg` },
+            { scale: 1 },
+          ],
+        };
+      }
 
-        if (!activeIsBeingSwiped) {
-          // No swipe in progress - stay at rest
-          return {
-            opacity: 0.7,
-            transform: [
-              { translateX: 0 },
-              { translateY: 0 },
-              { rotate: "0deg" },
-              { scale: 0.96 },
-            ],
-          };
-        }
-
-        const absTranslateX = Math.abs(translateX.value);
-
-        // Scale up as the active card swipes away
+      // If this is the next card (active + 1), react to the active card's movement
+      if (jobIndex === activeCardIndex.value + 1) {
+        const absTranslateX = Math.abs(activeTranslateX.value);
         const scale = interpolate(
           absTranslateX,
           [0, SCREEN_WIDTH * 0.5],
@@ -151,130 +232,67 @@ export const CardRenderer = memo(
         };
       }
 
-      // Cards further back - hidden
+      // Cards further back
       return {
         opacity: 0,
-        transform: [
-          { translateX: 0 },
-          { translateY: 0 },
-          { rotate: "0deg" },
-          { scale: 0.96 },
-        ],
+        transform: [{ scale: 0.96 }],
       };
-    }, [jobIndex]);
+    });
 
-    // Check if this is the active card on UI thread
-    const isActive = useDerivedValue(() => {
-      return activeCardIndex.value === jobIndex;
-    }, [jobIndex]);
-
-    // Heart icon style (for hand swipes)
     const heartIconStyle = useAnimatedStyle(() => {
-      if (isProgrammaticSwipe.value === 1 || !isActive.value) {
-        return { opacity: 0, transform: [{ scale: 0 }] };
+      const x = translateX.value;
+      if (x > 20) {
+        return {
+          opacity: interpolate(x, [0, 50, 100], [0, 0.5, 1], "clamp"),
+          transform: [{ scale: interpolate(x, [0, 100], [0.5, 1.2], "clamp") }],
+        };
       }
-      const opacity = interpolate(
-        translateX.value,
-        [0, 50, 100],
-        [0, 0.5, 1],
-        "clamp",
-      );
-      const scale = interpolate(
-        translateX.value,
-        [0, 100],
-        [0.5, 1.2],
-        "clamp",
-      );
-      return {
-        opacity: translateX.value > 20 ? opacity : 0,
-        transform: [{ scale }],
-      };
-    }, []);
+      return { opacity: 0, transform: [{ scale: 0 }] };
+    });
 
-    // X icon style (for hand swipes)
     const xIconStyle = useAnimatedStyle(() => {
-      if (isProgrammaticSwipe.value === 1 || !isActive.value) {
-        return { opacity: 0, transform: [{ scale: 0 }] };
+      const x = translateX.value;
+      if (x < -20) {
+        return {
+          opacity: interpolate(x, [0, -50, -100], [0, 0.5, 1], "clamp"),
+          transform: [
+            { scale: interpolate(x, [0, -100], [0.5, 1.2], "clamp") },
+          ],
+        };
       }
-      const opacity = interpolate(
-        translateX.value,
-        [0, -50, -100],
-        [0, 0.5, 1],
-        "clamp",
-      );
-      const scale = interpolate(
-        translateX.value,
-        [0, -100],
-        [0.5, 1.2],
-        "clamp",
-      );
-      return {
-        opacity: translateX.value < -20 ? opacity : 0,
-        transform: [{ scale }],
-      };
-    }, []);
+      return { opacity: 0, transform: [{ scale: 0 }] };
+    });
 
-    // LIKE text style (for button swipes)
     const likeTextStyle = useAnimatedStyle(() => {
-      if (isProgrammaticSwipe.value === 0 || !isActive.value) {
-        return { opacity: 0, transform: [{ scale: 0 }] };
+      const x = translateX.value;
+      if (x > 20) {
+        return {
+          opacity: interpolate(x, [0, 50, 100], [0, 0.5, 1], "clamp"),
+          transform: [{ scale: interpolate(x, [0, 100], [0.5, 1.2], "clamp") }],
+        };
       }
-      const opacity = interpolate(
-        translateX.value,
-        [0, 50, 100],
-        [0, 0.5, 1],
-        "clamp",
-      );
-      const scale = interpolate(
-        translateX.value,
-        [0, 100],
-        [0.5, 1.2],
-        "clamp",
-      );
-      return {
-        opacity: translateX.value > 20 ? opacity : 0,
-        transform: [{ scale }],
-      };
-    }, []);
+      return { opacity: 0, transform: [{ scale: 0 }] };
+    });
 
-    // NOPE text style (for button swipes)
     const nopeTextStyle = useAnimatedStyle(() => {
-      if (isProgrammaticSwipe.value === 0 || !isActive.value) {
-        return { opacity: 0, transform: [{ scale: 0 }] };
+      const x = translateX.value;
+      if (x < -20) {
+        return {
+          opacity: interpolate(x, [0, -50, -100], [0, 0.5, 1], "clamp"),
+          transform: [
+            { scale: interpolate(x, [0, -100], [0.5, 1.2], "clamp") },
+          ],
+        };
       }
-      const opacity = interpolate(
-        translateX.value,
-        [0, -50, -100],
-        [0, 0.5, 1],
-        "clamp",
-      );
-      const scale = interpolate(
-        translateX.value,
-        [0, -100],
-        [0.5, 1.2],
-        "clamp",
-      );
-      return {
-        opacity: translateX.value < -20 ? opacity : 0,
-        transform: [{ scale }],
-      };
-    }, []);
+      return { opacity: 0, transform: [{ scale: 0 }] };
+    });
 
-    // Don't render cards that are swiped away (based on React state)
-    if (stackPosition < 0) {
-      return null;
-    }
+    // Don't render cards that are too far gone
+    if (stackPosition < -1) return null;
+    if (stackPosition > 2) return null;
 
-    // Don't render cards too far back
-    if (stackPosition > 2) {
-      return null;
-    }
+    const isSwipeable = stackPosition === 0;
 
-    // Determine if this card should be interactive (only top card based on React state)
-    const isTopCard = stackPosition === 0;
-
-    // Single unified render - all cards rendered the same way
-    // cardStyle handles opacity, scale, and transform based on activeCardIndex shared value
     return (
       <GestureDetector gesture={gesture}>
         <Animated.View
@@ -283,9 +301,8 @@ export const CardRenderer = memo(
             cardStyle,
             { zIndex: 100 - stackPosition },
           ]}
-          pointerEvents={isTopCard ? "auto" : "none"}
         >
-          {/* Swipe indicators - only shown on active card via animated styles */}
+          {/* Overlays */}
           <Animated.View
             style={[styles.iconOverlay, styles.heartOverlay, heartIconStyle]}
           >
@@ -310,21 +327,23 @@ export const CardRenderer = memo(
               <Text style={styles.nopeText}>NOPE</Text>
             </View>
           </Animated.View>
+
           <MemoizedJobCard
             job={job}
-            onExpandChange={isTopCard ? onExpandChange : undefined}
+            onExpandChange={isSwipeable ? onExpandChange : undefined}
           />
         </Animated.View>
       </GestureDetector>
     );
   },
   (prev, next) => {
-    // Minimize re-renders - only re-render if job changes or stack position changes significantly
-    const prevStack = prev.jobIndex - prev.currentIndex;
-    const nextStack = next.jobIndex - next.currentIndex;
-
-    // Same job, same relative position = don't re-render
-    return prev.job.id === next.job.id && prevStack === nextStack;
+    // Only re-render if identity changes or big stack shifts
+    // We want to avoid re-rendering just because shared values changed
+    return (
+      prev.job.id === next.job.id &&
+      prev.jobIndex === next.jobIndex &&
+      prev.currentIndex === next.currentIndex
+    );
   },
 );
 
