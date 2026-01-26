@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Platform,
   StyleSheet,
@@ -27,10 +26,7 @@ import {
 } from "../../src/components/feed/JobFiltersModal";
 import { ProfileSelectorModal } from "../../src/components/feed/ProfileSelectorModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
-import {
-  ParsedVoiceCommand,
-  VoiceAutoPilotOverlay,
-} from "../../src/components/feed/VoiceAutoPilotOverlay";
+import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { useAutomation } from "../../src/hooks/useAutomation";
@@ -43,6 +39,7 @@ import {
   WorkplaceType,
 } from "../../src/types/job.types";
 import { JobProfile } from "../../src/types/profile.types";
+import { ParsedVoiceCommand } from "../../src/types/voice.types";
 
 // Android renders fonts/icons larger, scale down for consistency
 const uiScale = Platform.OS === "android" ? 0.85 : 1;
@@ -308,21 +305,33 @@ export default function FeedScreen() {
     (command: ParsedVoiceCommand) => {
       console.log("Voice command parsed:", command);
 
-      // Apply filters from voice command
-      if (command.filters) {
+      // Map parsed params to JobFilters
+      const { params, intent } = command;
+
+      if (params) {
         const newFilters: JobFilters = {
-          remoteOnly: command.filters.remote || false,
-          salaryMin: command.filters.minSalary ?? 30000,
-          salaryMax: 200000,
-          jobTypes: command.filters.jobTypes || [],
-          workModes: command.filters.remote ? ["remote"] : [],
-          country: null,
-          cities: command.filters.locations || [],
-          experienceLevels: [],
+          remoteOnly: params.remote || false,
+          salaryMin: params.salaryMin ?? 30000,
+          salaryMax: params.salaryMax ?? 200000,
+          jobTypes: params.jobType || [], // already string[]
+          workModes: params.remote ? ["remote"] : [],
+          country: params.country || null,
+          cities: params.city
+            ? [params.city]
+            : params.location
+              ? [params.location]
+              : [],
+          experienceLevels: params.experienceLevel
+            ? [params.experienceLevel]
+            : [],
           visaSponsorship: false,
         };
 
-        // Apply filters to job service
+        // ... existing mapping logic ...
+        // We will simplify and trust the service params mapping for now,
+        // or rebuild this mapping block.
+
+        // Re-implementing filter application based on new params structure
         const jobTypesMap: Record<string, EmploymentType> = {
           "full-time": "full_time",
           "part-time": "part_time",
@@ -342,61 +351,74 @@ export default function FeedScreen() {
           remoteOnly: newFilters.remoteOnly,
           salaryMin: newFilters.salaryMin,
           salaryMax: newFilters.salaryMax,
-          jobTypes:
-            newFilters.jobTypes.length > 0
-              ? (newFilters.jobTypes
-                  .map((t) => jobTypesMap[t.toLowerCase()] || null)
-                  .filter(Boolean) as EmploymentType[])
-              : undefined,
-          workModes:
-            newFilters.workModes.length > 0
-              ? (newFilters.workModes
-                  .map((m) => workModesMap[m.toLowerCase()] || null)
-                  .filter(Boolean) as WorkplaceType[])
-              : undefined,
+          jobTypes: params.jobType
+            ? (params.jobType
+                .map((t: string) => jobTypesMap[t.toLowerCase()] || null)
+                .filter(Boolean) as EmploymentType[])
+            : undefined,
+          workModes: params.remote
+            ? (["remote"] as WorkplaceType[])
+            : undefined,
           cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
-          keywords: command.filters.keywords,
+          keywords: params.jobTitle ? [params.jobTitle] : undefined,
         };
 
-        const result = jobService.searchJobs(searchFilters);
-        console.log("Voice filter - found jobs:", result.total);
-        setJobs(result.jobs);
-        setCurrentJobIndex(0);
-        setFilters(newFilters);
+        if (params.skills) {
+          searchFilters.keywords = [
+            ...(searchFilters.keywords || []),
+            ...params.skills,
+          ];
+        }
+
+        if (intent === "search" || intent === "filter" || intent === "apply") {
+          const result = jobService.searchJobs(searchFilters);
+          console.log("Voice filter - found jobs:", result.total);
+          setJobs(result.jobs);
+          setCurrentJobIndex(0);
+          setFilters(newFilters);
+        }
       }
 
-      // Start auto-swipe if requested
-      if (command.autoSwipe) {
-        const { direction, count } = command.autoSwipe;
-        const swipeCount =
-          count === "all"
-            ? Math.min(jobs.length - currentJobIndex, 20)
-            : Math.min(count, jobs.length - currentJobIndex);
+      // Handle Auto-Apply / Auto-Swipe
+      if (params.applyToAll || intent === "apply") {
+        const swipeCount = params.applyToAll ? 20 : 5; // Default to 5 or 20
 
-        if (swipeCount > 0) {
-          setIsAutoPilotActive(true);
-          setAutoPilotProgress({ current: 0, total: swipeCount });
+        setIsAutoPilotActive(true);
+        setAutoPilotProgress({ current: 0, total: swipeCount });
 
-          let swiped = 0;
-          autoPilotRef.current = setInterval(() => {
-            if (swiped >= swipeCount) {
-              if (autoPilotRef.current) {
-                clearInterval(autoPilotRef.current);
-              }
-              setIsAutoPilotActive(false);
-              return;
+        let swiped = 0;
+        // ... (existing interval logic) ...
+        autoPilotRef.current = setInterval(() => {
+          if (swiped >= swipeCount) {
+            if (autoPilotRef.current) {
+              clearInterval(autoPilotRef.current);
             }
+            setIsAutoPilotActive(false);
+            return;
+          }
 
-            if (direction === "right") {
-              swipeDeckRef.current?.swipeRight();
-            } else {
-              swipeDeckRef.current?.swipeLeft();
-            }
+          swipeDeckRef.current?.swipeRight(); // Always apply for "apply" intent
 
-            swiped++;
-            setAutoPilotProgress({ current: swiped, total: swipeCount });
-          }, 800); // Swipe every 800ms
-        }
+          swiped++;
+          setAutoPilotProgress({ current: swiped, total: swipeCount });
+        }, 800);
+      }
+
+      if (intent === "skip") {
+        const swipeCount = 5;
+        setIsAutoPilotActive(true);
+        setAutoPilotProgress({ current: 0, total: swipeCount });
+        let swiped = 0;
+        autoPilotRef.current = setInterval(() => {
+          if (swiped >= swipeCount) {
+            if (autoPilotRef.current) clearInterval(autoPilotRef.current);
+            setIsAutoPilotActive(false);
+            return;
+          }
+          swipeDeckRef.current?.swipeLeft();
+          swiped++;
+          setAutoPilotProgress({ current: swiped, total: swipeCount });
+        }, 800);
       }
     },
     [jobs.length, currentJobIndex],
@@ -565,10 +587,11 @@ export default function FeedScreen() {
                 </Text>
               </View>
               <View style={styles.stopContainer}>
-                <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={[styles.stopText, { color: colors.textTertiary }]}>
-                  STOP
-                </Text>
+                <Ionicons
+                  name="pause-circle"
+                  size={Math.round(32 * uiScale)}
+                  color={colors.primary}
+                />
               </View>
             </View>
             {/* Progress Bar Line */}
@@ -663,7 +686,7 @@ export default function FeedScreen() {
             onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
           >
             <MaterialCommunityIcons
-              name={isAutoPilotActive ? "stop" : "waveform"}
+              name={isAutoPilotActive ? "pause" : "waveform"}
               size={Math.round(36 * uiScale)}
               color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
             />

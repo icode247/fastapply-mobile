@@ -1,7 +1,7 @@
 // Speech-to-Text Service - Using OpenAI Whisper API
 
-import * as FileSystem from "expo-file-system";
 import Constants from "expo-constants";
+import * as FileSystem from "expo-file-system/legacy";
 import { TranscriptionResult } from "../../types/voice.types";
 
 // Get API key from environment variables
@@ -44,7 +44,7 @@ class SpeechToTextService {
    */
   async transcribe(
     audioUri: string,
-    options?: TranscriptionOptions
+    options?: TranscriptionOptions,
   ): Promise<TranscriptionResult> {
     if (!this.isConfigured()) {
       console.error("OpenAI API key not configured");
@@ -68,21 +68,13 @@ class SpeechToTextService {
       // Create form data for the API request
       const formData = new FormData();
 
-      // Read file as base64 and convert to blob
-      const base64Audio = await FileSystem.readAsStringAsync(audioUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      // Append file using React Native's FormData pattern
+      formData.append("file", {
+        uri: audioUri,
+        name: `audio.${extension}`,
+        type: mimeType,
+      } as any);
 
-      // Convert base64 to blob
-      const binaryString = atob(base64Audio);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: mimeType });
-
-      // Append to form data
-      formData.append("file", blob, `audio.${extension}`);
       formData.append("model", "whisper-1");
 
       // Add optional parameters
@@ -108,7 +100,7 @@ class SpeechToTextService {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error?.message || `API error: ${response.status}`
+          errorData.error?.message || `API error: ${response.status}`,
         );
       }
 

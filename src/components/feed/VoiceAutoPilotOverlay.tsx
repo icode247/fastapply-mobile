@@ -1,9 +1,14 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Audio } from "expo-av";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Alert,
   Animated,
+  AppState,
+  AppStateStatus,
   Dimensions,
   KeyboardAvoidingView,
   Modal,
@@ -21,29 +26,19 @@ import { useTheme } from "../../../src/hooks";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-// Simulated voice commands for demo
-const DEMO_COMMANDS = [
+import {
+  speechToTextService,
+  voiceCommandParserService,
+  voiceRecordingService,
+} from "../../../src/services/voice";
+import { ParsedVoiceCommand } from "../../../src/types/voice.types";
+
+// Example suggestions
+const SUGGESTIONS = [
   "Find me remote software engineer jobs",
   "Show full-time positions in San Francisco",
   "Apply to all jobs paying over $100k",
 ];
-
-export interface ParsedVoiceCommand {
-  action: "filter" | "apply" | "skip" | "search";
-  filters?: {
-    remote?: boolean;
-    jobTypes?: string[];
-    locations?: string[];
-    minSalary?: number;
-    keywords?: string[];
-  };
-  autoSwipe?: {
-    direction: "left" | "right";
-    count: number | "all";
-    condition?: string;
-  };
-  rawText: string;
-}
 
 interface VoiceAutoPilotOverlayProps {
   visible: boolean;
@@ -77,8 +72,16 @@ const CSS_ANIMATION = `
             align-items: center;
         }
 
+        .orb-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.1s ease-out;
+        }
+
         .inner-core {
-            position: absolute;
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, #ffffff 0%, #c2e9fb 25%, #00c6ff 50%, #0072ff 75%, #ffffff 100%);
@@ -103,20 +106,23 @@ const CSS_ANIMATION = `
 </head>
 <body>
     <div class="voice-orb">
-        <div class="inner-core"></div>
+        <div class="orb-wrapper">
+            <div class="inner-core"></div>
+        </div>
     </div>
 </body>
 </html>
 `;
 
 // WebView-based Voice Orb
-const WebViewOrb: React.FC<{ onLoad?: () => void; visible?: boolean }> = ({
-  onLoad,
-  visible = true,
-}) => {
+const WebViewOrb = React.forwardRef<
+  WebView,
+  { onLoad?: () => void; visible?: boolean }
+>(({ onLoad, visible = true }, ref) => {
   return (
     <View style={[orbStyles.container, !visible && orbStyles.hidden]}>
       <WebView
+        ref={ref}
         originWhitelist={["*"]}
         source={{ html: CSS_ANIMATION }}
         style={orbStyles.webview}
@@ -126,7 +132,7 @@ const WebViewOrb: React.FC<{ onLoad?: () => void; visible?: boolean }> = ({
       />
     </View>
   );
-};
+});
 
 const orbStyles = StyleSheet.create({
   container: {
@@ -147,7 +153,8 @@ const orbStyles = StyleSheet.create({
 const AnimatedVoiceOrb: React.FC<{
   onTap: () => void;
   isVisible: boolean;
-}> = ({ onTap, isVisible }) => {
+  webViewRef: React.RefObject<WebView | null>;
+}> = ({ onTap, isVisible, webViewRef }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -174,7 +181,7 @@ const AnimatedVoiceOrb: React.FC<{
       style={styles.orbTouchable}
     >
       <Animated.View style={{ opacity: fadeAnim }}>
-        <WebViewOrb onLoad={handleLoad} visible={isVisible} />
+        <WebViewOrb ref={webViewRef} onLoad={handleLoad} visible={isVisible} />
       </Animated.View>
     </TouchableOpacity>
   );
@@ -192,6 +199,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   const [phase, setPhase] = useState<"listening" | "processing" | "confirming">(
     "listening",
   );
+  const [isRecording, setIsRecording] = useState(false);
   const [parsedCommand, setParsedCommand] = useState<ParsedVoiceCommand | null>(
     null,
   );
@@ -201,11 +209,15 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
+  const webViewRef = useRef<WebView>(null);
 
-  // Entry animation
+  // Entry animation and Auto-Start
   useEffect(() => {
+    let timeoutId: any;
+
     if (visible) {
       setPhase("listening");
+      setIsRecording(false);
       setParsedCommand(null);
       setManualInput("");
       setShowManualInput(false);
@@ -222,89 +234,186 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           useNativeDriver: true,
         }),
       ]).start();
+
+      // Auto-start recording after a short delay to allow animation to settle
+      timeoutId = setTimeout(() => {
+        startRecordingSession();
+      }, 500);
     } else {
       fadeAnim.setValue(0);
       slideAnim.setValue(50);
+      // Ensure recording is stopped if closed
+      voiceRecordingService.cancelRecording();
     }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [visible, fadeAnim, slideAnim]);
 
-  // Command Parser Mock
-  const parseCommand = useCallback((text: string): ParsedVoiceCommand => {
-    const lowerText = text.toLowerCase();
-    const command: ParsedVoiceCommand = {
-      action: "filter",
-      filters: {},
-      rawText: text,
+  // Handle AppState changes (Stop recording if backgrounded)
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState.match(/inactive|background/) && visible) {
+        // If app goes to background, cancel recording immediately
+        voiceRecordingService.cancelRecording();
+        onClose();
+      }
     };
 
-    if (lowerText.includes("apply") || lowerText.includes("accept")) {
-      command.action = "apply";
-      command.autoSwipe = {
-        direction: "right",
-        count: lowerText.includes("all") ? "all" : 5,
-      };
-    } else if (
-      lowerText.includes("skip") ||
-      lowerText.includes("reject") ||
-      lowerText.includes("pass")
-    ) {
-      command.action = "skip";
-      command.autoSwipe = {
-        direction: "left",
-        count: lowerText.includes("all") ? "all" : 5,
-      };
-    } else if (
-      lowerText.includes("find") ||
-      lowerText.includes("show") ||
-      lowerText.includes("search")
-    ) {
-      command.action = "search";
-    }
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange,
+    );
 
-    if (lowerText.includes("remote")) command.filters!.remote = true;
+    return () => {
+      subscription.remove();
+    };
+  }, [visible, onClose]);
 
-    // ... (rest of parser logic same as before but condensed for brevity)
-    if (lowerText.match(/(\d+)k/)) {
-      const match = lowerText.match(/(\d+)k/);
-      if (match) command.filters!.minSalary = parseInt(match[1]) * 1000;
-    }
-
-    const locs = ["San Francisco", "New York", "London", "Remote"];
-    const foundLocs = locs.filter((l) => lowerText.includes(l.toLowerCase()));
-    if (foundLocs.length) command.filters!.locations = foundLocs;
-
-    return command;
+  // Permissions check on mount
+  useEffect(() => {
+    voiceRecordingService.requestPermissions();
   }, []);
 
-  const handleOrbTap = useCallback(() => {
-    if (phase === "listening" && !showManualInput) {
-      setShowManualInput(true);
-    }
-  }, [phase, showManualInput]);
+  const stopAndProcess = useCallback(async () => {
+    setPhase("processing");
+    setIsRecording(false);
+    console.log("VoiceAutoPilotOverlay: Starting processing (v2)");
+    try {
+      const result = await voiceRecordingService.stopRecording();
 
-  const processCommand = useCallback(
-    (text: string) => {
-      setPhase("processing");
-      setTimeout(() => {
-        const parsed = parseCommand(text);
-        setParsedCommand(parsed);
+      // If no voice was detected at all (silent recording), just close
+      if (result.isSilent) {
+        console.log("Empty recording detected - cancelling");
+        setPhase("listening"); // Reset phase just in case
+        onClose();
+        return;
+      }
+
+      if (result.success && result.uri) {
+        // Transcribe
+        const transcription = await speechToTextService.transcribeJobCommand(
+          result.uri,
+        );
+
+        if (!transcription.text) {
+          Alert.alert("Sorry", "I didn't catch that. Please try again.");
+          setPhase("listening");
+          return;
+        }
+
+        // Parse Intent
+        const command = await voiceCommandParserService.parseCommand(
+          transcription.text,
+        );
+        setParsedCommand(command);
         setPhase("confirming");
-      }, 1000);
-    },
-    [parseCommand],
-  );
+      } else {
+        Alert.alert("Error", "Failed to capture audio.");
+        setPhase("listening");
+      }
+    } catch (error) {
+      console.error("Processing error:", error);
+      Alert.alert("Error", "Failed to process voice command.");
+      setPhase("listening");
+    }
+  }, []);
+
+  const startRecordingSession = useCallback(async () => {
+    // Play start sound
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../../assets/sounds/listen_on.mp3"),
+      );
+      await sound.playAsync();
+    } catch (e) {
+      // Ignore sound errors
+    }
+
+    // Stronger Haptic Feedback
+    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+    const started = await voiceRecordingService.startRecording({
+      onSilenceDetected: () => {
+        stopAndProcess();
+      },
+      onMeteringUpdate: (level) => {
+        // Scale the orb based on volume level
+        // Level is 0 to 1. Scale from 1.0 to 1.8 (More dramatic)
+        const scale = 1 + level * 0.8;
+
+        if (webViewRef.current) {
+          webViewRef.current.injectJavaScript(`
+                const wrapper = document.querySelector('.orb-wrapper');
+                if (wrapper) {
+                    wrapper.style.transform = 'scale(${scale})';
+                }
+             `);
+        }
+      },
+      silenceThresholdMs: 5000, // 5 seconds of silence stops recording
+    });
+    if (started) {
+      setPhase("listening");
+      setIsRecording(true);
+    } else {
+      Alert.alert(
+        "Permission Required",
+        "Please enable microphone permissions in settings to use voice commands.",
+      );
+    }
+  }, [stopAndProcess]);
+
+  const handleOrbTap = useCallback(async () => {
+    // If showing manual input, close it
+    if (showManualInput) {
+      setShowManualInput(false);
+      return;
+    }
+
+    // Toggle recording
+    const status = voiceRecordingService.getStatus();
+    if (status.isRecording) {
+      await stopAndProcess();
+    } else {
+      await startRecordingSession();
+    }
+  }, [showManualInput, stopAndProcess, startRecordingSession]);
+
+  // Handle manual text input
+  const processManualInput = useCallback(async (text: string) => {
+    setPhase("processing");
+    try {
+      const command = await voiceCommandParserService.parseCommand(text);
+      setParsedCommand(command);
+      setPhase("confirming");
+    } catch (e) {
+      setPhase("listening");
+    }
+  }, []);
 
   const renderListening = () => (
     <View style={styles.centerContent}>
-      <AnimatedVoiceOrb onTap={handleOrbTap} isVisible={visible} />
+      <AnimatedVoiceOrb
+        onTap={handleOrbTap}
+        isVisible={visible}
+        webViewRef={webViewRef}
+      />
 
       <Text style={[styles.statusTitle, { color: colors.text }]}>
-        {phase === "processing" ? "Thinking..." : "Listening..."}
+        {phase === "processing"
+          ? "Thinking..."
+          : isRecording
+            ? "Listening..."
+            : "Tap to Speak"}
       </Text>
       <Text style={[styles.statusSubtitle, { color: colors.textSecondary }]}>
         {phase === "processing"
           ? "Analyzing your request"
-          : "Tap orb to type manually"}
+          : isRecording
+            ? "Tap again to finish"
+            : "Or type manually"}
       </Text>
 
       {!showManualInput && phase === "listening" && (
@@ -314,7 +423,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           style={styles.suggestionsScroll}
           contentContainerStyle={styles.suggestionsContent}
         >
-          {DEMO_COMMANDS.map((cmd, i) => (
+          {SUGGESTIONS.map((cmd, i) => (
             <TouchableOpacity
               key={i}
               style={[
@@ -325,7 +434,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
                     : "rgba(0,0,0,0.05)",
                 },
               ]}
-              onPress={() => processCommand(cmd)}
+              onPress={() => processManualInput(cmd)}
             >
               <Text style={{ color: colors.textSecondary }}>"{cmd}"</Text>
             </TouchableOpacity>
@@ -349,7 +458,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
             placeholderTextColor={colors.textTertiary}
             value={manualInput}
             onChangeText={setManualInput}
-            onSubmitEditing={() => processCommand(manualInput)}
+            onSubmitEditing={() => processManualInput(manualInput)}
             autoFocus
           />
         </View>
@@ -382,21 +491,21 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
           ACTION
         </Text>
         <View style={styles.actionRow}>
-          {parsedCommand?.action === "apply" && (
+          {parsedCommand?.intent === "apply" && (
             <Ionicons name="heart" size={24} color="#00C853" />
           )}
-          {parsedCommand?.action === "skip" && (
+          {parsedCommand?.intent === "skip" && (
             <Ionicons name="close" size={24} color="#F72585" />
           )}
-          {parsedCommand?.action === "filter" && (
+          {parsedCommand?.intent === "filter" && (
             <Ionicons name="filter" size={24} color={colors.primary} />
           )}
           <Text style={[styles.actionText, { color: colors.text }]}>
-            {parsedCommand?.action === "apply"
+            {parsedCommand?.intent === "apply"
               ? "Auto-apply to matching jobs"
-              : parsedCommand?.action === "skip"
+              : parsedCommand?.intent === "skip"
                 ? "Auto-skip matching jobs"
-                : "Filter feed"}
+                : parsedCommand?.suggestion || "Update filters"}
           </Text>
         </View>
       </View>
