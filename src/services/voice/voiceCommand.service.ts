@@ -3,16 +3,17 @@
 import { NormalizedJob } from "../../types/job.types";
 import { JobProfile } from "../../types/profile.types";
 import {
+  JobMatchResult,
   ParsedVoiceCommand,
+  VoiceCommandParams,
   VoiceCommandResult,
   VoiceSessionState,
-  JobMatchResult,
 } from "../../types/voice.types";
-import { voiceRecordingService } from "./voiceRecording.service";
+import { jobService } from "../job.service";
+import { jobMatcherService } from "./jobMatcher.service";
 import { speechToTextService } from "./speechToText.service";
 import { voiceCommandParserService } from "./voiceCommandParser.service";
-import { jobMatcherService } from "./jobMatcher.service";
-import { jobService } from "../job.service";
+import { voiceRecordingService } from "./voiceRecording.service";
 
 type VoiceCommandCallback = (result: VoiceCommandResult) => void;
 
@@ -163,7 +164,7 @@ class VoiceCommandService {
     try {
       // Transcribe audio
       const transcription = await speechToTextService.transcribeJobCommand(
-        recordingResult.uri
+        recordingResult.uri,
       );
 
       if (!transcription.text) {
@@ -181,7 +182,7 @@ class VoiceCommandService {
 
       // Parse command
       const parsedCommand = await voiceCommandParserService.parseCommand(
-        transcription.text
+        transcription.text,
       );
 
       this.sessionState.lastCommand = parsedCommand;
@@ -232,7 +233,7 @@ class VoiceCommandService {
    * Execute a parsed command
    */
   private async executeCommand(
-    command: ParsedVoiceCommand
+    command: ParsedVoiceCommand,
   ): Promise<VoiceCommandResult> {
     switch (command.intent) {
       case "apply":
@@ -272,33 +273,56 @@ class VoiceCommandService {
    * Handle apply command
    */
   private async handleApplyCommand(
-    command: ParsedVoiceCommand
+    command: ParsedVoiceCommand,
   ): Promise<VoiceCommandResult> {
-    if (command.params.applyToAll && command.params.matchProfile) {
-      // Apply to all matching jobs
-      if (!this.userProfile) {
+    // Check if there are any filter params specified
+    const hasFilterParams =
+      command.params.jobTitle ||
+      command.params.country ||
+      command.params.city ||
+      command.params.state ||
+      command.params.remote ||
+      command.params.experienceLevel ||
+      command.params.company ||
+      command.params.skills?.length ||
+      command.params.jobType?.length ||
+      command.params.salaryMin;
+
+    // If user specified criteria (e.g., "apply to frontend jobs in UK")
+    if (hasFilterParams || command.params.applyToAll) {
+      // Filter jobs by the voice command params first
+      const filteredJobs = this.filterJobsByParams(command.params);
+
+      if (filteredJobs.length === 0) {
         return {
           success: false,
           command,
-          error: "No profile selected for matching",
+          error: "No jobs found matching your criteria",
+          matchedJobs: 0,
         };
       }
 
-      const matchingJobs = jobMatcherService.getAutoApplyJobs(
-        this.currentJobs,
-        this.userProfile
-      );
+      // If profile matching is also requested, further filter
+      let jobsToApply = filteredJobs;
+      if (command.params.matchProfile && this.userProfile) {
+        const matchResults = jobMatcherService.getAutoApplyJobs(
+          filteredJobs,
+          this.userProfile,
+        );
+        // Extract just the jobs from the match results
+        jobsToApply = matchResults.map(({ job }) => job);
+      }
 
       return {
         success: true,
         command,
         executedAction: "apply_all",
-        matchedJobs: matchingJobs.length,
-        appliedJobs: matchingJobs.length, // In production, would be actual applied count
+        matchedJobs: filteredJobs.length,
+        appliedJobs: jobsToApply.length,
       };
     }
 
-    // Apply to current job
+    // Apply to current job only (no filters specified)
     return {
       success: true,
       command,
@@ -310,9 +334,7 @@ class VoiceCommandService {
   /**
    * Handle skip command
    */
-  private handleSkipCommand(
-    command: ParsedVoiceCommand
-  ): VoiceCommandResult {
+  private handleSkipCommand(command: ParsedVoiceCommand): VoiceCommandResult {
     return {
       success: true,
       command,
@@ -323,18 +345,17 @@ class VoiceCommandService {
   /**
    * Handle search command
    */
-  private handleSearchCommand(
-    command: ParsedVoiceCommand
-  ): VoiceCommandResult {
+  private handleSearchCommand(command: ParsedVoiceCommand): VoiceCommandResult {
     const searchResults = jobService.searchByVoiceParams(command.params);
 
     // If profile-based matching is requested
-    let matchedResults: Array<{ job: NormalizedJob; match: JobMatchResult }> = [];
+    let matchedResults: Array<{ job: NormalizedJob; match: JobMatchResult }> =
+      [];
     if (command.params.matchProfile && this.userProfile) {
       matchedResults = jobMatcherService.matchByVoiceParams(
         searchResults,
         command.params,
-        this.userProfile
+        this.userProfile,
       );
     }
 
@@ -349,9 +370,7 @@ class VoiceCommandService {
   /**
    * Handle filter command
    */
-  private handleFilterCommand(
-    command: ParsedVoiceCommand
-  ): VoiceCommandResult {
+  private handleFilterCommand(command: ParsedVoiceCommand): VoiceCommandResult {
     // Filter current jobs
     const filteredJobs = this.filterJobsByParams(command.params);
 
@@ -389,7 +408,7 @@ class VoiceCommandService {
    * Handle details command
    */
   private handleDetailsCommand(
-    command: ParsedVoiceCommand
+    command: ParsedVoiceCommand,
   ): VoiceCommandResult {
     const currentJob = this.currentJobs[this.currentJobIndex];
     if (!currentJob) {
@@ -420,35 +439,103 @@ class VoiceCommandService {
 
   /**
    * Filter jobs by voice command params
+   * Supports all NLU-extracted parameters for precise filtering
    */
-  private filterJobsByParams(params: typeof ParsedVoiceCommand.prototype.params): NormalizedJob[] {
+  private filterJobsByParams(params: VoiceCommandParams): NormalizedJob[] {
     let filtered = [...this.currentJobs];
 
-    if (params.remote) {
-      filtered = filtered.filter(
-        (job) => job.isRemote || job.workMode.toLowerCase() === "remote"
+    // Filter by job title (e.g., "frontend", "backend developer")
+    if (params.jobTitle) {
+      const titleQuery = params.jobTitle.toLowerCase();
+      filtered = filtered.filter((job) =>
+        job.title.toLowerCase().includes(titleQuery),
       );
     }
 
+    // Filter by company name
+    if (params.company) {
+      const companyQuery = params.company.toLowerCase();
+      filtered = filtered.filter((job) =>
+        job.company.toLowerCase().includes(companyQuery),
+      );
+    }
+
+    // Filter by remote work
+    if (params.remote) {
+      filtered = filtered.filter(
+        (job) => job.isRemote || job.workMode.toLowerCase() === "remote",
+      );
+    }
+
+    // Filter by country (e.g., "UK", "United States")
     if (params.country) {
       const country = params.country.toLowerCase();
       filtered = filtered.filter((job) =>
         job.locations.some((loc) =>
-          loc.country?.toLowerCase().includes(country)
-        )
+          loc.country?.toLowerCase().includes(country),
+        ),
       );
     }
 
+    // Filter by state/province
+    if (params.state) {
+      const state = params.state.toLowerCase();
+      filtered = filtered.filter((job) =>
+        job.locations.some((loc) => loc.state?.toLowerCase().includes(state)),
+      );
+    }
+
+    // Filter by city
+    if (params.city) {
+      const city = params.city.toLowerCase();
+      filtered = filtered.filter((job) =>
+        job.locations.some((loc) => loc.city?.toLowerCase().includes(city)),
+      );
+    }
+
+    // Filter by experience level (e.g., "senior", "entry")
     if (params.experienceLevel) {
       const level = params.experienceLevel.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.experience.toLowerCase().includes(level)
+        job.experience.toLowerCase().includes(level),
       );
     }
 
+    // Filter by job type (e.g., "full_time", "contract")
+    if (params.jobType && params.jobType.length > 0) {
+      filtered = filtered.filter((job) =>
+        params.jobType!.some((type: string) =>
+          job.type.toLowerCase().includes(type.toLowerCase().replace("_", "-")),
+        ),
+      );
+    }
+
+    // Filter by required skills (using job tags and description)
+    if (params.skills && params.skills.length > 0) {
+      filtered = filtered.filter((job) => {
+        const jobTags = job.tags?.map((t: string) => t.toLowerCase()) || [];
+        const jobDescription = job.description.toLowerCase();
+        const jobTitle = job.title.toLowerCase();
+        return params.skills!.some(
+          (skill: string) =>
+            jobTags.some((tag: string) => tag.includes(skill.toLowerCase())) ||
+            jobDescription.includes(skill.toLowerCase()) ||
+            jobTitle.includes(skill.toLowerCase()),
+        );
+      });
+    }
+
+    // Filter by minimum salary
     if (params.salaryMin) {
       filtered = filtered.filter(
-        (job) => !job.salaryMax || job.salaryMax >= params.salaryMin!
+        (job) => !job.salaryMax || job.salaryMax >= params.salaryMin!,
+      );
+    }
+
+    // Filter by maximum salary
+    if (params.salaryMax) {
+      filtered = filtered.filter(
+        (job) => !job.salaryMin || job.salaryMin <= params.salaryMax!,
       );
     }
 
