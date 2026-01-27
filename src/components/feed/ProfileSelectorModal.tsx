@@ -35,9 +35,25 @@ export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const [selected, setSelected] = useState(
-    selectedProfileId || profiles[0]?.id
+    selectedProfileId || profiles[0]?.id,
   );
 
+  // Tailored resume state
+  const [useTailoredResume, setUseTailoredResume] = useState(false);
+  const [resumeType, setResumeType] = useState<"pdf" | "docx" | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+
+  // Template options
+  const pdfTemplates = ["Jake", "Harvard"];
+  const docxTemplates = [
+    "Aether",
+    "Eclipse",
+    "Eon",
+    "Exoplanet",
+    "Galaxy",
+    "Nova",
+    "Solstice",
+  ];
   const handleSelect = (profile: Profile) => {
     setSelected(profile.id);
   };
@@ -147,6 +163,186 @@ export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
               </TouchableOpacity>
             );
           })}
+
+          {/* Tailored Resume Section */}
+          <View style={styles.tailoredSection}>
+            {/* Checkbox */}
+            <TouchableOpacity
+              style={styles.checkboxRow}
+              onPress={() => {
+                setUseTailoredResume(!useTailoredResume);
+                if (useTailoredResume) {
+                  setResumeType(null);
+                  setSelectedTemplate(null);
+                }
+              }}
+            >
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    borderColor: useTailoredResume
+                      ? colors.primary
+                      : colors.border,
+                    backgroundColor: useTailoredResume
+                      ? colors.primary
+                      : "transparent",
+                  },
+                ]}
+              >
+                {useTailoredResume && (
+                  <Ionicons name="checkmark" size={14} color="#FFF" />
+                )}
+              </View>
+              <Text style={[styles.checkboxLabel, { color: colors.text }]}>
+                Use Tailored Resume
+              </Text>
+            </TouchableOpacity>
+
+            {/* Resume Type Selection */}
+            {useTailoredResume && (
+              <View style={styles.resumeTypeSection}>
+                <Text
+                  style={[styles.sectionLabel, { color: colors.textSecondary }]}
+                >
+                  Resume Type
+                </Text>
+                <View style={styles.typePillsRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typePill,
+                      {
+                        backgroundColor:
+                          resumeType === "pdf"
+                            ? colors.primary
+                            : colors.surface,
+                        borderColor:
+                          resumeType === "pdf" ? colors.primary : colors.border,
+                      },
+                    ]}
+                    onPress={() => {
+                      setResumeType("pdf");
+                      setSelectedTemplate(null);
+                    }}
+                  >
+                    <Ionicons
+                      name="document-text"
+                      size={16}
+                      color={resumeType === "pdf" ? "#FFF" : colors.text}
+                    />
+                    <Text
+                      style={[
+                        styles.typePillText,
+                        { color: resumeType === "pdf" ? "#FFF" : colors.text },
+                      ]}
+                    >
+                      PDF
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.typePill,
+                      {
+                        backgroundColor:
+                          resumeType === "docx"
+                            ? colors.primary
+                            : colors.surface,
+                        borderColor:
+                          resumeType === "docx"
+                            ? colors.primary
+                            : colors.border,
+                      },
+                    ]}
+                    onPress={() => {
+                      setResumeType("docx");
+                      setSelectedTemplate(null);
+                    }}
+                  >
+                    <Ionicons
+                      name="document"
+                      size={16}
+                      color={resumeType === "docx" ? "#FFF" : colors.text}
+                    />
+                    <Text
+                      style={[
+                        styles.typePillText,
+                        { color: resumeType === "docx" ? "#FFF" : colors.text },
+                      ]}
+                    >
+                      DOCX
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* Template Selection */}
+            {useTailoredResume && resumeType && (
+              <View style={styles.templateSection}>
+                <Text
+                  style={[styles.sectionLabel, { color: colors.textSecondary }]}
+                >
+                  Select Template
+                </Text>
+                <View style={styles.templateGrid}>
+                  {(resumeType === "pdf" ? pdfTemplates : docxTemplates).map(
+                    (template) => (
+                      <TouchableOpacity
+                        key={template}
+                        style={[
+                          styles.templateCard,
+                          {
+                            backgroundColor:
+                              selectedTemplate === template
+                                ? colors.primary + "15"
+                                : colors.surface,
+                            borderColor:
+                              selectedTemplate === template
+                                ? colors.primary
+                                : colors.border,
+                          },
+                        ]}
+                        onPress={() => setSelectedTemplate(template)}
+                      >
+                        <Ionicons
+                          name="document-text-outline"
+                          size={24}
+                          color={
+                            selectedTemplate === template
+                              ? colors.primary
+                              : colors.textSecondary
+                          }
+                        />
+                        <Text
+                          style={[
+                            styles.templateName,
+                            {
+                              color:
+                                selectedTemplate === template
+                                  ? colors.primary
+                                  : colors.text,
+                            },
+                          ]}
+                        >
+                          {template}
+                        </Text>
+                        {selectedTemplate === template && (
+                          <View
+                            style={[
+                              styles.templateCheck,
+                              { backgroundColor: colors.primary },
+                            ]}
+                          >
+                            <Ionicons name="checkmark" size={12} color="#FFF" />
+                          </View>
+                        )}
+                      </TouchableOpacity>
+                    ),
+                  )}
+                </View>
+              </View>
+            )}
+          </View>
         </ScrollView>
 
         {/* Confirm Button */}
@@ -247,5 +443,88 @@ const styles = StyleSheet.create({
     color: "#FFF",
     fontSize: typography.fontSize.lg,
     fontWeight: "700",
+  },
+  // Tailored Resume Styles
+  tailoredSection: {
+    marginTop: spacing[4],
+    paddingTop: spacing[4],
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.1)",
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing[3],
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checkboxLabel: {
+    fontSize: typography.fontSize.base,
+    fontWeight: "600",
+  },
+  resumeTypeSection: {
+    marginTop: spacing[4],
+  },
+  sectionLabel: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: "500",
+    marginBottom: spacing[2],
+  },
+  typePillsRow: {
+    flexDirection: "row",
+    gap: spacing[3],
+  },
+  typePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing[2],
+    paddingVertical: spacing[3],
+    paddingHorizontal: spacing[4],
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+  },
+  typePillText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: "600",
+  },
+  templateSection: {
+    marginTop: spacing[4],
+  },
+  templateGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing[3],
+  },
+  templateCard: {
+    width: "30%",
+    aspectRatio: 1,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: spacing[2],
+    position: "relative",
+  },
+  templateName: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: "500",
+    marginTop: spacing[1],
+    textAlign: "center",
+  },
+  templateCheck: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

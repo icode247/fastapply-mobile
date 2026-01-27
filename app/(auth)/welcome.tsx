@@ -10,14 +10,14 @@ import {
   Dimensions,
   Easing,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  ScrollView,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -111,7 +111,11 @@ const CompanyCard: React.FC<{
     >
       <View style={styles.companyCardInner}>
         <View style={styles.companyLogo}>
-          <Image source={company.logo} style={styles.companyLogoImage} resizeMode="contain" />
+          <Image
+            source={company.logo}
+            style={styles.companyLogoImage}
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.companyInfo}>
           <Text style={styles.companyName}>{company.name}</Text>
@@ -119,7 +123,11 @@ const CompanyCard: React.FC<{
         </View>
         {company.hasCheck && (
           <View style={styles.checkBadge}>
-            <Ionicons name="checkmark" size={Math.round(16 * uiScale)} color="#10B981" />
+            <Ionicons
+              name="checkmark"
+              size={Math.round(16 * uiScale)}
+              color="#10B981"
+            />
           </View>
         )}
       </View>
@@ -128,14 +136,13 @@ const CompanyCard: React.FC<{
 };
 
 // Gradient Text Component for Slide 1 title
-const GradientText: React.FC<{ children: string; style?: any }> = ({ children, style }) => {
+const GradientText: React.FC<{
+  children: string;
+  style?: any;
+}> = ({ children, style }) => {
   return (
     <MaskedView
-      maskElement={
-        <Text style={[styles.slide1Title, style]}>
-          {children}
-        </Text>
-      }
+      maskElement={<Text style={[styles.slide1Title, style]}>{children}</Text>}
     >
       <LinearGradient
         colors={["#FFFFFF", "#B4DBE8"]}
@@ -151,20 +158,21 @@ const GradientText: React.FC<{ children: string; style?: any }> = ({ children, s
 };
 
 // Slide 1 Component
-const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({ cardsAnimation }) => {
+const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({
+  cardsAnimation,
+}) => {
   return (
     <View style={styles.slideContainer}>
       {/* Title Section - positioned at top: 98px from nav (which is at 62px) = 36px from header */}
       <View style={styles.slide1TitleSection}>
-        <GradientText>
-          {`Swipe-Apply with\nVoice Auto-Pilot`}
-        </GradientText>
+        <GradientText>{`Swipe-Apply with\nVoice Auto-Pilot`}</GradientText>
       </View>
 
       {/* Subtitle - positioned at top: 194px */}
       <View style={styles.slide1SubtitleSection}>
         <Text style={styles.slide1Subtitle}>
-          Just tell Scout what you're looking for. Our AI voice assistant finds, matches, and applies to 50+ jobs daily-hands-free.
+          Just tell Scout what you're looking for. Our AI voice assistant finds,
+          matches, and applies to 50+ jobs daily-hands-free.
         </Text>
       </View>
 
@@ -193,14 +201,22 @@ const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({ cardsAnimation }
 // Arrow Left Icon
 const ArrowLeftIcon: React.FC = () => (
   <View style={styles.arrowIcon}>
-    <Ionicons name="chevron-back" size={Math.round(12 * uiScale)} color="rgba(255,255,255,0.5)" />
+    <Ionicons
+      name="chevron-back"
+      size={Math.round(12 * uiScale)}
+      color="rgba(255,255,255,0.5)"
+    />
   </View>
 );
 
 // Arrow Right Icon
 const ArrowRightIcon: React.FC = () => (
   <View style={styles.arrowIcon}>
-    <Ionicons name="chevron-forward" size={Math.round(12 * uiScale)} color="rgba(255,255,255,0.5)" />
+    <Ionicons
+      name="chevron-forward"
+      size={Math.round(12 * uiScale)}
+      color="rgba(255,255,255,0.5)"
+    />
   </View>
 );
 
@@ -268,7 +284,9 @@ const JobCard: React.FC<{
             <Text style={styles.jobTitle}>Software Engineer (Frontend)</Text>
           </View>
           <View style={styles.jobCompanyRow}>
-            <Text style={styles.jobCompanyName}>Global Solutions - New York, NY</Text>
+            <Text style={styles.jobCompanyName}>
+              Global Solutions - New York, NY
+            </Text>
           </View>
         </View>
 
@@ -277,11 +295,19 @@ const JobCard: React.FC<{
           <View style={styles.divider} />
           <View style={styles.detailsRow}>
             <View style={styles.detailItem}>
-              <Ionicons name="briefcase-outline" size={Math.round(14 * uiScale)} color="rgba(17,17,17,0.7)" />
+              <Ionicons
+                name="briefcase-outline"
+                size={Math.round(14 * uiScale)}
+                color="rgba(17,17,17,0.7)"
+              />
               <Text style={styles.detailText}>Full-time</Text>
             </View>
             <View style={styles.detailItem}>
-              <Ionicons name="cash-outline" size={Math.round(14 * uiScale)} color="rgba(17,17,17,0.7)" />
+              <Ionicons
+                name="cash-outline"
+                size={Math.round(14 * uiScale)}
+                color="rgba(17,17,17,0.7)"
+              />
               <Text style={styles.detailText}>120k - 150k</Text>
             </View>
           </View>
@@ -336,7 +362,9 @@ const NewJobsBadge: React.FC<{ animatedValue: Animated.Value }> = ({
 };
 
 // Slide 2 Component
-const Slide2: React.FC<{ cardAnimation: Animated.Value }> = ({ cardAnimation }) => {
+const Slide2: React.FC<{ cardAnimation: Animated.Value }> = ({
+  cardAnimation,
+}) => {
   return (
     <View style={styles.slideContainer}>
       {/* Title Section */}
@@ -386,6 +414,394 @@ const Slide2: React.FC<{ cardAnimation: Animated.Value }> = ({ cardAnimation }) 
   );
 };
 
+// ============== SLIDE 3 COMPONENTS ==============
+
+// Integration logo imports
+const integrationLogos = {
+  linkedin: require("../../assets/icons/linkedin.png"),
+  indeed: require("../../assets/icons/indeed.png"),
+  glassdoor: require("../../assets/icons/glassdoor.png"),
+  lever: require("../../assets/icons/lever.jpeg"),
+  greenhouse: require("../../assets/icons/greenhouse.jpeg"),
+  ziprecruiter: require("../../assets/icons/ziprecruiter.png"),
+  workday: require("../../assets/icons/workday.png"),
+  wellfound: require("../../assets/icons/wellfound.jpeg"),
+  scout: require("../../assets/icons/scout-icon.png"),
+};
+
+// Orbital logo positions - staggered distances around center
+// Some logos closer, some farther for a natural floating look
+const orbitalLogos = [
+  {
+    key: "linkedin",
+    logo: integrationLogos.linkedin,
+    color: "#0A66C2",
+    glowColor: "rgba(10, 102, 194, 0.6)",
+    // Top-left (closer)
+    position: { top: 25, left: 55 },
+    size: 52,
+    delay: 0,
+  },
+  {
+    key: "indeed",
+    logo: integrationLogos.indeed,
+    color: "#2164f3",
+    glowColor: "rgba(33, 100, 243, 0.6)",
+    // Top-right (farther)
+    position: { top: 15, right: 35 },
+    size: 56,
+    delay: 100,
+  },
+  {
+    key: "glassdoor",
+    logo: integrationLogos.glassdoor,
+    color: "#0caa41",
+    glowColor: "rgba(12, 170, 65, 0.6)",
+    // Left middle (closer)
+    position: { top: 90, left: 25 },
+    size: 48,
+    delay: 200,
+  },
+  {
+    key: "lever",
+    logo: integrationLogos.lever,
+    color: "#7C3AED",
+    glowColor: "rgba(124, 58, 237, 0.6)",
+    // Right middle (farther)
+    position: { top: 80, right: 15 },
+    size: 52,
+    delay: 300,
+  },
+  {
+    key: "greenhouse",
+    logo: integrationLogos.greenhouse,
+    color: "#FF6B35",
+    glowColor: "rgba(255, 107, 53, 0.6)",
+    // Bottom-left (farther)
+    position: { bottom: 15, left: 35 },
+    size: 50,
+    delay: 400,
+  },
+  {
+    key: "ziprecruiter",
+    logo: integrationLogos.ziprecruiter,
+    color: "#1D9B5E",
+    glowColor: "rgba(29, 155, 94, 0.6)",
+    // Bottom-right (closer)
+    position: { bottom: 25, right: 55 },
+    size: 48,
+    delay: 500,
+  },
+  {
+    key: "workday",
+    logo: integrationLogos.workday,
+    color: "#F68D2E",
+    glowColor: "rgba(246, 141, 46, 0.6)",
+    // Bottom center-left
+    position: { bottom: 70, left: 70 },
+    size: 44,
+    delay: 600,
+  },
+  {
+    key: "wellfound",
+    logo: integrationLogos.wellfound,
+    color: "#CC0000",
+    glowColor: "rgba(204, 0, 0, 0.6)",
+    // Top center-right
+    position: { top: 70, right: 70 },
+    size: 44,
+    delay: 700,
+  },
+];
+
+// Orbital Logo Component with animations
+const OrbitalLogo: React.FC<{
+  logo: any;
+  color: string;
+  glowColor: string;
+  position: { top?: number; bottom?: number; left?: number; right?: number };
+  size: number;
+  delay: number;
+  animatedValue: Animated.Value;
+}> = ({ logo, color, glowColor, position, size, delay, animatedValue }) => {
+  const floatAnim = useRef(new Animated.Value(0)).current;
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Float animation - gentle up/down movement
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 2000 + delay,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 2000 + delay,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    // Pulse/breathing animation - subtle scale changes
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500 + delay / 2,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 1500 + delay / 2,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    // Glow pulse animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 1200 + delay,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 1200 + delay,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  const translateY = floatAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -8],
+  });
+
+  const scale = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.95, 1.02],
+  });
+
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const entryScale = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
+  const borderOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 1],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.orbitalLogoContainer,
+        {
+          ...position,
+          width: size,
+          height: size,
+          opacity,
+          transform: [
+            { translateY },
+            { scale: Animated.multiply(scale, entryScale) },
+          ],
+        },
+      ]}
+    >
+      {/* Glow effect layer */}
+      <Animated.View
+        style={[
+          styles.orbitalLogoGlow,
+          {
+            width: size + 6,
+            height: size + 6,
+            borderRadius: (size + 6) / 2,
+            borderColor: color,
+            opacity: borderOpacity,
+            shadowColor: color,
+          },
+        ]}
+      />
+      {/* Main logo circle */}
+      <View
+        style={[
+          styles.orbitalLogoInner,
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            borderColor: color,
+          },
+        ]}
+      >
+        <Image
+          source={logo}
+          style={[
+            styles.orbitalLogoImage,
+            { width: size * 0.5, height: size * 0.5 },
+          ]}
+          resizeMode="contain"
+        />
+      </View>
+    </Animated.View>
+  );
+};
+
+// Central Scout Logo Component
+const CentralScoutLogo: React.FC<{ animatedValue: Animated.Value }> = ({
+  animatedValue,
+}) => {
+  const pulseAnim = useRef(new Animated.Value(0)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Breathing animation
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0,
+          duration: 2000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    // Glow animation for border
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: false,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  const scale = pulseAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.98, 1.03],
+  });
+
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
+
+  const entryScale = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 1],
+  });
+
+  const borderOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.6, 1],
+  });
+
+  return (
+    <Animated.View
+      style={[
+        styles.centralLogoContainer,
+        {
+          opacity,
+          transform: [{ scale: Animated.multiply(scale, entryScale) }],
+        },
+      ]}
+    >
+      {/* Glow ring */}
+      <Animated.View
+        style={[
+          styles.centralLogoGlow,
+          {
+            opacity: borderOpacity,
+          },
+        ]}
+      />
+      {/* Main logo */}
+      <View style={styles.centralLogoInner}>
+        <Image
+          source={integrationLogos.scout}
+          style={styles.centralLogoImage}
+          resizeMode="contain"
+        />
+      </View>
+    </Animated.View>
+  );
+};
+
+// Slide 3 Component
+const Slide3: React.FC<{ orbitAnimation: Animated.Value }> = ({
+  orbitAnimation,
+}) => {
+  return (
+    <View style={styles.slideContainer}>
+      {/* Title Section */}
+      <View style={styles.slide1TitleSection}>
+        <GradientText>{`Jobs from Top\nJob Boards`}</GradientText>
+      </View>
+
+      {/* Subtitle */}
+      <View style={styles.slide1SubtitleSection}>
+        <Text style={styles.slide1Subtitle}>
+          We aggregate jobs from LinkedIn, Indeed, Glassdoor, and 50+ top job
+          boards—all in one place.
+        </Text>
+      </View>
+
+      {/* Orbital Logos Section */}
+      <View style={styles.orbitalSection}>
+        {/* Central Scout Logo */}
+        <CentralScoutLogo animatedValue={orbitAnimation} />
+
+        {/* Orbiting Company Logos */}
+        {orbitalLogos.map((item) => (
+          <OrbitalLogo
+            key={item.key}
+            logo={item.logo}
+            color={item.color}
+            glowColor={item.glowColor}
+            position={item.position}
+            size={item.size}
+            delay={item.delay}
+            animatedValue={orbitAnimation}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 // ============== MAIN COMPONENT ==============
 export default function WelcomeScreen() {
   const router = useRouter();
@@ -398,6 +814,7 @@ export default function WelcomeScreen() {
   const headerTranslateY = useRef(new Animated.Value(-20)).current;
   const cardsAnimation = useRef(new Animated.Value(0)).current;
   const cardAnimation = useRef(new Animated.Value(0)).current;
+  const orbitAnimation = useRef(new Animated.Value(0)).current;
   const buttonsOpacity = useRef(new Animated.Value(0)).current;
   const buttonsTranslateY = useRef(new Animated.Value(30)).current;
 
@@ -435,6 +852,15 @@ export default function WelcomeScreen() {
       useNativeDriver: true,
     }).start();
 
+    // Orbit animation (for slide 3)
+    Animated.timing(orbitAnimation, {
+      toValue: 1,
+      duration: 1000,
+      delay: 400,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+
     // Buttons entrance
     Animated.parallel([
       Animated.timing(buttonsOpacity, {
@@ -457,7 +883,7 @@ export default function WelcomeScreen() {
   const slideIndexRef = useRef(0);
 
   useEffect(() => {
-    const totalRealPages = 2;
+    const totalRealPages = 3;
     const slideWidth = SCREEN_WIDTH - 44;
 
     const interval = setInterval(() => {
@@ -472,7 +898,7 @@ export default function WelcomeScreen() {
       // Update indicator (always shows 0 or 1)
       setCurrentPage(slideIndexRef.current % totalRealPages);
 
-      // After scrolling to the clone (index 2), instantly reset to real slide 1 (index 0)
+      // After scrolling to the clone (index 3), instantly reset to real slide 1 (index 0)
       if (slideIndexRef.current >= totalRealPages) {
         setTimeout(() => {
           slideIndexRef.current = 0;
@@ -490,8 +916,8 @@ export default function WelcomeScreen() {
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const page = Math.round(offsetX / (SCREEN_WIDTH - 44));
-    // Only show indicator for real pages (0 or 1)
-    setCurrentPage(page % 2);
+    // Only show indicator for real pages (0, 1, or 2)
+    setCurrentPage(page % 3);
   };
 
   return (
@@ -521,7 +947,7 @@ export default function WelcomeScreen() {
             style={styles.logoIcon}
             resizeMode="contain"
           />
-          <PageIndicator currentPage={currentPage} totalPages={2} />
+          <PageIndicator currentPage={currentPage} totalPages={3} />
         </Animated.View>
 
         {/* Swipeable Slides */}
@@ -543,6 +969,11 @@ export default function WelcomeScreen() {
           {/* Slide 2 */}
           <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
             <Slide2 cardAnimation={cardAnimation} />
+          </View>
+
+          {/* Slide 3 */}
+          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+            <Slide3 orbitAnimation={orbitAnimation} />
           </View>
 
           {/* Clone of Slide 1 for infinite loop */}
@@ -992,5 +1423,69 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#FFFFFF",
     lineHeight: Math.round(22 * uiScale),
+  },
+  // ============== SLIDE 3 STYLES ==============
+  orbitalSection: {
+    flex: 1,
+    marginTop: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  orbitalLogoContainer: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  orbitalLogoGlow: {
+    position: "absolute",
+    borderWidth: 2,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  orbitalLogoInner: {
+    backgroundColor: "rgba(20, 40, 60, 0.95)",
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  orbitalLogoImage: {
+    borderRadius: 4,
+  },
+  centralLogoContainer: {
+    width: 120,
+    height: 120,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  centralLogoGlow: {
+    position: "absolute",
+    width: 126,
+    height: 126,
+    borderRadius: 63,
+    borderWidth: 3,
+    borderColor: "#F59E0B",
+    shadowColor: "#F59E0B",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 10,
+  },
+  centralLogoInner: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(20, 40, 60, 0.95)",
+    borderWidth: 3,
+    borderColor: "#F59E0B",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  centralLogoImage: {
+    width: 65,
+    height: 65,
   },
 });
