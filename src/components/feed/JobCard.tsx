@@ -74,25 +74,40 @@ const JobCardComponent: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
             ]}
           >
             <Animated.View style={{ transform: [{ rotate: arrowRotation }] }}>
-              <Ionicons name="chevron-down" size={smallIconSize} color={colors.text} />
+              <Ionicons
+                name="chevron-down"
+                size={smallIconSize}
+                color={colors.text}
+              />
             </Animated.View>
           </TouchableOpacity>
         </View>
 
         <View style={styles.companyRow}>
           {/* Logo container with fixed dimensions and placeholder to prevent CLS */}
-          <View style={[styles.logoContainer, { backgroundColor: colors.surfaceSecondary }]}>
+          <View
+            style={[
+              styles.logoContainer,
+              { backgroundColor: colors.surfaceSecondary },
+            ]}
+          >
             <Image
-              source={{ uri: job.logo, cache: 'force-cache' }}
+              source={{ uri: job.logo, cache: "force-cache" }}
               style={styles.logo}
               fadeDuration={0}
             />
           </View>
           <View style={styles.companyInfo}>
-            <Text style={[styles.company, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[styles.company, { color: colors.text }]}
+              numberOfLines={1}
+            >
               {job.company}
             </Text>
-            <Text style={[styles.location, { color: colors.textTertiary }]} numberOfLines={1}>
+            <Text
+              style={[styles.location, { color: colors.textTertiary }]}
+              numberOfLines={1}
+            >
               {job.location}
             </Text>
           </View>
@@ -127,7 +142,11 @@ const JobCardComponent: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
           </Text>
           <View style={styles.row}>
             <View style={[styles.pill, { backgroundColor: "#E0F2F1" }]}>
-              <Ionicons name="business-outline" size={iconSize} color="#009688" />
+              <Ionicons
+                name="business-outline"
+                size={iconSize}
+                color="#009688"
+              />
               <Text style={[styles.pillText, { color: "#009688" }]}>
                 {job.workMode}
               </Text>
@@ -184,9 +203,10 @@ export const JobCard = memo(JobCardComponent, (prevProps, nextProps) => {
 
 const styles = StyleSheet.create({
   card: {
-    width: "100%",
+    // width: "100%",
     height: "100%",
     padding: spacing[6],
+    margin: spacing[2],
     shadowOffset: {
       width: 0,
       height: 4,

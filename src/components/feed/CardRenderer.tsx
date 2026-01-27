@@ -185,7 +185,7 @@ export const CardRenderer = memo(
         isCardExpandedShared,
         activeTranslateX,
         activeCardIndex,
-        currentIndex, // Crucial: Re-create gesture when index advances so .enabled() is re-evaluated
+        currentIndex,
       ],
     );
 
