@@ -319,6 +319,7 @@ class VoiceCommandService {
         executedAction: "apply_all",
         matchedJobs: filteredJobs.length,
         appliedJobs: jobsToApply.length,
+        filteredJobs: jobsToApply,
       };
     }
 
@@ -328,6 +329,7 @@ class VoiceCommandService {
       command,
       executedAction: "apply",
       appliedJobs: 1,
+      filteredJobs: [this.currentJobs[this.currentJobIndex]].filter(Boolean),
     };
   }
 
@@ -349,21 +351,22 @@ class VoiceCommandService {
     const searchResults = jobService.searchByVoiceParams(command.params);
 
     // If profile-based matching is requested
-    let matchedResults: Array<{ job: NormalizedJob; match: JobMatchResult }> =
-      [];
+    let finalResults = searchResults;
     if (command.params.matchProfile && this.userProfile) {
-      matchedResults = jobMatcherService.matchByVoiceParams(
+      const matchedResults = jobMatcherService.matchByVoiceParams(
         searchResults,
         command.params,
         this.userProfile,
       );
+      finalResults = matchedResults.map(({ job }) => job);
     }
 
     return {
       success: true,
       command,
       executedAction: "search",
-      matchedJobs: searchResults.length,
+      matchedJobs: finalResults.length,
+      filteredJobs: finalResults,
     };
   }
 
@@ -379,6 +382,7 @@ class VoiceCommandService {
       command,
       executedAction: "filter",
       matchedJobs: filteredJobs.length,
+      filteredJobs: filteredJobs,
     };
   }
 

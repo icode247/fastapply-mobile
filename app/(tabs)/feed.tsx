@@ -24,13 +24,21 @@ import {
   JobFilters,
   JobFiltersModal,
 } from "../../src/components/feed/JobFiltersModal";
-import { ProfileSelectorModal } from "../../src/components/feed/ProfileSelectorModal";
+import { NotificationPermissionModal } from "../../src/components/feed/NotificationPermissionModal";
+import {
+  ProfileSelectorModal,
+  ProfileSelection,
+  ResumeSettings,
+} from "../../src/components/feed/ProfileSelectorModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
 import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { useAutomation } from "../../src/hooks/useAutomation";
+import { useSwipeBatchQueue } from "../../src/hooks/useSwipeBatchQueue";
 import { automationService } from "../../src/services/automation.service";
+import { notificationService } from "../../src/services/notification.service";
+import { storage } from "../../src/utils/storage";
 import { jobService } from "../../src/services/job.service";
 import { profileService } from "../../src/services/profile.service";
 import {
@@ -145,6 +153,7 @@ export default function FeedScreen() {
   const [showFilters, setShowFilters] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [filters, setFilters] = useState<JobFilters | null>(null);
 
   // Real profiles from backend
@@ -153,6 +162,13 @@ export default function FeedScreen() {
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
     null,
   );
+
+  // Resume settings for automation
+  const [resumeSettings, setResumeSettings] = useState<ResumeSettings>({
+    useTailoredResume: false,
+    resumeType: null,
+    resumeTemplate: null,
+  });
 
   // Fetch profiles on mount
   useEffect(() => {
@@ -203,6 +219,23 @@ export default function FeedScreen() {
     profileName: selectedProfile?.name,
   });
 
+  // Batch queue hook - handles debounced batching of swiped jobs (silent/invisible to user)
+  const {
+    pendingJobs: batchPendingJobs,
+    addSwipedJob,
+    flushAndReset,
+  } = useSwipeBatchQueue({
+    profileId: selectedProfileId,
+    profileName: selectedProfile?.name,
+    resumeSettings,
+    onBatchSent: (automation, jobCount) => {
+      console.log(`Batch sent! ${jobCount} jobs queued to automation ${automation.id}`);
+    },
+    onBatchError: (error) => {
+      console.error("Batch error:", error);
+    },
+  });
+
   // Load jobs on mount
   useEffect(() => {
     const allJobs = jobService.getAllJobs();
@@ -222,6 +255,51 @@ export default function FeedScreen() {
     };
   }, []);
 
+  // Check if we should show notification permission modal on first load
+  useEffect(() => {
+    const checkNotificationPermission = async () => {
+      try {
+        // TODO: REMOVE THIS LINE AFTER TESTING - forces modal to show
+        await storage.removeItem("notification_modal_shown");
+
+        // Check if user has already seen/dismissed the modal
+        const hasSeenModal = await storage.getItem("notification_modal_shown");
+        if (hasSeenModal === "true") {
+          return;
+        }
+
+        // Show immediately - this is the first screen after login
+        setShowNotificationModal(true);
+      } catch (error) {
+        console.error("Error checking notification permission:", error);
+      }
+    };
+
+    checkNotificationPermission();
+  }, []);
+
+  // Handle enabling notifications
+  const handleEnableNotifications = async () => {
+    setShowNotificationModal(false);
+    await storage.setItem("notification_modal_shown", "true");
+
+    try {
+      const token = await notificationService.registerForPushNotificationsAsync();
+      if (token) {
+        await notificationService.updateServerToken(token);
+        console.log("Notifications enabled successfully");
+      }
+    } catch (error) {
+      console.error("Error enabling notifications:", error);
+    }
+  };
+
+  // Handle skipping notifications
+  const handleSkipNotifications = async () => {
+    setShowNotificationModal(false);
+    await storage.setItem("notification_modal_shown", "true");
+  };
+
   const handleSwipeLeft = (job: LegacyJob) => {
     console.log("Rejected:", job.title);
     setCurrentJobIndex((prev) => prev + 1);
@@ -229,41 +307,17 @@ export default function FeedScreen() {
 
   const handleSwipeRight = (job: LegacyJob) => {
     console.log("Applied:", job.title);
-    // setCurrentJobIndex((prev) => prev + 1);
+    setCurrentJobIndex((prev) => prev + 1);
 
-    // TODO: Queue code commented out for testing
-    // // Queue job directly to automation service - completely bypass React state
-    // // This ensures swiping is never blocked by the queue operation
-    // const profileId = selectedProfileId;
-    // const profileName = selectedProfile?.name;
-    // const normalizedJob = jobs.find((j) => j.id === job.id);
+    // Find the normalized job to get the URL
+    const normalizedJob = jobs.find((j) => j.id === job.id);
+    if (!normalizedJob) {
+      console.warn("Could not find normalized job for:", job.id);
+      return;
+    }
 
-    // if (!profileId || !normalizedJob) {
-    //   return;
-    // }
-
-    // const jobUrl = normalizedJob.applyUrl || normalizedJob.listingUrl;
-    // if (!jobUrl) {
-    //   return;
-    // }
-
-    // // Fire and forget - call service directly without any React state updates
-    // automationService.addJobToQueue(
-    //   profileId,
-    //   jobUrl,
-    //   {
-    //     title: normalizedJob.title,
-    //     company: normalizedJob.company,
-    //     platform: normalizedJob.source,
-    //   },
-    //   profileName
-    // ).then((result) => {
-    //   if (result.success) {
-    //     console.log("Job queued:", normalizedJob.title);
-    //   }
-    // }).catch((err) => {
-    //   console.error("Failed to queue job:", err);
-    // });
+    // Add to batch queue - will be sent after 2 minutes of inactivity
+    addSwipedJob(normalizedJob);
   };
 
   const handleUndo = () => {
@@ -279,7 +333,7 @@ export default function FeedScreen() {
     swipeDeckRef.current?.swipeRight();
   };
 
-  const handleSelectProfile = () => {
+  const handleSelectProfile = async () => {
     if (profilesLoading) {
       Alert.alert("Loading", "Please wait while profiles are loading...");
       return;
@@ -292,6 +346,13 @@ export default function FeedScreen() {
       );
       return;
     }
+
+    // If there are pending jobs, flush them before changing settings
+    if (batchPendingJobs.length > 0) {
+      console.log("Flushing pending jobs before profile change...");
+      await flushAndReset();
+    }
+
     setShowProfileSelector(true);
   };
 
@@ -347,7 +408,13 @@ export default function FeedScreen() {
           onsite: "onsite",
         };
 
+        // Build query string from job title and skills
+        const queryParts: string[] = [];
+        if (params.jobTitle) queryParts.push(params.jobTitle);
+        if (params.skills) queryParts.push(...params.skills);
+
         const searchFilters = {
+          query: queryParts.length > 0 ? queryParts.join(" ") : undefined,
           remoteOnly: newFilters.remoteOnly,
           salaryMin: newFilters.salaryMin,
           salaryMax: newFilters.salaryMax,
@@ -359,16 +426,12 @@ export default function FeedScreen() {
           workModes: params.remote
             ? (["remote"] as WorkplaceType[])
             : undefined,
+          countries: params.country ? [params.country] : undefined,
+          states: params.state ? [params.state] : undefined,
           cities: newFilters.cities.length > 0 ? newFilters.cities : undefined,
-          keywords: params.jobTitle ? [params.jobTitle] : undefined,
+          companies: params.company ? [params.company] : undefined,
+          skills: params.skills,
         };
-
-        if (params.skills) {
-          searchFilters.keywords = [
-            ...(searchFilters.keywords || []),
-            ...params.skills,
-          ];
-        }
 
         if (intent === "search" || intent === "filter" || intent === "apply") {
           const result = jobService.searchJobs(searchFilters);
@@ -505,9 +568,6 @@ export default function FeedScreen() {
                   : selectedProfile
                     ? ` • ${selectedProfile.name}`
                     : ""}
-              {queueStats &&
-                queueStats.pending > 0 &&
-                ` • ${queueStats.pending} queued`}
             </Text>
           </View>
           <View style={styles.headerActions}>
@@ -744,12 +804,23 @@ export default function FeedScreen() {
       <ProfileSelectorModal
         visible={showProfileSelector}
         onClose={() => setShowProfileSelector(false)}
-        onSelect={(profile) => {
+        onSelect={(selection: ProfileSelection) => {
+          const { profile, resumeSettings: newResumeSettings } = selection;
           setSelectedProfileId(profile.id);
+          setResumeSettings(newResumeSettings);
           console.log("Selected profile:", profile.name);
+          console.log("Resume settings:", newResumeSettings);
         }}
         selectedProfileId={selectedProfileId || undefined}
         profiles={modalProfiles}
+        initialResumeSettings={resumeSettings}
+      />
+
+      {/* Notification Permission Modal */}
+      <NotificationPermissionModal
+        visible={showNotificationModal}
+        onEnable={handleEnableNotifications}
+        onSkip={handleSkipNotifications}
       />
     </SafeAreaView>
   );

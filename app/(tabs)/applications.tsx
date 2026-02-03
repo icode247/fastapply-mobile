@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -24,6 +24,10 @@ import { borderRadius, spacing } from "../../src/constants/theme";
 const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { useTheme } from "../../src/hooks";
 import { applicationService } from "../../src/services/application.service";
+import {
+  getPendingSwipedJobs,
+  PendingSwipedJob,
+} from "../../src/services/pendingSwipes.service";
 import { Application } from "../../src/types";
 
 const { width } = Dimensions.get("window");
@@ -149,6 +153,117 @@ const FilterChip: React.FC<{
           </View>
         )}
       </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+// Pending swipe item (local, not yet sent to backend)
+const PendingSwipeItem: React.FC<{
+  job: PendingSwipedJob;
+  index: number;
+}> = ({ job, index }) => {
+  const translateX = useRef(new Animated.Value(60)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+  const { colors, isDark } = useTheme();
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(translateX, {
+        toValue: 0,
+        duration: 600,
+        delay: 100 + index * 80,
+        easing: Easing.out(Easing.back(1.2)),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 400,
+        delay: 100 + index * 80,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [index]);
+
+  const swipedTimeAgo = getRelativeTime(new Date(job.swipedAt).toISOString());
+
+  return (
+    <Animated.View
+      style={[
+        styles.applicationItem,
+        {
+          opacity,
+          transform: [{ translateX }],
+          backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
+        },
+      ]}
+    >
+      <View style={styles.applicationItemInner}>
+        {/* Company Logo */}
+        <View
+          style={[styles.companyLogo, { backgroundColor: "#64748B" + "20" }]}
+        >
+          <Text style={[styles.logoText, { color: "#64748B" }]}>
+            {job.company[0]?.toUpperCase() || "?"}
+          </Text>
+        </View>
+
+        {/* Main Info */}
+        <View style={styles.mainInfo}>
+          <View style={styles.topRow}>
+            <Text
+              style={[styles.companyName, { color: colors.text, flex: 1 }]}
+              numberOfLines={1}
+            >
+              {job.company}
+            </Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: "#64748B" + "20", flexShrink: 0 },
+              ]}
+            >
+              <Ionicons
+                name="time-outline"
+                size={Math.round(12 * uiScale)}
+                color="#64748B"
+              />
+              <Text style={[styles.statusText, { color: "#64748B" }]}>
+                Queued
+              </Text>
+            </View>
+          </View>
+          <Text
+            style={[styles.positionText, { color: colors.text }]}
+            numberOfLines={1}
+          >
+            {job.title}
+          </Text>
+          <View style={styles.detailsRow}>
+            <View style={[styles.detailItem, { flex: 1 }]}>
+              <Ionicons
+                name="globe-outline"
+                size={Math.round(14 * uiScale)}
+                color={colors.textTertiary}
+              />
+              <Text
+                style={[
+                  styles.detailText,
+                  { color: colors.textSecondary, flex: 1 },
+                ]}
+                numberOfLines={1}
+              >
+                {job.platform || "Job Board"}
+              </Text>
+            </View>
+          </View>
+          <Text style={[styles.appliedText, { color: colors.textTertiary }]}>
+            Swiped {swipedTimeAgo}
+          </Text>
+        </View>
+
+        {/* Pending indicator instead of arrow */}
+        <ActivityIndicator size="small" color="#64748B" />
+      </View>
     </Animated.View>
   );
 };
@@ -487,6 +602,7 @@ export default function ApplicationsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [pendingSwipes, setPendingSwipes] = useState<PendingSwipedJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
@@ -547,11 +663,15 @@ export default function ApplicationsScreen() {
 
         const response = await applicationService.getApplications(params);
 
-        // Also fetch stats if resetting to keep counts up to date
+        // Also fetch stats and pending swipes if resetting
         if (reset) {
-          const stats = await applicationService.getStats();
+          const [stats, localPending] = await Promise.all([
+            applicationService.getStats(),
+            getPendingSwipedJobs(),
+          ]);
           setOfferCount(stats.completed || 0);
           setInterviewCount(stats.processing || 0);
+          setPendingSwipes(localPending);
         }
 
         const newApps = response.data;
@@ -578,6 +698,17 @@ export default function ApplicationsScreen() {
     fetchApplications(true);
   }, [activeFilter, debouncedSearchQuery]);
 
+  // Refresh pending swipes when screen comes into focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const refreshPendingSwipes = async () => {
+        const localPending = await getPendingSwipedJobs();
+        setPendingSwipes(localPending);
+      };
+      refreshPendingSwipes();
+    }, [])
+  );
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchApplications(true);
@@ -598,8 +729,42 @@ export default function ApplicationsScreen() {
     );
   };
 
+  // Filter pending swipes based on search query
+  const filteredPendingSwipes = React.useMemo(() => {
+    if (activeFilter !== "all" && activeFilter !== "pending") {
+      return [];
+    }
+    if (!debouncedSearchQuery) {
+      return pendingSwipes;
+    }
+    const query = debouncedSearchQuery.toLowerCase();
+    return pendingSwipes.filter(
+      (job) =>
+        job.title.toLowerCase().includes(query) ||
+        job.company.toLowerCase().includes(query)
+    );
+  }, [pendingSwipes, activeFilter, debouncedSearchQuery]);
+
+  // Combined data: pending swipes first, then applications
+  type ListItem =
+    | { type: "pending"; data: PendingSwipedJob }
+    | { type: "application"; data: Application };
+
+  const combinedData = React.useMemo<ListItem[]>(() => {
+    const pending: ListItem[] = filteredPendingSwipes.map((job) => ({
+      type: "pending" as const,
+      data: job,
+    }));
+    const apps: ListItem[] = applications.map((app) => ({
+      type: "application" as const,
+      data: app,
+    }));
+    return [...pending, ...apps];
+  }, [filteredPendingSwipes, applications]);
+
   const renderEmpty = () => {
     if (isLoading) return null;
+    if (combinedData.length > 0) return null;
     return (
       <View
         style={{ alignItems: "center", paddingTop: 100, paddingBottom: 100 }}
@@ -615,6 +780,9 @@ export default function ApplicationsScreen() {
       </View>
     );
   };
+
+  // Calculate display total count (including local pending)
+  const displayTotalCount = totalCount + filteredPendingSwipes.length;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -632,25 +800,35 @@ export default function ApplicationsScreen() {
       />
 
       <FlatList
-        data={applications}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <ApplicationItem
-            id={item.id}
-            company={item.company || "Unknown Company"}
-            position={item.jobTitle || "Position Unknown"}
-            location={item.jobLocation || "Remote"}
-            salary={""} // Salary info not always in Application object
-            status={(item.status as FilterStatus) || "submitted"}
-            appliedAt={getRelativeTime(item.createdAt)}
-            logo={(item.company || "C")[0].toUpperCase()}
-            index={index}
-            onPress={() => router.push(`/application/${item.id}`)}
-          />
-        )}
+        data={combinedData}
+        keyExtractor={(item) =>
+          item.type === "pending"
+            ? `pending-${item.data.id}`
+            : `app-${item.data.id}`
+        }
+        renderItem={({ item, index }) => {
+          if (item.type === "pending") {
+            return <PendingSwipeItem job={item.data} index={index} />;
+          }
+          const app = item.data;
+          return (
+            <ApplicationItem
+              id={app.id}
+              company={app.company || "Unknown Company"}
+              position={app.jobTitle || "Position Unknown"}
+              location={app.jobLocation || "Remote"}
+              salary={""}
+              status={(app.status as FilterStatus) || "submitted"}
+              appliedAt={getRelativeTime(app.createdAt)}
+              logo={(app.company || "C")[0].toUpperCase()}
+              index={index}
+              onPress={() => router.push(`/application/${app.id}`)}
+            />
+          );
+        }}
         ListHeaderComponent={
           <ApplicationsHeader
-            totalCount={totalCount}
+            totalCount={displayTotalCount}
             offerCount={offerCount}
             interviewCount={interviewCount}
             searchQuery={searchQuery}

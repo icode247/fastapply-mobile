@@ -18,12 +18,24 @@ interface Profile {
   isComplete: boolean;
 }
 
+export interface ResumeSettings {
+  useTailoredResume: boolean;
+  resumeType: "pdf" | "docx" | null;
+  resumeTemplate: string | null;
+}
+
+export interface ProfileSelection {
+  profile: Profile;
+  resumeSettings: ResumeSettings;
+}
+
 interface ProfileSelectorModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelect: (profile: Profile) => void;
+  onSelect: (selection: ProfileSelection) => void;
   selectedProfileId?: string;
   profiles: Profile[];
+  initialResumeSettings?: ResumeSettings;
 }
 
 export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
@@ -32,16 +44,23 @@ export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
   onSelect,
   selectedProfileId,
   profiles,
+  initialResumeSettings,
 }) => {
   const { colors } = useTheme();
   const [selected, setSelected] = useState(
     selectedProfileId || profiles[0]?.id,
   );
 
-  // Tailored resume state
-  const [useTailoredResume, setUseTailoredResume] = useState(false);
-  const [resumeType, setResumeType] = useState<"pdf" | "docx" | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  // Tailored resume state - initialize from props if provided
+  const [useTailoredResume, setUseTailoredResume] = useState(
+    initialResumeSettings?.useTailoredResume ?? false
+  );
+  const [resumeType, setResumeType] = useState<"pdf" | "docx" | null>(
+    initialResumeSettings?.resumeType ?? null
+  );
+  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(
+    initialResumeSettings?.resumeTemplate ?? null
+  );
 
   // Template options
   const pdfTemplates = ["Jake", "Harvard"];
@@ -61,7 +80,14 @@ export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
   const handleConfirm = () => {
     const profile = profiles.find((p) => p.id === selected);
     if (profile) {
-      onSelect(profile);
+      onSelect({
+        profile,
+        resumeSettings: {
+          useTailoredResume,
+          resumeType,
+          resumeTemplate: selectedTemplate,
+        },
+      });
     }
     onClose();
   };

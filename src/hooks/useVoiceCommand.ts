@@ -126,7 +126,8 @@ export function useVoiceCommand(
 
       switch (intent) {
         case "apply":
-          if (result.command.params.applyToAll) {
+          if (result.command.params.applyToAll || result.filteredJobs && result.filteredJobs.length > 1) {
+            const jobsToApply = result.filteredJobs || [];
             Alert.alert(
               "Auto-Apply",
               `Found ${result.matchedJobs || 0} matching jobs. Apply to all?`,
@@ -135,7 +136,10 @@ export function useVoiceCommand(
                 {
                   text: "Apply to All",
                   onPress: () => {
-                    // In production, would trigger bulk apply
+                    // Filter the jobs list to show only matching jobs and trigger apply
+                    if (jobsToApply.length > 0) {
+                      onFilter?.(jobsToApply);
+                    }
                     Alert.alert(
                       "Success",
                       `Applied to ${result.appliedJobs || 0} jobs!`
@@ -162,25 +166,29 @@ export function useVoiceCommand(
           break;
 
         case "search":
-          if (result.matchedJobs !== undefined) {
-            Alert.alert(
-              "Search Results",
-              `Found ${result.matchedJobs} jobs matching "${result.command.rawText}"`
-            );
-            // Trigger search callback with filtered jobs
-            // In a full implementation, would pass the actual filtered jobs
+          {
+            const searchedJobs = result.filteredJobs || jobsRef.current;
+            if (result.matchedJobs !== undefined) {
+              Alert.alert(
+                "Search Results",
+                `Found ${result.matchedJobs} jobs matching "${result.command.rawText}"`
+              );
+            }
+            onSearch?.(searchedJobs);
           }
-          onSearch?.(jobsRef.current);
           break;
 
         case "filter":
-          if (result.matchedJobs !== undefined) {
-            Alert.alert(
-              "Filter Applied",
-              `${result.matchedJobs} jobs match your filter`
-            );
+          {
+            const filteredJobsList = result.filteredJobs || jobsRef.current;
+            if (result.matchedJobs !== undefined) {
+              Alert.alert(
+                "Filter Applied",
+                `${result.matchedJobs} jobs match your filter`
+              );
+            }
+            onFilter?.(filteredJobsList);
           }
-          onFilter?.(jobsRef.current);
           break;
 
         case "details":

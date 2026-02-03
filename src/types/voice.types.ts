@@ -57,6 +57,7 @@ export interface VoiceCommandResult {
   executedAction?: string;
   matchedJobs?: number;
   appliedJobs?: number;
+  filteredJobs?: import("./job.types").NormalizedJob[];
   error?: string;
 }
 
