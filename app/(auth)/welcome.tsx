@@ -533,7 +533,7 @@ export default function WelcomeScreen() {
       />
 
       {/* Main Content */}
-      <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
+      <View style={[styles.content, { paddingTop: insets.top + 12,  }]}>
         {/* Header with Logo and Page Indicator */}
         <Animated.View
           style={[
@@ -544,11 +544,11 @@ export default function WelcomeScreen() {
             },
           ]}
         >
-          <Image
+          {/* <Image
             source={require("../../assets/icons/scout-icon.png")}
             style={styles.logoIcon}
             resizeMode="contain"
-          />
+          /> */}
           <PageIndicator currentPage={currentPage} totalPages={2} />
         </Animated.View>
 

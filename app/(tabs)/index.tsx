@@ -1,777 +1,1007 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import * as NavigationBar from "expo-navigation-bar";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
-  Animated,
-  Dimensions,
-  Easing,
+  Alert,
   Platform,
-  RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { borderRadius, spacing } from "../../src/constants/theme";
-import { useTheme } from "../../src/hooks";
-import { applicationService } from "../../src/services/application.service";
-import { subscriptionService } from "../../src/services/subscription.service";
-import { useAuthStore } from "../../src/stores";
 import {
-  Application,
-  ApplicationStats,
-  ApplicationStatus,
-  Subscription,
-  UsageStats,
-} from "../../src/types";
-
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = (width - spacing[6] * 2 - spacing[4]) / 2;
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import {
+  JobFilters,
+  JobFiltersModal,
+} from "../../src/components/feed/JobFiltersModal";
+import { NotificationPermissionModal } from "../../src/components/feed/NotificationPermissionModal";
+import {
+  ProfileSelectorModal,
+  ProfileSelection,
+  ResumeSettings,
+} from "../../src/components/feed/ProfileSelectorModal";
+import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
+import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
+import { LoadingScreen } from "../../src/components/shared/LoadingScreen";
+import { spacing, typography } from "../../src/constants/theme";
+import { useTheme } from "../../src/hooks";
+import { useAutomation } from "../../src/hooks/useAutomation";
+import { useSwipeBatchQueue } from "../../src/hooks/useSwipeBatchQueue";
+import { automationService } from "../../src/services/automation.service";
+import { notificationService } from "../../src/services/notification.service";
+import { storage } from "../../src/utils/storage";
+import { jobService, JobPreferences } from "../../src/services/job.service";
+import { profileService } from "../../src/services/profile.service";
+import {
+  EmploymentType,
+  NormalizedJob,
+  WorkplaceType,
+} from "../../src/types/job.types";
+import { JobProfile } from "../../src/types/profile.types";
+import { ParsedVoiceCommand } from "../../src/types/voice.types";
 
 // Android renders fonts/icons larger, scale down for consistency
 const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
-// Helper function to format relative time
-const getRelativeTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
+// Profile interface for ProfileSelectorModal
+interface Profile {
+  id: string;
+  name: string;
+  headline?: string;
+  isComplete: boolean;
+}
 
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+// Convert JobProfile to Profile format for modal
+function toProfile(profile: JobProfile): Profile {
+  // Consider a profile complete if it has basic info filled
+  const hasBasicInfo = !!(
+    profile.firstName &&
+    profile.lastName &&
+    profile.email
+  );
+  return {
+    id: profile.id,
+    name: profile.name,
+    headline: profile.headline,
+    isComplete: hasBasicInfo,
+  };
+}
+
+// Legacy Job interface for backward compatibility with SwipeDeck
+interface LegacyJob {
+  id: string;
+  title: string;
+  company: string;
+  logo: string;
+  salary: string;
+  type: string;
+  workMode: string;
+  location: string;
+  experience: string;
+  description: string;
+  postedAt: string;
+  tags: string[];
+}
+
+// Convert NormalizedJob to LegacyJob format for SwipeDeck
+function toLegacyJob(job: NormalizedJob): LegacyJob {
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company,
+    logo: job.logo,
+    salary: job.salary,
+    type: job.type,
+    workMode: job.workMode,
+    location: job.location,
+    experience: job.experience,
+    description: job.description,
+    postedAt: job.postedAt,
+    tags: job.tags,
+  };
+}
+
+// Map profile job type strings to API employment types
+const JOB_TYPE_MAP: Record<string, EmploymentType> = {
+  "Full-time": "full_time",
+  "Part-time": "part_time",
+  "Contract": "contract",
+  "Freelance": "freelance",
+  "Internship": "internship",
 };
 
-// Animated counter component
-const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({
-  value,
-  duration = 1500,
-}) => {
-  const [displayValue, setDisplayValue] = useState(0);
+// Map profile experience level strings to API experience levels
+const EXPERIENCE_MAP: Record<string, "entry" | "mid" | "senior" | "lead" | "executive"> = {
+  "Entry Level": "entry",
+  "Junior": "entry",
+  "Mid Level": "mid",
+  "Senior": "senior",
+  "Lead": "lead",
+  "Manager": "lead",
+  "Executive": "executive",
+};
 
+// Build job preferences from user's profile
+function buildJobPreferencesFromProfile(profile?: JobProfile): JobPreferences | undefined {
+  if (!profile?.preferences) {
+    // No preferences set - return undefined to use service defaults
+    return undefined;
+  }
+
+  const prefs = profile.preferences;
+  const jobPrefs: JobPreferences = {};
+
+  // Use positions as keywords (job titles user is looking for)
+  if (prefs.positions && prefs.positions.length > 0) {
+    jobPrefs.keywords = prefs.positions;
+  }
+
+  // Map job types
+  if (prefs.jobType && prefs.jobType.length > 0) {
+    jobPrefs.jobTypes = prefs.jobType
+      .map((t) => JOB_TYPE_MAP[t])
+      .filter((t): t is EmploymentType => t !== undefined);
+  }
+
+  // Map experience levels
+  if (prefs.experience && prefs.experience.length > 0) {
+    jobPrefs.experienceLevels = prefs.experience
+      .map((e) => EXPERIENCE_MAP[e])
+      .filter((e): e is "entry" | "mid" | "senior" | "lead" | "executive" => e !== undefined);
+  }
+
+  // Remote only -> work mode
+  if (prefs.remoteOnly) {
+    jobPrefs.workModes = ["remote"];
+  }
+
+  // Locations
+  if (prefs.locations && prefs.locations.length > 0) {
+    jobPrefs.locations = prefs.locations;
+  }
+
+  // Company blacklist
+  if (prefs.companyBlacklist && prefs.companyBlacklist.length > 0) {
+    jobPrefs.companyBlacklist = prefs.companyBlacklist;
+  }
+
+  // Only return if we have at least some preferences
+  const hasPrefs = Object.keys(jobPrefs).length > 0;
+  return hasPrefs ? jobPrefs : undefined;
+}
+
+export default function FeedScreen() {
+  const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  const swipeDeckRef = useRef<SwipeDeckRef>(null);
+
+  // Actions container bottom offset
+  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 23 : 100;
+
+  // Load jobs from service
+  const [jobs, setJobs] = useState<NormalizedJob[]>([]);
+  const [currentJobIndex, setCurrentJobIndex] = useState(0);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+
+  // Auto-pilot state
+  const [isAutoPilotActive, setIsAutoPilotActive] = useState(false);
+  const [autoPilotProgress, setAutoPilotProgress] = useState({
+    current: 0,
+    total: 0,
+  });
+  const autoPilotRef = useRef<number | null>(null);
+
+  // Card expanded state (full screen mode)
+  const [isCardExpanded, setIsCardExpanded] = useState(false);
+
+  // Swiping state (hide action buttons while swiping)
+  const [isSwiping, setIsSwiping] = useState(false);
+
+  // Set Android navigation bar color to match theme
   useEffect(() => {
-    let startTime: number;
-    let animationFrame: number;
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync(colors.background);
+      NavigationBar.setButtonStyleAsync(
+        colors.background === "#FFFFFF" ||
+          colors.background.toLowerCase() === "#fff"
+          ? "dark"
+          : "light",
+      );
+    }
+  }, [colors.background]);
 
-    const animate = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setDisplayValue(Math.floor(value * easeOutQuart));
+  // Modal states
+  const [showFilters, setShowFilters] = useState(false);
+  const [showProfileSelector, setShowProfileSelector] = useState(false);
+  const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
+  const [filters, setFilters] = useState<JobFilters | null>(null);
 
-      if (progress < 1) {
-        animationFrame = requestAnimationFrame(animate);
+  // Real profiles from backend
+  const [profiles, setProfiles] = useState<JobProfile[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(true);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
+    null,
+  );
+
+  // Resume settings for automation
+  const [resumeSettings, setResumeSettings] = useState<ResumeSettings>({
+    useTailoredResume: false,
+    resumeType: null,
+    resumeTemplate: null,
+  });
+
+  // Fetch profiles on mount
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        setProfilesLoading(true);
+        const fetchedProfiles = await profileService.getProfiles();
+        setProfiles(fetchedProfiles);
+
+        // Select primary profile by default, or first profile
+        const primaryProfile = fetchedProfiles.find((p) => p.isPrimary);
+        if (primaryProfile) {
+          setSelectedProfileId(primaryProfile.id);
+        } else if (fetchedProfiles.length > 0) {
+          setSelectedProfileId(fetchedProfiles[0].id);
+        }
+
+        console.log("Loaded profiles:", fetchedProfiles.length);
+
+        // Clean up any cached data for profiles that no longer exist
+        const validProfileIds = fetchedProfiles.map((p) => p.id);
+        await automationService.cleanupInvalidProfiles(validProfileIds);
+      } catch (error) {
+        console.error("Failed to load profiles:", error);
+      } finally {
+        setProfilesLoading(false);
       }
     };
 
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [value, duration]);
-
-  return <Text style={styles.statValue}>{displayValue}</Text>;
-};
-
-// Stats card with gradient and animation
-const StatsCard: React.FC<{
-  title: string;
-  value: number;
-  subtitle: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  gradient: string[];
-  delay: number;
-  onPress?: () => void;
-}> = ({ title, value, subtitle, icon, gradient, delay, onPress }) => {
-  const translateY = useRef(new Animated.Value(50)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.9)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 700,
-        delay,
-        easing: Easing.out(Easing.back(1.3)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 500,
-        delay,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 700,
-        delay,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [delay]);
-
-  return (
-    <Animated.View
-      style={[
-        styles.statsCard,
-        {
-          opacity,
-          transform: [{ translateY }, { scale }],
-        },
-      ]}
-    >
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
-        <LinearGradient
-          colors={gradient as [string, string, ...string[]]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.statsCardGradient}
-        >
-          <View style={styles.statsCardIcon}>
-            <Ionicons name={icon} size={Math.round(24 * uiScale)} color="rgba(255,255,255,0.9)" />
-          </View>
-          <AnimatedCounter value={value} />
-          <Text style={styles.statTitle}>{title}</Text>
-          <Text style={styles.statSubtitle}>{subtitle}</Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-// Application card with status indicator
-const ApplicationCard: React.FC<{
-  company: string;
-  position: string;
-  status: ApplicationStatus | string;
-  logo: string;
-  time: string;
-  delay: number;
-  onPress: () => void;
-}> = ({ company, position, status, logo, time, delay, onPress }) => {
-  const translateX = useRef(new Animated.Value(50)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(1)).current;
-  const { colors, isDark } = useTheme();
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(translateX, {
-        toValue: 0,
-        duration: 600,
-        delay,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [delay]);
-
-  const statusConfig: Record<
-    string,
-    { color: string; label: string; icon: string }
-  > = {
-    // Backend statuses
-    submitted: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    pending: { color: "#F59E0B", label: "Pending", icon: "time" },
-    processing: { color: "#8B5CF6", label: "Processing", icon: "sync" },
-    completed: {
-      color: "#10B981",
-      label: "Completed",
-      icon: "checkmark-done-circle",
-    },
-    failed: { color: "#EF4444", label: "Failed", icon: "alert-circle" },
-    cancelled: { color: "#6B7280", label: "Cancelled", icon: "close-circle" },
-    // Legacy/UI statuses
-    applied: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    reviewing: { color: "#F59E0B", label: "In Review", icon: "eye" },
-    interview: { color: "#0284c7", label: "Interview", icon: "calendar" },
-    offer: { color: "#10B981", label: "Offer", icon: "trophy" },
-    rejected: { color: "#EF4444", label: "Rejected", icon: "close-circle" },
-  };
-
-  const config = statusConfig[status] || statusConfig.submitted;
-
-  const handlePressIn = () => {
-    Animated.spring(scale, {
-      toValue: 0.98,
-      tension: 100,
-      friction: 10,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scale, {
-      toValue: 1,
-      tension: 100,
-      friction: 10,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  return (
-    <Animated.View
-      style={[
-        styles.applicationCard,
-        {
-          opacity,
-          transform: [{ translateX }, { scale }],
-          backgroundColor: isDark ? colors.surfaceSecondary : colors.surface,
-        },
-      ]}
-    >
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={styles.applicationCardInner}
-      >
-        <View
-          style={[
-            styles.applicationLogo,
-            { backgroundColor: config.color + "20" },
-          ]}
-        >
-          <Text style={[styles.logoText, { color: config.color }]}>{logo}</Text>
-        </View>
-        <View style={styles.applicationInfo}>
-          <Text
-            style={[styles.companyName, { color: colors.text }]}
-            numberOfLines={1}
-          >
-            {company}
-          </Text>
-          <Text
-            style={[styles.positionName, { color: colors.textSecondary }]}
-            numberOfLines={1}
-          >
-            {position}
-          </Text>
-          <Text
-            style={[styles.applicationTime, { color: colors.textTertiary }]}
-          >
-            {time}
-          </Text>
-        </View>
-        <View style={styles.statusBadge}>
-          <View style={[styles.statusDot, { backgroundColor: config.color }]} />
-          <Ionicons
-            name={config.icon as keyof typeof Ionicons.glyphMap}
-            size={Math.round(16 * uiScale)}
-            color={config.color}
-          />
-        </View>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-// Quick action button
-const QuickAction: React.FC<{
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  color: string;
-  onPress: () => void;
-  delay: number;
-}> = ({ icon, label, color, onPress, delay }) => {
-  const translateY = useRef(new Animated.Value(30)).current;
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(1)).current;
-  const { colors, isDark } = useTheme();
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 600,
-        delay,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        delay,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [delay]);
-
-  return (
-    <Animated.View
-      style={[
-        {
-          opacity,
-          transform: [{ translateY }, { scale }],
-        },
-      ]}
-    >
-      <TouchableOpacity
-        style={[
-          styles.quickAction,
-          {
-            backgroundColor: isDark ? colors.surfaceSecondary : colors.level1,
-          },
-        ]}
-        activeOpacity={0.7}
-        onPress={onPress}
-      >
-        <View
-          style={[styles.quickActionIcon, { backgroundColor: color + "20" }]}
-        >
-          <Ionicons name={icon} size={Math.round(22 * uiScale)} color={color} />
-        </View>
-        <Text style={[styles.quickActionLabel, { color: colors.text }]}>
-          {label}
-        </Text>
-        <Ionicons
-          name="chevron-forward"
-          size={Math.round(18 * uiScale)}
-          color={colors.textTertiary}
-        />
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-// Credit usage ring
-const CreditRing: React.FC<{ used: number; total: number }> = ({
-  used,
-  total,
-}) => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const { colors, isDark } = useTheme();
-  const percentage = (used / total) * 100;
-
-  useEffect(() => {
-    Animated.timing(progress, {
-      toValue: percentage,
-      duration: 1500,
-      delay: 500,
-      easing: Easing.out(Easing.exp),
-      useNativeDriver: false,
-    }).start();
-  }, [percentage]);
-
-  return (
-    <View style={styles.creditRingContainer}>
-      <View
-        style={[
-          styles.creditRing,
-          { borderColor: isDark ? colors.border : colors.borderLight },
-        ]}
-      >
-        <LinearGradient
-          colors={["#0ea5e9", "#0284c7", "#38bdf8"]}
-          style={[
-            styles.creditProgress,
-            { transform: [{ rotate: `${(percentage / 100) * 360}deg` }] },
-          ]}
-        />
-        <View
-          style={[
-            styles.creditRingInner,
-            {
-              backgroundColor: isDark
-                ? colors.surfaceSecondary
-                : colors.surface,
-            },
-          ]}
-        >
-          <Text style={[styles.creditValue, { color: colors.text }]}>
-            {used}
-          </Text>
-          <Text style={[styles.creditLabel, { color: colors.textSecondary }]}>
-            of {total}
-          </Text>
-        </View>
-      </View>
-      <Text style={[styles.creditTitle, { color: colors.text }]}>
-        Credits Used
-      </Text>
-      <Text style={[styles.creditSubtitle, { color: colors.textSecondary }]}>
-        This month
-      </Text>
-    </View>
-  );
-};
-
-export default function DashboardScreen() {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-  const { colors, isDark } = useTheme();
-  const { user, primaryJobProfile, isAuthenticated } = useAuthStore();
-  const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // API Data State
-  const [appStats, setAppStats] = useState<ApplicationStats | null>(null);
-  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [recentApplications, setRecentApplications] = useState<Application[]>(
-    []
-  );
-
-  // Helper function to get time-based greeting
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
-  };
-
-  // Helper function to get user display name (first name only for greeting)
-  const getUserDisplayName = () => {
-    // Try to get first name from profile first, then user, then fallback
-    if (primaryJobProfile?.firstName) {
-      return primaryJobProfile.firstName;
-    }
-    if (user?.name) {
-      // Get first word from user name
-      return user.name.split(" ")[0];
-    }
-    if (user?.email) {
-      return user.email.split("@")[0];
-    }
-    return "there";
-  };
-
-  // Header animation
-  const headerOpacity = useRef(new Animated.Value(0)).current;
-  const headerTranslateY = useRef(new Animated.Value(-20)).current;
-
-  const fetchDashboardData = useCallback(async () => {
-    try {
-      const [appStatsData, usageStatsData, subscriptionData, recentApps] =
-        await Promise.all([
-          applicationService.getStats(),
-          subscriptionService.getUsageStats(),
-          subscriptionService.getCurrentSubscription(),
-          applicationService.getRecentApplications(5),
-        ]);
-
-      setAppStats(appStatsData);
-      setUsageStats(usageStatsData);
-      setSubscription(subscriptionData);
-      setRecentApplications(recentApps);
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-      // Keep showing any existing data on error
-    } finally {
-      setIsLoading(false);
-    }
+    loadProfiles();
   }, []);
 
+  // Get selected profile
+  const selectedProfile = useMemo(
+    () => profiles.find((p) => p.id === selectedProfileId),
+    [profiles, selectedProfileId],
+  );
+
+  // Convert profiles to modal format
+  const modalProfiles = useMemo(() => profiles.map(toProfile), [profiles]);
+
+  // Convert jobs to legacy format for SwipeDeck
+  const legacyJobs = useMemo(() => jobs.map(toLegacyJob), [jobs]);
+
+  // Automation hook - for stats display only (queue happens directly via service)
+  const { queueStats, pendingCount } = useAutomation({
+    profileId: selectedProfileId,
+    profileName: selectedProfile?.name,
+  });
+
+  // Batch queue hook - handles debounced batching of swiped jobs (silent/invisible to user)
+  const {
+    pendingJobs: batchPendingJobs,
+    addSwipedJob,
+    flushAndReset,
+  } = useSwipeBatchQueue({
+    profileId: selectedProfileId,
+    profileName: selectedProfile?.name,
+    resumeSettings,
+    onBatchSent: (automation, jobCount) => {
+      console.log(`Batch sent! ${jobCount} jobs queued to automation ${automation.id}`);
+    },
+    onBatchError: (error) => {
+      console.error("Batch error:", error);
+    },
+  });
+
+  // Subscribe to job service updates (for prefetch results)
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerOpacity, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerTranslateY, {
-        toValue: 0,
-        duration: 600,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: true,
-      }),
-    ]).start();
+    const unsubscribe = jobService.subscribe(() => {
+      // Update jobs when service state changes (e.g., after prefetch)
+      const allJobs = jobService.getAllJobs();
+      setJobs(allJobs);
+    });
 
-    // Fetch data on mount only if authenticated
-    if (isAuthenticated) {
-      fetchDashboardData();
-    } else {
-      setIsLoading(false);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Load jobs from API once profile is available (to use preferences)
+  useEffect(() => {
+    // Wait for profiles to finish loading
+    if (profilesLoading) return;
+
+    const loadJobs = async () => {
+      setIsLoadingJobs(true);
+      try {
+        // Build preferences from selected profile
+        const preferences = buildJobPreferencesFromProfile(selectedProfile);
+        console.log("Loading jobs with preferences:", preferences);
+
+        const fetchedJobs = await jobService.fetchInitialJobs(preferences);
+        setJobs(fetchedJobs);
+        console.log("Loaded jobs from API:", fetchedJobs.length);
+      } catch (error) {
+        console.error("Failed to load jobs:", error);
+      } finally {
+        setIsLoadingJobs(false);
+      }
+    };
+
+    loadJobs();
+  }, [profilesLoading, selectedProfile]);
+
+  // Trigger prefetch when approaching the end of jobs
+  // The service handles all the logic - we just need to tell it the current index
+  useEffect(() => {
+    jobService.prefetchIfNeeded(currentJobIndex);
+  }, [currentJobIndex]);
+
+  // Cleanup auto-pilot on unmount
+  useEffect(() => {
+    return () => {
+      if (autoPilotRef.current) {
+        clearInterval(autoPilotRef.current);
+      }
+    };
+  }, []);
+
+  // Check if we should show notification permission modal on first load
+  useEffect(() => {
+    const checkNotificationPermission = async () => {
+      try {
+        // Check if user has already seen/dismissed the modal
+        const hasSeenModal = await storage.getItem("notification_modal_shown");
+        if (hasSeenModal === "true") {
+          return;
+        }
+
+        // Show immediately - this is the first screen after login
+        setShowNotificationModal(true);
+      } catch (error) {
+        console.error("Error checking notification permission:", error);
+      }
+    };
+
+    checkNotificationPermission();
+  }, []);
+
+  // Handle enabling notifications
+  const handleEnableNotifications = async () => {
+    setShowNotificationModal(false);
+    await storage.setItem("notification_modal_shown", "true");
+
+    try {
+      const token = await notificationService.registerForPushNotificationsAsync();
+      if (token) {
+        await notificationService.updateServerToken(token);
+        console.log("Notifications enabled successfully");
+      }
+    } catch (error) {
+      console.error("Error enabling notifications:", error);
     }
-  }, [fetchDashboardData, isAuthenticated]);
+  };
 
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchDashboardData();
-    setRefreshing(false);
-  }, [fetchDashboardData]);
+  // Handle skipping notifications
+  const handleSkipNotifications = async () => {
+    setShowNotificationModal(false);
+    await storage.setItem("notification_modal_shown", "true");
+  };
 
-  // Build stats from API data (fallback to 0 if not loaded)
-  // API returns 'submitted' instead of 'applied', map accordingly
-  const stats = [
-    {
-      title: "Applied",
-      value: appStats?.submitted ?? appStats?.applied ?? 0,
-      subtitle: "Sent",
-      icon: "paper-plane" as const,
-      gradient: [colors.primary, colors.primaryDark],
-    },
-    {
-      title: "Processing",
-      // Calculate processing if not explicitly returned: Total - Submitted - Failed - Pending
-      value:
-        appStats?.processing ??
-        Math.max(
-          0,
-          (appStats?.total ?? 0) -
-            (appStats?.submitted ?? 0) -
-            (appStats?.failed ?? 0) -
-            (appStats?.pending ?? 0)
-        ),
-      subtitle: "In Progress",
-      icon: "sync" as const,
-      gradient: [colors.warning, colors.warningDark],
-    },
-    {
-      title: "Completed",
-      // Completed might be same as submitted or different, using submitted as best proxy if 0
-      value: appStats?.completed ?? appStats?.submitted ?? 0,
-      subtitle: "Decisions",
-      icon: "checkmark-circle" as const,
-      gradient: [colors.success, colors.successDark],
-    },
-    {
-      title: "Pending",
-      value: appStats?.pending ?? 0,
-      subtitle: "Queue",
-      icon: "time" as const,
-      gradient: [colors.error, colors.primaryDark],
-    },
-  ];
+  const handleSwipeLeft = (job: LegacyJob) => {
+    console.log("Rejected:", job.title);
+    setCurrentJobIndex((prev) => prev + 1);
+  };
 
-  // Transform recent applications for display
-  const applications = (recentApplications || []).map((app) => ({
-    id: app.id,
-    company: app.company || "Unknown",
-    position: app.jobTitle || "Position",
-    status: app.status as
-      | "applied"
-      | "reviewing"
-      | "interview"
-      | "offer"
-      | "rejected",
-    logo: (app.company || "C")[0].toUpperCase(),
-    time: getRelativeTime(app.createdAt),
-  }));
+  const handleSwipeRight = (job: LegacyJob) => {
+    console.log("Applied:", job.title);
+    setCurrentJobIndex((prev) => prev + 1);
 
-  // Determine if user has unlimited plan based on subscription tier or high credit limit
-  const isUnlimited =
-    subscription?.tier === "unlimited" ||
-    subscription?.tier === "enterprise" ||
-    usageStats?.subscription?.tier === "unlimited" ||
-    usageStats?.subscription?.tier === "enterprise" ||
-    (usageStats?.creditsTotal ?? 0) === -1 ||
-    (usageStats?.creditsRemaining ?? 0) > 2000000;
+    // Find the normalized job to get the URL
+    const normalizedJob = jobs.find((j) => j.id === job.id);
+    if (!normalizedJob) {
+      console.warn("Could not find normalized job for:", job.id);
+      return;
+    }
 
-  const quickActions = [
-    {
-      icon: "add-circle" as const,
-      label: "New Application",
-      color: "#0ea5e9",
-      onPress: () => router.push("/(tabs)/feed"),
+    // Add to batch queue - will be sent after 2 minutes of inactivity
+    addSwipedJob(normalizedJob);
+  };
+
+  const handleUndo = () => {
+    swipeDeckRef.current?.undo();
+    setCurrentJobIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const handleReject = () => {
+    swipeDeckRef.current?.swipeLeft();
+  };
+
+  const handleAccept = () => {
+    swipeDeckRef.current?.swipeRight();
+  };
+
+  const handleSelectProfile = async () => {
+    if (profilesLoading) {
+      Alert.alert("Loading", "Please wait while profiles are loading...");
+      return;
+    }
+    if (profiles.length === 0) {
+      Alert.alert(
+        "No Profiles Found",
+        "Please create a job profile first to enable job automation.",
+        [{ text: "OK" }],
+      );
+      return;
+    }
+
+    // If there are pending jobs, flush them before changing settings
+    if (batchPendingJobs.length > 0) {
+      console.log("Flushing pending jobs before profile change...");
+      await flushAndReset();
+    }
+
+    setShowProfileSelector(true);
+  };
+
+  // Voice auto-pilot handler
+  const handleVoiceCommand = () => {
+    setShowVoiceOverlay(true);
+  };
+
+  // Handle parsed voice command
+  const handleVoiceCommandParsed = useCallback(
+    (command: ParsedVoiceCommand) => {
+      console.log("Voice command parsed:", command);
+
+      // Map parsed params to JobFilters
+      const { params, intent } = command;
+
+      if (params) {
+        // Build locations array from voice params
+        const voiceLocations: Array<{ id: string; name: string }> = [];
+        if (params.city) {
+          voiceLocations.push({
+            id: params.city.toLowerCase().replace(/\s/g, "-"),
+            name: params.city,
+          });
+        } else if (params.location) {
+          voiceLocations.push({
+            id: params.location.toLowerCase().replace(/\s/g, "-"),
+            name: params.location,
+          });
+        }
+
+        const newFilters: JobFilters = {
+          jobTitles: params.jobTitle ? [params.jobTitle] : [],
+          locations: voiceLocations,
+          remoteOnly: params.remote || false,
+          salaryMin: params.salaryMin ?? 30000,
+          salaryMax: params.salaryMax ?? 200000,
+          jobTypes: params.jobType || [],
+          workModes: params.remote ? ["remote"] : [],
+          experienceLevels: params.experienceLevel
+            ? [params.experienceLevel]
+            : [],
+          visaSponsorship: false,
+        };
+
+        // Re-implementing filter application based on new params structure
+        const jobTypesMap: Record<string, EmploymentType> = {
+          "full-time": "full_time",
+          "part-time": "part_time",
+          contract: "contract",
+          internship: "internship",
+          freelance: "freelance",
+        };
+
+        const workModesMap: Record<string, WorkplaceType> = {
+          remote: "remote",
+          hybrid: "hybrid",
+          "on-site": "onsite",
+          onsite: "onsite",
+        };
+
+        // Build query string from job title and skills
+        const queryParts: string[] = [];
+        if (params.jobTitle) queryParts.push(params.jobTitle);
+        if (params.skills) queryParts.push(...params.skills);
+
+        const searchFilters = {
+          query: queryParts.length > 0 ? queryParts.join(" ") : undefined,
+          jobTitles: params.jobTitle ? [params.jobTitle] : undefined,
+          remoteOnly: newFilters.remoteOnly,
+          salaryMin: newFilters.salaryMin,
+          salaryMax: newFilters.salaryMax,
+          jobTypes: params.jobType
+            ? (params.jobType
+                .map((t: string) => jobTypesMap[t.toLowerCase()] || null)
+                .filter(Boolean) as EmploymentType[])
+            : undefined,
+          workModes: params.remote
+            ? (["remote"] as WorkplaceType[])
+            : undefined,
+          locations: voiceLocations.length > 0
+            ? voiceLocations.map((l) => l.name)
+            : undefined,
+          countries: params.country ? [params.country] : undefined,
+          states: params.state ? [params.state] : undefined,
+          companies: params.company ? [params.company] : undefined,
+          skills: params.skills,
+        };
+
+        if (intent === "search" || intent === "filter" || intent === "apply") {
+          const result = jobService.searchJobs(searchFilters);
+          console.log("Voice filter - found jobs:", result.total);
+          setJobs(result.jobs);
+          setCurrentJobIndex(0);
+          setFilters(newFilters);
+
+          // If intent is apply, auto-apply to ALL filtered jobs
+          if (intent === "apply" && result.jobs.length > 0) {
+            const swipeCount = result.jobs.length;
+
+            setIsAutoPilotActive(true);
+            setAutoPilotProgress({ current: 0, total: swipeCount });
+
+            let swiped = 0;
+            autoPilotRef.current = setInterval(() => {
+              if (swiped >= swipeCount) {
+                if (autoPilotRef.current) {
+                  clearInterval(autoPilotRef.current);
+                }
+                setIsAutoPilotActive(false);
+                return;
+              }
+
+              swipeDeckRef.current?.swipeRight();
+              swiped++;
+              setAutoPilotProgress({ current: swiped, total: swipeCount });
+            }, 800);
+          }
+        }
+      }
+
+      // Handle Auto-Apply when no filters (applyToAll without search)
+      if (params.applyToAll && intent !== "apply") {
+        const remainingJobs = jobs.length - currentJobIndex;
+        const swipeCount = remainingJobs > 0 ? remainingJobs : 0;
+
+        if (swipeCount > 0) {
+          setIsAutoPilotActive(true);
+          setAutoPilotProgress({ current: 0, total: swipeCount });
+
+          let swiped = 0;
+          autoPilotRef.current = setInterval(() => {
+            if (swiped >= swipeCount) {
+              if (autoPilotRef.current) {
+                clearInterval(autoPilotRef.current);
+              }
+              setIsAutoPilotActive(false);
+              return;
+            }
+
+            swipeDeckRef.current?.swipeRight();
+            swiped++;
+            setAutoPilotProgress({ current: swiped, total: swipeCount });
+          }, 800);
+        }
+      }
+
+      if (intent === "skip") {
+        const remainingJobs = jobs.length - currentJobIndex;
+        const swipeCount = remainingJobs > 0 ? remainingJobs : 0;
+
+        if (swipeCount > 0) {
+          setIsAutoPilotActive(true);
+          setAutoPilotProgress({ current: 0, total: swipeCount });
+          let swiped = 0;
+          autoPilotRef.current = setInterval(() => {
+            if (swiped >= swipeCount) {
+              if (autoPilotRef.current) clearInterval(autoPilotRef.current);
+              setIsAutoPilotActive(false);
+              return;
+            }
+            swipeDeckRef.current?.swipeLeft();
+            swiped++;
+            setAutoPilotProgress({ current: swiped, total: swipeCount });
+          }, 800);
+        }
+      }
     },
-    {
-      icon: "document-text" as const,
-      label: "Update Resume",
-      color: "#10B981",
-      onPress: () => router.push("/(tabs)/profiles"),
-    },
-    {
-      icon: "analytics" as const,
-      label: "View Analytics",
-      color: "#F59E0B",
-      onPress: () => router.push("/(tabs)/applications"),
-    },
-  ];
+    [jobs.length, currentJobIndex],
+  );
+
+  // Stop auto-pilot
+  const stopAutoPilot = useCallback(() => {
+    if (autoPilotRef.current) {
+      clearInterval(autoPilotRef.current);
+    }
+    setIsAutoPilotActive(false);
+  }, []);
+
+  const handleApplyFilters = async (newFilters: JobFilters) => {
+    setFilters(newFilters);
+    console.log("Filters applied:", newFilters);
+
+    // Check if we need to re-fetch from API (job titles or locations changed)
+    const hasJobTitles = newFilters.jobTitles.length > 0;
+    const hasLocations = newFilters.locations.length > 0;
+
+    // Map UI job types to API format
+    const jobTypesMap: Record<string, EmploymentType> = {
+      "full-time": "full_time",
+      "part-time": "part_time",
+      contract: "contract",
+      internship: "internship",
+      freelance: "freelance",
+    };
+
+    // Map UI work modes to API format
+    const workModesMap: Record<string, WorkplaceType> = {
+      remote: "remote",
+      hybrid: "hybrid",
+      "on-site": "onsite",
+      onsite: "onsite",
+    };
+
+    if (hasJobTitles || hasLocations) {
+      // Fetch from API with new preferences (resets the job list)
+      setIsLoadingJobs(true);
+      try {
+        const preferences = {
+          keywords: newFilters.jobTitles,
+          locations: newFilters.locations.map((loc) => loc.name),
+          workModes: newFilters.remoteOnly
+            ? (["remote"] as WorkplaceType[])
+            : newFilters.workModes.length > 0
+              ? (newFilters.workModes
+                  .map((m) => workModesMap[m.toLowerCase()] || null)
+                  .filter(Boolean) as WorkplaceType[])
+              : undefined,
+          jobTypes:
+            newFilters.jobTypes.length > 0
+              ? (newFilters.jobTypes
+                  .map((t) => jobTypesMap[t.toLowerCase()] || null)
+                  .filter(Boolean) as EmploymentType[])
+              : undefined,
+        };
+
+        const fetchedJobs = await jobService.fetchInitialJobs(preferences);
+        console.log("Fetched jobs from API with filters:", fetchedJobs.length);
+        setJobs(fetchedJobs);
+        setCurrentJobIndex(0);
+      } catch (error) {
+        console.error("Failed to fetch jobs with filters:", error);
+      } finally {
+        setIsLoadingJobs(false);
+      }
+    } else {
+      // Apply filters locally
+      const searchFilters = {
+        remoteOnly: newFilters.remoteOnly,
+        jobTypes:
+          newFilters.jobTypes.length > 0
+            ? (newFilters.jobTypes
+                .map((t) => jobTypesMap[t.toLowerCase()] || null)
+                .filter(Boolean) as EmploymentType[])
+            : undefined,
+        workModes:
+          newFilters.workModes.length > 0
+            ? (newFilters.workModes
+                .map((m) => workModesMap[m.toLowerCase()] || null)
+                .filter(Boolean) as WorkplaceType[])
+            : undefined,
+      };
+
+      const result = jobService.searchJobs(searchFilters);
+      console.log(
+        "Filtered jobs locally:",
+        result.total,
+        "of",
+        jobService.getAllJobs().length,
+      );
+      setJobs(result.jobs);
+      setCurrentJobIndex(0);
+    }
+  };
+
+  // Show loading screen on initial load
+  if (isLoadingJobs && jobs.length === 0) {
+    return <LoadingScreen />;
+  }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Status bar background */}
-      <View
-        style={[
-          styles.statusBarBackground,
-          { backgroundColor: colors.background, height: insets.top },
-        ]}
-      />
-      {/* Header gradient overlay */}
-      <LinearGradient
-        colors={[colors.background, "transparent"]}
-        style={[styles.headerGradient, { top: insets.top }]}
-      />
-
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: insets.top + 20 },
-        ]}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={colors.primary}
-          />
-        }
-      >
-        {/* Header */}
-        <Animated.View
-          style={[
-            styles.header,
-            {
-              opacity: headerOpacity,
-              transform: [{ translateY: headerTranslateY }],
-            },
-          ]}
-        >
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      {/* Header - hide when card is expanded */}
+      {!isCardExpanded && (
+        <View style={styles.header}>
           <View>
-            <Text style={[styles.greeting, { color: colors.textSecondary }]}>{getGreeting()}</Text>
-            <Text style={[styles.userName, { color: colors.text }]}>
-              {getUserDisplayName()} 👋
+            <Text style={[styles.headerTitle, { color: colors.text }]}>
+              Discover
+            </Text>
+            <Text
+              style={[styles.headerSubtitle, { color: colors.textSecondary }]}
+            >
+              {profilesLoading
+                ? "Loading profiles..."
+                : profiles.length === 0
+                  ? "No profile selected"
+                  : selectedProfile
+                    ? selectedProfile.name
+                    : "Select a profile"}
             </Text>
           </View>
-          <TouchableOpacity style={styles.notificationBtn}>
-            <BlurView
-              intensity={20}
-              tint={isDark ? "dark" : "light"}
-              style={[styles.notificationBtnBlur, { borderColor: colors.border }]}
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={[
+                styles.filterButton,
+                { backgroundColor: colors.surfaceSecondary },
+              ]}
+              onPress={() => setShowFilters(true)}
             >
               <Ionicons
-                name="notifications-outline"
+                name="options-outline"
                 size={Math.round(22 * uiScale)}
                 color={colors.text}
               />
-              <View style={[styles.notificationDot, { borderColor: colors.background }]} />
-            </BlurView>
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Stats Grid */}
-        <View style={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <StatsCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              subtitle={stat.subtitle}
-              icon={stat.icon}
-              gradient={stat.gradient}
-              delay={200 + index * 100}
-            />
-          ))}
-        </View>
-
-        {/* Credits section */}
-        <View style={[styles.section, styles.creditsSection]}>
-          <BlurView
-            intensity={isDark ? 30 : 50}
-            tint={isDark ? "dark" : "light"}
-            style={styles.creditsSectionBlur}
-          >
-            <CreditRing
-              used={usageStats?.creditsUsed ?? 0}
-              total={
-                usageStats?.creditsTotal === -1 || isUnlimited
-                  ? Math.max(100, usageStats?.creditsUsed ?? 0)
-                  : usageStats?.creditsTotal ?? 100
-              }
-            />
-            <View style={styles.creditsInfo}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>
-                {isUnlimited ? "Unlimited Plan" : "Credits Usage"}
-              </Text>
-              <Text
-                style={[
-                  styles.creditDescription,
-                  { color: colors.textSecondary },
-                ]}
-              >
-                {isUnlimited
-                  ? `${
-                      usageStats?.applicationsThisMonth ??
-                      appStats?.thisMonth ??
-                      0
-                    } applications this month • Unlimited credits`
-                  : `${usageStats?.creditsRemaining ?? 0} credits remaining${
-                      usageStats?.applicationsThisMonth
-                        ? ` • ${usageStats.applicationsThisMonth} applications this month`
-                        : ""
-                    }`}
-              </Text>
-              {/* Only show upgrade button if not unlimited */}
-              {!isUnlimited && (
-                <TouchableOpacity style={styles.upgradeBtn}>
-                  <LinearGradient
-                    colors={[colors.primary, colors.primaryDark]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.upgradeBtnGradient}
-                  >
-                    <Text style={styles.upgradeBtnText}>Upgrade Plan</Text>
-                    <Ionicons name="sparkles" size={Math.round(16 * uiScale)} color="#FFF" />
-                  </LinearGradient>
-                </TouchableOpacity>
+              {filters && (
+                <View
+                  style={[
+                    styles.filterBadge,
+                    { backgroundColor: colors.primary },
+                  ]}
+                />
               )}
-            </View>
-          </BlurView>
-        </View>
-
-        {/* Recent Applications */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Recent Applications
-            </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/applications")}
-            >
-              <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
           </View>
-          <View style={styles.applicationsList}>
-            {applications.map((app, index) => (
-              <ApplicationCard
-                key={app.id}
-                {...app}
-                delay={800 + index * 100}
-                onPress={() => router.push(`/application/${index + 1}`)}
-              />
-            ))}
-          </View>
         </View>
+      )}
 
-        {/* Quick Actions */}
-        <View style={[styles.section, { paddingBottom: insets.bottom + 100 }]}>
-          <Text
+      {/* Auto-pilot progress indicator - hide when expanded */}
+      {isAutoPilotActive && !isCardExpanded && (
+        <TouchableOpacity
+          style={[
+            styles.glassBannerContainer,
+            { top: insets.top + spacing[16] },
+          ]}
+          onPress={stopAutoPilot}
+          activeOpacity={0.8}
+        >
+          <BlurView
+            intensity={Platform.OS === "ios" ? 80 : 100}
+            tint={colors.background === "#FFFFFF" ? "light" : "dark"}
             style={[
-              styles.sectionTitle,
-              { color: colors.text, marginBottom: spacing[4] },
+              styles.glassBanner,
+              {
+                borderColor: colors.border,
+                backgroundColor: isDark
+                  ? "rgba(30,30,30,0.5)"
+                  : "rgba(255,255,255,0.5)",
+              },
             ]}
           >
-            Quick Actions
-          </Text>
-          {quickActions.map((action, index) => (
-            <QuickAction
-              key={action.label}
-              {...action}
-              delay={1200 + index * 100}
-              onPress={action.onPress}
+            <View style={styles.bannerContent}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: colors.primary + "20" },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="robot-happy-outline"
+                  size={Math.round(24 * uiScale)}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={styles.textContainer}>
+                <Text style={[styles.bannerTitle, { color: colors.text }]}>
+                  Auto-Pilot Active
+                </Text>
+                <Text
+                  style={[
+                    styles.bannerSubtitle,
+                    { color: colors.textSecondary },
+                  ]}
+                >
+                  Processing {autoPilotProgress.current} of{" "}
+                  {autoPilotProgress.total}
+                </Text>
+              </View>
+              <View style={styles.stopContainer}>
+                <Ionicons
+                  name="pause-circle"
+                  size={Math.round(32 * uiScale)}
+                  color={colors.primary}
+                />
+              </View>
+            </View>
+            {/* Progress Bar Line */}
+            <View
+              style={[styles.progressBar, { backgroundColor: colors.border }]}
+            >
+              <View
+                style={[
+                  styles.progressFill,
+                  {
+                    backgroundColor: colors.primary,
+                    width: `${Math.min((autoPilotProgress.current / autoPilotProgress.total) * 100, 100)}%`,
+                  },
+                ]}
+              />
+            </View>
+          </BlurView>
+        </TouchableOpacity>
+      )}
+
+      {/* Swipe Deck */}
+      <View
+        style={[
+          styles.deckContainer,
+          Platform.OS === "android" && { marginBottom: -10 },
+        ]}
+      >
+        <SwipeDeck
+          ref={swipeDeckRef}
+          jobs={legacyJobs as any}
+          onSwipeLeft={handleSwipeLeft}
+          onSwipeRight={handleSwipeRight}
+          onExpandChange={setIsCardExpanded}
+          onSwipingChange={setIsSwiping}
+          isFetchingMore={jobService.isPrefetchingJobs()}
+        />
+      </View>
+
+      {/* Action Buttons - hide when card is expanded or swiping */}
+      {!isCardExpanded && !isSwiping && (
+        <View
+          style={[
+            styles.actionsContainer,
+            {
+              backgroundColor: colors.surfaceSecondary,
+              bottom: actionsBottomOffset,
+            },
+          ]}
+        >
+          {/* Undo */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.smallButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleUndo}
+          >
+            <Ionicons
+              name="arrow-undo"
+              size={Math.round(20 * uiScale)}
+              color="#FBC02D"
             />
-          ))}
+          </TouchableOpacity>
+
+          {/* Reject */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.largeButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleReject}
+          >
+            <Ionicons
+              name="close"
+              size={Math.round(30 * uiScale)}
+              color="#F72585"
+            />
+          </TouchableOpacity>
+
+          {/* Voice Auto-Pilot (Center, Largest) */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.xlButton,
+              {
+                backgroundColor: isAutoPilotActive
+                  ? colors.primary
+                  : colors.surface,
+              },
+            ]}
+            onPress={isAutoPilotActive ? stopAutoPilot : handleVoiceCommand}
+          >
+            <MaterialCommunityIcons
+              name={isAutoPilotActive ? "pause" : "waveform"}
+              size={Math.round(36 * uiScale)}
+              color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
+            />
+          </TouchableOpacity>
+
+          {/* Accept */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.largeButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleAccept}
+          >
+            <Ionicons
+              name="heart"
+              size={Math.round(30 * uiScale)}
+              color="#00C853"
+            />
+          </TouchableOpacity>
+
+          {/* Select Profile */}
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.smallButton,
+              { backgroundColor: colors.surface },
+            ]}
+            onPress={handleSelectProfile}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={Math.round(20 * uiScale)}
+              color="#FF9800"
+            />
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
+      )}
+
+      {/* Voice Auto-Pilot Overlay */}
+      <VoiceAutoPilotOverlay
+        visible={showVoiceOverlay}
+        onClose={() => setShowVoiceOverlay(false)}
+        onCommandParsed={handleVoiceCommandParsed}
+      />
+
+      {/* Modals */}
+      <JobFiltersModal
+        visible={showFilters}
+        onClose={() => setShowFilters(false)}
+        onApply={handleApplyFilters}
+        initialFilters={filters || undefined}
+      />
+
+      <ProfileSelectorModal
+        visible={showProfileSelector}
+        onClose={() => setShowProfileSelector(false)}
+        onSelect={(selection: ProfileSelection) => {
+          const { profile, resumeSettings: newResumeSettings } = selection;
+          setSelectedProfileId(profile.id);
+          setResumeSettings(newResumeSettings);
+          console.log("Selected profile:", profile.name);
+          console.log("Resume settings:", newResumeSettings);
+        }}
+        selectedProfileId={selectedProfileId || undefined}
+        profiles={modalProfiles}
+        initialResumeSettings={resumeSettings}
+      />
+
+      {/* Notification Permission Modal */}
+      <NotificationPermissionModal
+        visible={showNotificationModal}
+        onEnable={handleEnableNotifications}
+        onSkip={handleSkipNotifications}
+      />
+    </SafeAreaView>
   );
 }
 
@@ -779,272 +1009,159 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  statusBarBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  headerGradient: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    height: 200,
-    zIndex: 0,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: spacing[6],
-  },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: spacing[8],
+    paddingHorizontal: spacing[6],
+    paddingTop: spacing[2],
+    paddingBottom: spacing[2],
   },
-  greeting: {
-    fontSize: Math.round(16 * uiScale),
-    fontWeight: "500",
-  },
-  userName: {
-    fontSize: Math.round(28 * uiScale),
+  headerTitle: {
+    fontSize: typography.fontSize["3xl"],
     fontWeight: "800",
-    marginTop: spacing[1],
   },
-  notificationBtn: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  notificationBtnBlur: {
-    width: Math.round(48 * uiScale),
-    height: Math.round(48 * uiScale),
-    borderRadius: Math.round(16 * uiScale),
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-  },
-  notificationDot: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#EF4444",
-    borderWidth: 2,
-  },
-  statsGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginHorizontal: -spacing[2],
-    marginBottom: spacing[6],
-  },
-  statsCard: {
-    width: CARD_WIDTH,
-    marginHorizontal: spacing[2],
-    marginBottom: spacing[4],
-  },
-  statsCardGradient: {
-    padding: spacing[5],
-    borderRadius: borderRadius.xl,
-    minHeight: 140,
-  },
-  statsCardIcon: {
-    width: Math.round(44 * uiScale),
-    height: Math.round(44 * uiScale),
-    borderRadius: Math.round(14 * uiScale),
-    backgroundColor: "rgba(255,255,255,0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: spacing[3],
-  },
-  statValue: {
-    fontSize: Math.round(36 * uiScale),
-    fontWeight: "800",
-    color: "#FFFFFF",
-  },
-  statTitle: {
-    fontSize: Math.round(15 * uiScale),
-    fontWeight: "600",
-    color: "#FFFFFF",
-    marginTop: spacing[1],
-  },
-  statSubtitle: {
-    fontSize: Math.round(13 * uiScale),
-    color: "rgba(255,255,255,0.7)",
+  headerSubtitle: {
+    fontSize: typography.fontSize.sm,
     marginTop: 2,
   },
-  section: {
-    marginBottom: spacing[6],
+  filterButton: {
+    width: Math.round(44 * uiScale),
+    height: Math.round(44 * uiScale),
+    borderRadius: Math.round(22 * uiScale),
+    justifyContent: "center",
+    alignItems: "center",
   },
-  sectionHeader: {
+  filterBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  autoPilotBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: spacing[2],
+    paddingHorizontal: spacing[4],
+    marginHorizontal: spacing[6],
+    borderRadius: 12,
+    gap: 8,
+  },
+  autoPilotText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: Math.round(14 * uiScale),
+  },
+  autoPilotStop: {
+    color: "rgba(255,255,255,0.7)",
+    fontSize: Math.round(12 * uiScale),
+    marginLeft: 8,
+  },
+  deckContainer: {
+    flex: 1,
+    zIndex: 1,
+    marginVertical: spacing[2],
+  },
+  actionsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: spacing[4],
-  },
-  sectionTitle: {
-    fontSize: Math.round(20 * uiScale),
-    fontWeight: "700",
-  },
-  seeAllText: {
-    fontSize: Math.round(15 * uiScale),
-    color: "#0ea5e9",
-    fontWeight: "600",
-  },
-  creditsSection: {
-    borderRadius: borderRadius.xl,
-    overflow: "hidden",
-  },
-  creditsSectionBlur: {
-    flexDirection: "row",
-    padding: spacing[5],
-    borderRadius: borderRadius.xl,
+    width: "85%",
+    alignSelf: "center",
+    paddingHorizontal: spacing[4],
+    paddingVertical: spacing[1],
+    position: "absolute",
+    zIndex: 100,
+    borderRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
-  creditRingContainer: {
-    alignItems: "center",
-    marginRight: spacing[5],
-  },
-  creditRing: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 4,
+  actionButton: {
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: spacing[2],
   },
-  creditProgress: {
+  smallButton: {
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
+    borderRadius: Math.round(20 * uiScale),
+  },
+  largeButton: {
+    width: Math.round(54 * uiScale),
+    height: Math.round(54 * uiScale),
+    borderRadius: Math.round(27 * uiScale),
+  },
+  xlButton: {
+    width: Math.round(66 * uiScale),
+    height: Math.round(66 * uiScale),
+    borderRadius: Math.round(33 * uiScale),
+  },
+  glassBannerContainer: {
     position: "absolute",
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  creditRingInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: "center",
+    left: spacing[4],
+    right: spacing[4],
+    zIndex: 200,
     alignItems: "center",
   },
-  creditValue: {
-    fontSize: Math.round(20 * uiScale),
-    fontWeight: "800",
-  },
-  creditLabel: {
-    fontSize: Math.round(11 * uiScale),
-    fontWeight: "500",
-  },
-  creditTitle: {
-    fontSize: Math.round(12 * uiScale),
-    fontWeight: "600",
-  },
-  creditSubtitle: {
-    fontSize: Math.round(11 * uiScale),
-  },
-  creditsInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  creditDescription: {
-    fontSize: Math.round(14 * uiScale),
-    lineHeight: Math.round(20 * uiScale),
-    marginTop: spacing[2],
-    marginBottom: spacing[4],
-  },
-  upgradeBtn: {
-    borderRadius: borderRadius.lg,
+  glassBanner: {
+    borderRadius: 20,
     overflow: "hidden",
-    alignSelf: "flex-start",
+    width: "100%",
+    borderWidth: 1,
   },
-  upgradeBtnGradient: {
+  bannerContent: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: spacing[2] + 2,
-    paddingHorizontal: spacing[4],
-    gap: spacing[2],
-  },
-  upgradeBtnText: {
-    fontSize: Math.round(14 * uiScale),
-    fontWeight: "700",
-    color: "#FFF",
-  },
-  applicationsList: {
+    padding: spacing[3],
     gap: spacing[3],
   },
-  applicationCard: {
-    borderRadius: borderRadius.xl,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  applicationCardInner: {
-    flexDirection: "row",
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: "center",
-    padding: spacing[4],
-  },
-  applicationLogo: {
-    width: Math.round(48 * uiScale),
-    height: Math.round(48 * uiScale),
-    borderRadius: Math.round(14 * uiScale),
     justifyContent: "center",
-    alignItems: "center",
   },
-  logoText: {
-    fontSize: Math.round(20 * uiScale),
-    fontWeight: "800",
-  },
-  applicationInfo: {
+  textContainer: {
     flex: 1,
-    marginLeft: spacing[4],
   },
-  companyName: {
-    fontSize: Math.round(16 * uiScale),
+  bannerTitle: {
+    fontSize: 14,
     fontWeight: "700",
+    marginBottom: 2,
   },
-  positionName: {
-    fontSize: Math.round(14 * uiScale),
-    marginTop: 2,
+  bannerSubtitle: {
+    fontSize: 12,
   },
-  applicationTime: {
-    fontSize: Math.round(12 * uiScale),
-    marginTop: 4,
-  },
-  statusBadge: {
-    flexDirection: "row",
+  stopContainer: {
     alignItems: "center",
-    gap: spacing[2],
+    gap: 4,
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+  stopText: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.5,
   },
-  quickAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: spacing[4],
-    borderRadius: borderRadius.xl,
-    marginBottom: spacing[3],
+  progressBar: {
+    height: 2,
+    width: "100%",
   },
-  quickActionIcon: {
-    width: Math.round(44 * uiScale),
-    height: Math.round(44 * uiScale),
-    borderRadius: Math.round(14 * uiScale),
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: spacing[4],
-  },
-  quickActionLabel: {
-    flex: 1,
-    fontSize: Math.round(16 * uiScale),
-    fontWeight: "600",
+  progressFill: {
+    height: "100%",
   },
 });

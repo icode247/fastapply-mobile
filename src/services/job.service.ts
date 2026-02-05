@@ -1,57 +1,355 @@
-// Job Service - Load jobs from local JSON (replaceable with API)
+// Job Service - Efficient job fetching with seamless pagination
+// Users should never see loading states after the initial load
 
+import { ENDPOINTS } from "../constants/api";
 import {
-  Job,
+  ApiJob,
+  DatePostedFilter,
+  EmploymentType,
+  ExperienceLevel,
+  JobPlatform,
   JobSearchFilters,
   JobSearchResponse,
   NormalizedJob,
-  normalizeJob,
+  normalizeApiJob,
+  WorkplaceType,
 } from "../types/job.types";
+import api from "./api";
 
-// Import jobs from local JSON file
-// TODO: Replace with API call when ready
-import rawJobsData from "../data/jobs.json";
+// Supported ATS platforms - must match backend allowed values
+const SUPPORTED_PLATFORMS: JobPlatform[] = ["rippling", "ashby", "workable"];
 
-const jobsData = rawJobsData as Job[];
+// Configuration
+const BATCH_SIZE = 50; // Jobs per API request
+const PREFETCH_THRESHOLD = 10; // Start prefetch when this many jobs remain
+
+// Job preferences for API search
+export interface JobPreferences {
+  keywords?: string[];
+  locations?: string[];
+  workModes?: WorkplaceType[];
+  jobTypes?: EmploymentType[];
+  experienceLevels?: ExperienceLevel[];
+  platforms?: JobPlatform[];
+  datePosted?: DatePostedFilter;
+  companyBlacklist?: string[];
+  limit?: number;
+}
+
+// API response structure
+interface JobSearchApiResponse {
+  success: boolean;
+  data: {
+    jobs: ApiJob[];
+    total: number;
+    hasMore?: boolean;
+  };
+}
+
+// Subscription callback type
+type JobServiceListener = () => void;
 
 class JobService {
-  private jobs: Job[] = jobsData;
-  private normalizedJobs: NormalizedJob[] = [];
-  private isInitialized = false;
+  // Core job data
+  private jobs: NormalizedJob[] = [];
+  private fetchedJobIds = new Set<string>();
+
+  // Pagination state
+  private hasMoreJobs = true;
+  private isFetching = false;
+  private isPrefetching = false;
+  private lastError: string | null = null;
+
+  // Current search preferences (for consistent pagination)
+  private currentPreferences: JobPreferences | null = null;
+
+  // Listeners for state changes
+  private listeners: JobServiceListener[] = [];
 
   /**
-   * Initialize the job service and normalize all jobs
+   * Subscribe to state changes
    */
-  initialize(): void {
-    if (this.isInitialized) return;
-
-    this.normalizedJobs = this.jobs.map((job) => normalizeJob(job));
-    this.isInitialized = true;
+  subscribe(listener: JobServiceListener): () => void {
+    this.listeners.push(listener);
+    return () => {
+      this.listeners = this.listeners.filter((l) => l !== listener);
+    };
   }
 
   /**
-   * Get all jobs (normalized for UI)
+   * Notify all listeners of state change
+   */
+  private notifyListeners(): void {
+    this.listeners.forEach((listener) => listener());
+  }
+
+  /**
+   * Build API payload from preferences
+   */
+  private buildPayload(preferences?: JobPreferences): Record<string, unknown> {
+    const prefs = preferences || this.currentPreferences;
+
+    const payload: Record<string, unknown> = {
+      keywords: prefs?.keywords || ["Software Engineer"],
+      limit: prefs?.limit || BATCH_SIZE,
+      platforms:
+        prefs?.platforms?.filter((p) => SUPPORTED_PLATFORMS.includes(p)) ||
+        SUPPORTED_PLATFORMS,
+    };
+
+    // Add optional fields only if they have values
+    if (prefs?.locations && prefs.locations.length > 0) {
+      payload.locations = prefs.locations;
+    }
+    if (prefs?.workModes && prefs.workModes.length > 0) {
+      payload.workModes = prefs.workModes;
+    }
+    if (prefs?.jobTypes && prefs.jobTypes.length > 0) {
+      payload.jobTypes = prefs.jobTypes;
+    }
+    if (prefs?.experienceLevels && prefs.experienceLevels.length > 0) {
+      payload.experienceLevels = prefs.experienceLevels;
+    }
+    if (prefs?.datePosted) {
+      payload.datePosted = prefs.datePosted;
+    }
+    if (prefs?.companyBlacklist && prefs.companyBlacklist.length > 0) {
+      payload.companyBlacklist = prefs.companyBlacklist;
+    }
+
+    // Note: API doesn't support excludeIds - we filter duplicates client-side
+
+    return payload;
+  }
+
+  /**
+   * Fetch initial jobs - resets state and fetches first batch
+   */
+  async fetchInitialJobs(preferences?: JobPreferences): Promise<NormalizedJob[]> {
+    // Reset state for fresh fetch
+    this.jobs = [];
+    this.fetchedJobIds.clear();
+    this.hasMoreJobs = true;
+    this.lastError = null;
+
+    // Store preferences for subsequent fetches
+    if (preferences) {
+      this.currentPreferences = preferences;
+    }
+
+    return this.fetchJobsBatch();
+  }
+
+  /**
+   * Fetch more jobs - appends to existing jobs
+   * Returns the newly fetched jobs (not all jobs)
+   */
+  async fetchMoreJobs(): Promise<NormalizedJob[]> {
+    if (this.isFetching || !this.hasMoreJobs) {
+      return [];
+    }
+
+    return this.fetchJobsBatch();
+  }
+
+  /**
+   * Internal: Fetch a batch of jobs from the API
+   */
+  private async fetchJobsBatch(): Promise<NormalizedJob[]> {
+    if (this.isFetching) {
+      return [];
+    }
+
+    this.isFetching = true;
+    this.lastError = null;
+    this.notifyListeners();
+
+    try {
+      const payload = this.buildPayload();
+      console.log("[JobService] Fetching jobs:", {
+        existingCount: this.jobs.length,
+        excludeCount: this.fetchedJobIds.size,
+      });
+
+      const response = await api.post<JobSearchApiResponse>(
+        ENDPOINTS.JOBS.SEARCH,
+        payload
+      );
+
+      if (response.data.success && response.data.data?.jobs?.length > 0) {
+        const newApiJobs = response.data.data.jobs;
+
+        // Filter out any duplicates (in case excludeIds isn't supported)
+        const uniqueJobs = newApiJobs.filter(
+          (job) => !this.fetchedJobIds.has(job.id)
+        );
+
+        if (uniqueJobs.length === 0) {
+          // All returned jobs were duplicates - no more new jobs
+          console.log("[JobService] No new unique jobs found");
+          this.hasMoreJobs = false;
+          this.notifyListeners();
+          return [];
+        }
+
+        // Track fetched IDs
+        uniqueJobs.forEach((job) => this.fetchedJobIds.add(job.id));
+
+        // Normalize and append
+        const normalizedJobs = uniqueJobs.map((job) => normalizeApiJob(job));
+        this.jobs = [...this.jobs, ...normalizedJobs];
+
+        // Check if we got fewer jobs than requested (indicates no more available)
+        if (newApiJobs.length < BATCH_SIZE) {
+          this.hasMoreJobs = false;
+        }
+
+        console.log("[JobService] Fetched jobs:", {
+          newJobs: normalizedJobs.length,
+          totalJobs: this.jobs.length,
+          hasMore: this.hasMoreJobs,
+        });
+
+        this.notifyListeners();
+        return normalizedJobs;
+      } else {
+        console.log("[JobService] API returned no jobs");
+        this.hasMoreJobs = false;
+        this.notifyListeners();
+        return [];
+      }
+    } catch (error) {
+      console.error("[JobService] Failed to fetch jobs:", error);
+      this.lastError =
+        error instanceof Error ? error.message : "Failed to fetch jobs";
+
+      // Stop trying to fetch more on API errors (e.g., 400 Bad Request)
+      // This prevents repeated failed requests
+      this.hasMoreJobs = false;
+
+      this.notifyListeners();
+      return [];
+    } finally {
+      this.isFetching = false;
+      this.notifyListeners();
+    }
+  }
+
+  /**
+   * Prefetch more jobs in the background
+   * Call this when the user approaches the end of current jobs
+   * Non-blocking - will not show loading states to user
+   */
+  prefetchIfNeeded(currentIndex: number): void {
+    const remainingJobs = this.jobs.length - currentIndex;
+
+    // Only prefetch if:
+    // 1. Not already fetching/prefetching
+    // 2. There are more jobs available
+    // 3. Remaining jobs are at or below threshold
+    if (
+      this.isFetching ||
+      this.isPrefetching ||
+      !this.hasMoreJobs ||
+      remainingJobs > PREFETCH_THRESHOLD
+    ) {
+      return;
+    }
+
+    console.log("[JobService] Starting prefetch, remaining jobs:", remainingJobs);
+    this.isPrefetching = true;
+
+    // Fetch in background without blocking
+    this.fetchJobsBatch()
+      .then((newJobs) => {
+        if (newJobs.length > 0) {
+          console.log("[JobService] Prefetch complete:", newJobs.length, "new jobs");
+        }
+      })
+      .catch((error) => {
+        console.error("[JobService] Prefetch failed:", error);
+      })
+      .finally(() => {
+        this.isPrefetching = false;
+      });
+  }
+
+  /**
+   * Get all jobs
    */
   getAllJobs(): NormalizedJob[] {
-    this.initialize();
-    return this.normalizedJobs;
+    return this.jobs;
+  }
+
+  /**
+   * Get jobs starting from a specific index
+   * Useful for getting only remaining jobs
+   */
+  getJobsFrom(startIndex: number): NormalizedJob[] {
+    return this.jobs.slice(startIndex);
   }
 
   /**
    * Get a job by ID
    */
   getJobById(id: string): NormalizedJob | undefined {
-    this.initialize();
-    return this.normalizedJobs.find((job) => job.id === id);
+    return this.jobs.find((job) => job.id === id);
   }
 
   /**
-   * Search jobs with filters
+   * Get job at specific index
+   */
+  getJobAtIndex(index: number): NormalizedJob | undefined {
+    return this.jobs[index];
+  }
+
+  /**
+   * Get total job count
+   */
+  getJobCount(): number {
+    return this.jobs.length;
+  }
+
+  /**
+   * Check if there are more jobs available from API
+   */
+  getHasMoreJobs(): boolean {
+    return this.hasMoreJobs;
+  }
+
+  /**
+   * Check if currently fetching (initial load)
+   */
+  isFetchingJobs(): boolean {
+    return this.isFetching && this.jobs.length === 0;
+  }
+
+  /**
+   * Check if currently prefetching (background fetch)
+   */
+  isPrefetchingJobs(): boolean {
+    return this.isPrefetching;
+  }
+
+  /**
+   * Get last error
+   */
+  getLastError(): string | null {
+    return this.lastError;
+  }
+
+  /**
+   * Check if jobs are loaded
+   */
+  hasJobs(): boolean {
+    return this.jobs.length > 0;
+  }
+
+  /**
+   * Search/filter jobs locally from the fetched results
    */
   searchJobs(filters: JobSearchFilters): JobSearchResponse {
-    this.initialize();
-
-    let filteredJobs = [...this.normalizedJobs];
+    let filteredJobs = [...this.jobs];
 
     // Text query search
     if (filters.query) {
@@ -62,6 +360,18 @@ class JobService {
           job.company.toLowerCase().includes(query) ||
           job.location.toLowerCase().includes(query) ||
           job.tags.some((tag) => tag.toLowerCase().includes(query))
+      );
+    }
+
+    // Job titles filter
+    if (filters.jobTitles && filters.jobTitles.length > 0) {
+      const titles = filters.jobTitles.map((t) => t.toLowerCase());
+      filteredJobs = filteredJobs.filter((job) =>
+        titles.some(
+          (title) =>
+            job.title.toLowerCase().includes(title) ||
+            job.tags.some((tag) => tag.toLowerCase().includes(title))
+        )
       );
     }
 
@@ -94,49 +404,6 @@ class JobService {
       );
     }
 
-    if (filters.countries && filters.countries.length > 0) {
-      const countries = filters.countries.map((c) => c.toLowerCase());
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) =>
-            loc.country && countries.includes(loc.country.toLowerCase())
-        )
-      );
-    }
-
-    if (filters.states && filters.states.length > 0) {
-      const states = filters.states.map((s) => s.toLowerCase());
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) => loc.state && states.includes(loc.state.toLowerCase())
-        )
-      );
-    }
-
-    if (filters.cities && filters.cities.length > 0) {
-      const cities = filters.cities.map((c) => c.toLowerCase());
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) => loc.city && cities.includes(loc.city.toLowerCase())
-        )
-      );
-    }
-
-    // Salary filters
-    if (filters.salaryMin !== undefined) {
-      filteredJobs = filteredJobs.filter(
-        (job) =>
-          job.salaryMax === undefined || job.salaryMax >= filters.salaryMin!
-      );
-    }
-
-    if (filters.salaryMax !== undefined) {
-      filteredJobs = filteredJobs.filter(
-        (job) =>
-          job.salaryMin === undefined || job.salaryMin <= filters.salaryMax!
-      );
-    }
-
     // Company filter
     if (filters.companies && filters.companies.length > 0) {
       const companies = filters.companies.map((c) => c.toLowerCase());
@@ -158,9 +425,6 @@ class JobService {
     return {
       jobs: filteredJobs,
       total: filteredJobs.length,
-      page: 1,
-      limit: filteredJobs.length,
-      filters,
     };
   }
 
@@ -171,9 +435,6 @@ class JobService {
     jobTitle?: string;
     jobType?: string[];
     location?: string;
-    country?: string;
-    state?: string;
-    city?: string;
     remote?: boolean;
     experienceLevel?: string;
     salaryMin?: number;
@@ -181,9 +442,7 @@ class JobService {
     company?: string;
     skills?: string[];
   }): NormalizedJob[] {
-    this.initialize();
-
-    let filteredJobs = [...this.normalizedJobs];
+    let filteredJobs = [...this.jobs];
 
     // Job title search
     if (params.jobTitle) {
@@ -202,41 +461,11 @@ class JobService {
       );
     }
 
-    // Location filter (general)
+    // Location filter
     if (params.location) {
       const locationQuery = params.location.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
         job.location.toLowerCase().includes(locationQuery)
-      );
-    }
-
-    // Country filter
-    if (params.country) {
-      const countryQuery = params.country.toLowerCase();
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) => loc.country && loc.country.toLowerCase().includes(countryQuery)
-        )
-      );
-    }
-
-    // State filter
-    if (params.state) {
-      const stateQuery = params.state.toLowerCase();
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) => loc.state && loc.state.toLowerCase().includes(stateQuery)
-        )
-      );
-    }
-
-    // City filter
-    if (params.city) {
-      const cityQuery = params.city.toLowerCase();
-      filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some(
-          (loc) => loc.city && loc.city.toLowerCase().includes(cityQuery)
-        )
       );
     }
 
@@ -248,21 +477,6 @@ class JobService {
       );
     }
 
-    // Salary filter
-    if (params.salaryMin !== undefined) {
-      filteredJobs = filteredJobs.filter(
-        (job) =>
-          job.salaryMax === undefined || job.salaryMax >= params.salaryMin!
-      );
-    }
-
-    if (params.salaryMax !== undefined) {
-      filteredJobs = filteredJobs.filter(
-        (job) =>
-          job.salaryMin === undefined || job.salaryMin <= params.salaryMax!
-      );
-    }
-
     // Skills filter
     if (params.skills && params.skills.length > 0) {
       const skills = params.skills.map((s) => s.toLowerCase());
@@ -270,8 +484,7 @@ class JobService {
         (job) =>
           job.tags.some((tag) =>
             skills.some((skill) => tag.toLowerCase().includes(skill))
-          ) ||
-          job.title.toLowerCase().includes(skills.join(" "))
+          ) || job.title.toLowerCase().includes(skills.join(" "))
       );
     }
 
@@ -279,40 +492,23 @@ class JobService {
   }
 
   /**
-   * Get unique locations from all jobs
+   * Get unique locations from fetched jobs
    */
-  getUniqueLocations(): {
-    countries: string[];
-    states: string[];
-    cities: string[];
-  } {
-    this.initialize();
-
-    const countries = new Set<string>();
-    const states = new Set<string>();
-    const cities = new Set<string>();
-
-    for (const job of this.normalizedJobs) {
-      for (const loc of job.locations) {
-        if (loc.country) countries.add(loc.country);
-        if (loc.state) states.add(loc.state);
-        if (loc.city) cities.add(loc.city);
+  getUniqueLocations(): string[] {
+    const locations = new Set<string>();
+    for (const job of this.jobs) {
+      if (job.location && job.location !== "Location not specified") {
+        locations.add(job.location);
       }
     }
-
-    return {
-      countries: Array.from(countries).sort(),
-      states: Array.from(states).sort(),
-      cities: Array.from(cities).sort(),
-    };
+    return Array.from(locations).sort();
   }
 
   /**
-   * Get unique companies from all jobs
+   * Get unique companies from fetched jobs
    */
   getUniqueCompanies(): string[] {
-    this.initialize();
-    const companies = new Set(this.normalizedJobs.map((job) => job.company));
+    const companies = new Set(this.jobs.map((job) => job.company));
     return Array.from(companies).sort();
   }
 
@@ -323,54 +519,53 @@ class JobService {
     total: number;
     byType: Record<string, number>;
     byWorkMode: Record<string, number>;
-    byLocation: Record<string, number>;
+    bySource: Record<string, number>;
     withSalary: number;
   } {
-    this.initialize();
-
     const byType: Record<string, number> = {};
     const byWorkMode: Record<string, number> = {};
-    const byLocation: Record<string, number> = {};
+    const bySource: Record<string, number> = {};
     let withSalary = 0;
 
-    for (const job of this.normalizedJobs) {
-      // Count by type
+    for (const job of this.jobs) {
       byType[job.type] = (byType[job.type] || 0) + 1;
-
-      // Count by work mode
       byWorkMode[job.workMode] = (byWorkMode[job.workMode] || 0) + 1;
-
-      // Count by primary location (country)
-      const country = job.locations[0]?.country || "Unknown";
-      byLocation[country] = (byLocation[country] || 0) + 1;
-
-      // Count jobs with salary
-      if (job.salaryMin || job.salaryMax) {
+      bySource[job.source] = (bySource[job.source] || 0) + 1;
+      if (job.salary && job.salary !== "Salary not disclosed") {
         withSalary++;
       }
     }
 
     return {
-      total: this.normalizedJobs.length,
+      total: this.jobs.length,
       byType,
       byWorkMode,
-      byLocation,
+      bySource,
       withSalary,
     };
   }
 
   /**
-   * Refresh jobs from source
-   * TODO: Implement API call when ready
+   * Reset the service state (useful for logout or filter changes)
    */
-  async refreshJobs(): Promise<void> {
-    // In production, this would fetch from API:
-    // const response = await api.get('/api/v1/jobs');
-    // this.jobs = response.data;
-    // this.normalizedJobs = this.jobs.map(normalizeJob);
+  reset(): void {
+    this.jobs = [];
+    this.fetchedJobIds.clear();
+    this.hasMoreJobs = true;
+    this.isFetching = false;
+    this.isPrefetching = false;
+    this.lastError = null;
+    this.currentPreferences = null;
+    this.notifyListeners();
+  }
 
-    // For now, just re-normalize existing data
-    this.normalizedJobs = this.jobs.map((job) => normalizeJob(job));
+  // Legacy method aliases for backward compatibility
+  async fetchJobs(preferences?: JobPreferences): Promise<NormalizedJob[]> {
+    return this.fetchInitialJobs(preferences);
+  }
+
+  isLoadingJobs(): boolean {
+    return this.isFetchingJobs();
   }
 }
 

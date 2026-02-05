@@ -213,6 +213,11 @@ export const isApiError = (error: unknown): error is AxiosError => {
   return axios.isAxiosError(error);
 };
 
+// Check if error is a 404 Not Found
+export const isNotFoundError = (error: unknown): boolean => {
+  return isApiError(error) && error.response?.status === 404;
+};
+
 // Get error message from API error
 export const getApiErrorMessage = (error: unknown): string => {
   if (isApiError(error)) {

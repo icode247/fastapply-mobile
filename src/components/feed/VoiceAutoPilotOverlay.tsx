@@ -333,20 +333,6 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       onSilenceDetected: () => {
         stopAndProcess();
       },
-      onMeteringUpdate: (level) => {
-        // Scale the orb based on volume level
-        // Level is 0 to 1. Scale from 1.0 to 1.8 (More dramatic)
-        const scale = 1 + level * 0.8;
-
-        if (webViewRef.current) {
-          webViewRef.current.injectJavaScript(`
-                const wrapper = document.querySelector('.orb-wrapper');
-                if (wrapper) {
-                    wrapper.style.transform = 'scale(${scale})';
-                }
-             `);
-        }
-      },
       silenceThresholdMs: 5000, // 5 seconds of silence stops recording
     });
     if (started) {

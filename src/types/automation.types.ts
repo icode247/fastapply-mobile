@@ -53,17 +53,24 @@ export interface ScheduleConfig {
 // URL queue item for direct_urls mode
 export interface AutomationUrl {
   id: string;
-  automationId: string;
-  url: string;
-  status: UrlStatus;
-  jobTitle?: string;
-  company?: string;
+  userId: string;
+  scheduledAutomationId: string;
+  jobProfileId: string;
+  jobUrl: string;
   platform?: string;
+  jobTitle?: string;
+  companyName?: string;
+  status: UrlStatus;
   priority?: number;
-  retryCount?: number;
-  lastError?: string;
-  processedAt?: string;
+  scheduledFor?: string;
+  attempts?: number;
+  maxAttempts?: number;
+  lastAttemptedAt?: string;
+  completedAt?: string;
+  errorMessage?: string;
+  metadata?: any;
   createdAt: string;
+  updatedAt: string;
 }
 
 // Automation run history

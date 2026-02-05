@@ -1,22 +1,4 @@
-// Job Types - Aligned with ATS Job Search API
-
-export interface JobLocation {
-  location: string;
-  city: string | null;
-  state: string | null;
-  country: string | null;
-  latitude: number | null;
-  longitude: number | null;
-}
-
-export interface JobCompensation {
-  min: number;
-  max: number;
-  currency: string;
-  period: string | null;
-  raw_text: string;
-  is_estimated: boolean;
-}
+// Job Types - Aligned with Job Search API
 
 export type EmploymentType =
   | "full_time"
@@ -36,20 +18,66 @@ export type ExperienceLevel =
   | "executive"
   | null;
 
-export type JobSource = "greenhouse" | "lever_co" | "workday" | "other";
+// Supported ATS platforms - must match backend allowed values
+export type JobPlatform = "rippling" | "ashby" | "workable";
 
+export type DatePostedFilter =
+  | "today"
+  | "last_3_days"
+  | "last_week"
+  | "last_month"
+  | "any";
+
+// API Job response from /api/v1/jobs/search
+export interface ApiJob {
+  id: string;
+  title: string;
+  company: string;
+  companyUrl?: string;
+  companyLogo?: string;
+  url: string;
+  applyUrl: string;
+  location: string;
+  salary: string | null;
+  salaryMin?: number;
+  salaryMax?: number;
+  salaryCurrency?: string;
+  employmentType: string | null;
+  workplaceType: string | null;
+  experienceLevel: string | null;
+  platform: JobPlatform;
+  datePosted: string;
+  isRemote: boolean;
+  description?: string;
+  benefits?: string[];
+  keySkills?: string[];
+  requirementsSummary?: string;
+  visaSponsorship?: boolean;
+}
+
+// Legacy Job interface for backward compatibility
 export interface Job {
   id: string;
   title: string;
   "company.name": string;
   listing_url: string;
   apply_url: string;
-  locations: JobLocation[];
-  compensation: JobCompensation | null;
+  locations: Array<{
+    location: string;
+    city: string | null;
+    state: string | null;
+    country: string | null;
+  }>;
+  compensation: {
+    min: number;
+    max: number;
+    currency: string;
+    raw_text: string;
+  } | null;
   employment_type: EmploymentType;
   workplace_type: WorkplaceType;
   experience_level: ExperienceLevel;
-  source: JobSource | string;
+  source: string;
   date_posted: string;
   is_remote: boolean;
 }
@@ -59,14 +87,15 @@ export interface NormalizedJob {
   id: string;
   title: string;
   company: string;
+  companyUrl?: string;
   logo: string;
   salary: string;
   salaryMin?: number;
   salaryMax?: number;
+  salaryCurrency?: string;
   type: string;
   workMode: string;
   location: string;
-  locations: JobLocation[];
   experience: string;
   description: string;
   postedAt: string;
@@ -75,39 +104,163 @@ export interface NormalizedJob {
   applyUrl: string;
   source: string;
   isRemote: boolean;
+  benefits?: string[];
+  keySkills?: string[];
+  requirementsSummary?: string;
+  visaSponsorship?: boolean;
 }
 
-// Job search filters
+// Job search filters (for local filtering)
 export interface JobSearchFilters {
   query?: string;
+  jobTitles?: string[];
   jobTypes?: EmploymentType[];
   workModes?: WorkplaceType[];
   experienceLevels?: ExperienceLevel[];
   locations?: string[];
-  countries?: string[];
-  states?: string[];
-  cities?: string[];
   remoteOnly?: boolean;
   salaryMin?: number;
   salaryMax?: number;
   companies?: string[];
   skills?: string[];
-  postedAfter?: string;
-  postedBefore?: string;
+}
+
+// API search request payload
+export interface JobSearchRequest {
+  keywords: string[];
+  platforms?: JobPlatform[];
+  locations?: string[];
+  workModes?: WorkplaceType[];
+  jobTypes?: EmploymentType[];
+  experienceLevels?: ExperienceLevel[];
+  datePosted?: DatePostedFilter;
+  companyBlacklist?: string[];
+  limit?: number;
 }
 
 // Job search response
 export interface JobSearchResponse {
   jobs: NormalizedJob[];
   total: number;
-  page: number;
-  limit: number;
-  filters: JobSearchFilters;
 }
 
-// Utility function to normalize raw job data
+// Utility function to normalize API job response
+export function normalizeApiJob(job: ApiJob): NormalizedJob {
+  const postedDate = new Date(job.datePosted);
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - postedDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const postedAt =
+    diffDays === 0
+      ? "Today"
+      : diffDays === 1
+        ? "1 day ago"
+        : diffDays < 7
+          ? `${diffDays} days ago`
+          : diffDays < 30
+            ? `${Math.floor(diffDays / 7)} weeks ago`
+            : `${Math.floor(diffDays / 30)} months ago`;
+
+  const employmentTypeMap: Record<string, string> = {
+    full_time: "Full-time",
+    Full_time: "Full-time",
+    FULL_TIME: "Full-time",
+    "Full-time": "Full-time",
+    part_time: "Part-time",
+    Part_time: "Part-time",
+    PART_TIME: "Part-time",
+    "Part-time": "Part-time",
+    contract: "Contract",
+    Contract: "Contract",
+    CONTRACT: "Contract",
+    internship: "Internship",
+    Internship: "Internship",
+    INTERNSHIP: "Internship",
+    freelance: "Freelance",
+    Freelance: "Freelance",
+    FREELANCE: "Freelance",
+  };
+
+  const workModeMap: Record<string, string> = {
+    remote: "Remote",
+    Remote: "Remote",
+    hybrid: "Hybrid",
+    Hybrid: "Hybrid",
+    onsite: "On-site",
+    Onsite: "On-site",
+    "on-site": "On-site",
+    "On-site": "On-site",
+  };
+
+  const experienceLevelMap: Record<string, string> = {
+    entry: "Entry Level",
+    Entry: "Entry Level",
+    mid: "Mid Level",
+    Mid: "Mid Level",
+    senior: "Senior Level",
+    Senior: "Senior Level",
+    lead: "Lead",
+    Lead: "Lead",
+    executive: "Executive",
+    Executive: "Executive",
+  };
+
+  // Use keySkills from API if available, otherwise extract from title
+  const tags = job.keySkills?.slice(0, 6) || extractTagsFromTitle(job.title);
+
+  const salary = job.salary || "Salary not disclosed";
+  const location = job.location || "Location not specified";
+
+  // Use company logo from API, fallback to generated avatar
+  const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company)}&background=random&size=128`;
+  const logo = job.companyLogo && job.companyLogo.trim() !== ""
+    ? job.companyLogo
+    : fallbackLogo;
+
+  // Use actual description from API, fallback to generated summary
+  const description = job.description ||
+    `Apply for ${job.title} at ${job.company}. ${location}. ${salary}.`;
+
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company,
+    companyUrl: job.companyUrl,
+    logo,
+    salary,
+    salaryMin: job.salaryMin,
+    salaryMax: job.salaryMax,
+    salaryCurrency: job.salaryCurrency,
+    type: job.employmentType
+      ? employmentTypeMap[job.employmentType] || job.employmentType
+      : "Full-time",
+    workMode: job.isRemote
+      ? "Remote"
+      : job.workplaceType
+        ? workModeMap[job.workplaceType] || job.workplaceType
+        : "On-site",
+    location,
+    experience: job.experienceLevel
+      ? experienceLevelMap[job.experienceLevel] || job.experienceLevel
+      : "Not specified",
+    description,
+    postedAt,
+    tags,
+    listingUrl: job.url,
+    applyUrl: job.applyUrl,
+    source: job.platform,
+    isRemote: job.isRemote,
+    benefits: job.benefits,
+    keySkills: job.keySkills,
+    requirementsSummary: job.requirementsSummary,
+    visaSponsorship: job.visaSponsorship,
+  };
+}
+
+// Legacy utility function to normalize raw job data (for backward compatibility)
 export function normalizeJob(job: Job): NormalizedJob {
-  const primaryLocation = job.locations[0];
+  const primaryLocation = job.locations?.[0];
   const locationStr = primaryLocation
     ? primaryLocation.location ||
       [primaryLocation.city, primaryLocation.state, primaryLocation.country]
@@ -170,7 +323,6 @@ export function normalizeJob(job: Job): NormalizedJob {
         ? workModeMap[job.workplace_type] || "On-site"
         : "On-site",
     location: locationStr,
-    locations: job.locations,
     experience: job.experience_level
       ? `${job.experience_level.charAt(0).toUpperCase()}${job.experience_level.slice(1)} Level`
       : "Not specified",

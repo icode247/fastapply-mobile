@@ -44,7 +44,7 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="feed"
+        name="index"
         options={{
           title: "Jobs",
           tabBarIcon: ({ color, size }) => (
@@ -62,7 +62,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="index"
+        name="dashboard"
         options={{
           title: "Dashboard",
           tabBarIcon: ({ color, size }) => (

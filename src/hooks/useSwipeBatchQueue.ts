@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ENDPOINTS } from "../constants/api";
 import api, { getApiErrorMessage } from "../services/api";
+import { cacheSwipedJob, SwipedJobDetails } from "../services/swipedJobsCache.service";
 import { Automation, CreateAutomationDto } from "../types/automation.types";
 import { NormalizedJob } from "../types/job.types";
 import { storage } from "../utils/storage";
@@ -81,6 +82,10 @@ export function useSwipeBatchQueue(
   profileNameRef.current = profileName;
   resumeSettingsRef.current = resumeSettings;
 
+  // Track if pending jobs have been loaded from storage
+  const pendingJobsLoadedRef = useRef(false);
+  const pendingJobsToSendRef = useRef<PendingSwipedJob[] | null>(null);
+
   // Load pending jobs from storage on mount
   useEffect(() => {
     const loadPendingJobs = async () => {
@@ -99,14 +104,16 @@ export function useSwipeBatchQueue(
               lastSwipeTimeRef.current = lastSwipe;
               startDebounceTimer(remaining);
             } else {
-              // Timer already expired, send batch immediately
-              sendBatch(jobs);
+              // Timer already expired - but profile may not be selected yet
+              // Store jobs for later send when profile becomes available
+              pendingJobsToSendRef.current = jobs;
             }
           }
         }
       } catch (error) {
         console.error("Failed to load pending swipes:", error);
       }
+      pendingJobsLoadedRef.current = true;
     };
 
     loadPendingJobs();
@@ -212,6 +219,11 @@ export function useSwipeBatchQueue(
           ? `${currentProfileName} - Job Applications`
           : `My Daily Job Applications`;
 
+        // Calculate schedule time as 1 minute from now
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 1);
+        const scheduleTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
         // Build payload with resume settings if enabled
         const payload: Record<string, unknown> = {
           name: automationName,
@@ -219,7 +231,7 @@ export function useSwipeBatchQueue(
           applicationMode: "direct_urls",
           maxApplicationsPerDay: 10,
           scheduleType: "daily",
-          scheduleTime: "09:00",
+          scheduleTime: scheduleTime,
           jobUrls: jobUrls,
           isActive: true,
         };
@@ -264,6 +276,16 @@ export function useSwipeBatchQueue(
     [onBatchSent, onBatchError]
   );
 
+  // Send deferred batch when profile becomes available
+  useEffect(() => {
+    if (profileId && pendingJobsToSendRef.current && pendingJobsToSendRef.current.length > 0) {
+      const jobsToSend = pendingJobsToSendRef.current;
+      pendingJobsToSendRef.current = null; // Clear ref to prevent double-send
+      console.log("Profile now available, sending deferred batch:", jobsToSend.length, "jobs");
+      sendBatch(jobsToSend);
+    }
+  }, [profileId, sendBatch]);
+
   /**
    * Add a swiped job to the pending queue
    */
@@ -276,14 +298,30 @@ export function useSwipeBatchQueue(
         return;
       }
 
+      const swipedAt = Date.now();
+
       const pendingJob: PendingSwipedJob = {
         id: job.id,
         url: url,
         title: job.title,
         company: job.company,
         platform: job.source,
-        swipedAt: Date.now(),
+        swipedAt: swipedAt,
       };
+
+      // Cache job details permanently for future display
+      const cachedJob: SwipedJobDetails = {
+        url: url,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        salary: job.salary,
+        platform: job.source,
+        swipedAt: swipedAt,
+      };
+      cacheSwipedJob(cachedJob).catch((err) =>
+        console.error("Failed to cache swiped job:", err)
+      );
 
       // Add to pending jobs (avoid duplicates)
       setPendingJobs((prev) => {

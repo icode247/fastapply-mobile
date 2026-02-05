@@ -475,9 +475,7 @@ class VoiceCommandService {
     if (params.country) {
       const country = params.country.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.locations.some((loc) =>
-          loc.country?.toLowerCase().includes(country),
-        ),
+        job.location.toLowerCase().includes(country),
       );
     }
 
@@ -485,7 +483,7 @@ class VoiceCommandService {
     if (params.state) {
       const state = params.state.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.locations.some((loc) => loc.state?.toLowerCase().includes(state)),
+        job.location.toLowerCase().includes(state),
       );
     }
 
@@ -493,7 +491,7 @@ class VoiceCommandService {
     if (params.city) {
       const city = params.city.toLowerCase();
       filtered = filtered.filter((job) =>
-        job.locations.some((loc) => loc.city?.toLowerCase().includes(city)),
+        job.location.toLowerCase().includes(city),
       );
     }
 

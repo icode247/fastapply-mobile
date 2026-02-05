@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   Platform,
@@ -20,7 +21,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
 import { spacing } from "../../constants/theme";
 import { useTheme } from "../../hooks";
-import { Job } from "../../mocks/jobs";
+import { NormalizedJob } from "../../types/job.types";
 import { CardRenderer } from "./CardRenderer";
 
 const fontScale = Platform.OS === "android" ? 0.85 : 1;
@@ -28,28 +29,29 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const SWIPE_THRESHOLD = SCREEN_WIDTH * 0.25;
 
 interface SwipeDeckProps {
-  jobs: Job[];
-  onSwipeLeft: (job: Job) => void;
-  onSwipeRight: (job: Job) => void;
+  jobs: NormalizedJob[];
+  onSwipeLeft: (job: NormalizedJob) => void;
+  onSwipeRight: (job: NormalizedJob) => void;
   onExpandChange?: (expanded: boolean) => void;
   onSwipingChange?: (isSwiping: boolean) => void;
+  isFetchingMore?: boolean;
 }
 
 export interface SwipeDeckRef {
   swipeLeft: () => void;
   swipeRight: () => void;
   undo: () => void;
-  getCurrentJob: () => Job | null;
+  getCurrentJob: () => NormalizedJob | null;
 }
 
 export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
   (
-    { jobs, onSwipeLeft, onSwipeRight, onExpandChange, onSwipingChange },
+    { jobs, onSwipeLeft, onSwipeRight, onExpandChange, onSwipingChange, isFetchingMore = false },
     ref,
   ) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [swipeHistory, setSwipeHistory] = useState<
-      { job: Job; direction: "left" | "right" }[]
+      { job: NormalizedJob; direction: "left" | "right" }[]
     >([]);
     const [isCardExpanded, setIsCardExpanded] = useState(false);
     const { colors } = useTheme();
@@ -70,7 +72,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
 
     const isCardExpandedShared = useSharedValue(false);
     const visibleJobs = useMemo(() => {
-      const result: { job: Job; index: number }[] = [];
+      const result: { job: NormalizedJob; index: number }[] = [];
       const startIdx = Math.max(0, currentIndex - 1);
       for (let i = startIdx; i < Math.min(jobs.length, currentIndex + 5); i++) {
         result.push({ job: jobs[i], index: i });
@@ -91,7 +93,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
     const currentJob = jobs[currentIndex];
 
     const handleSwipe = useCallback(
-      (direction: "left" | "right", job: Job) => {
+      (direction: "left" | "right", job: NormalizedJob) => {
         setSwipeHistory((prev) => [...prev, { job, direction }]);
         setCurrentIndex((prev) => prev + 1);
 
@@ -171,8 +173,22 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       [animateSwipe, undo, currentJob],
     );
 
-    // Empty state
+    // Empty state - only show if we're at the end
     if (currentIndex >= jobs.length) {
+      // Only show loading if actively fetching more jobs
+      // With prefetch, this should rarely happen since jobs load in background
+      if (isFetchingMore) {
+        return (
+          <View style={[styles.container, styles.center]}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+              Loading more jobs...
+            </Text>
+          </View>
+        );
+      }
+
+      // No more jobs available - show "all caught up"
       return (
         <View style={[styles.container, styles.center]}>
           <Ionicons

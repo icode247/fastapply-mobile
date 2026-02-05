@@ -183,17 +183,16 @@ class JobMatcherService {
       return 85;
     }
 
-    // Check job locations array
-    for (const loc of job.locations) {
-      if (profile.country && loc.country?.toLowerCase() === profile.country.toLowerCase()) {
-        return 60;
-      }
-      if (profile.state && loc.state?.toLowerCase() === profile.state.toLowerCase()) {
-        return 70;
-      }
-      if (profile.currentCity && loc.city?.toLowerCase() === profile.currentCity.toLowerCase()) {
-        return 85;
-      }
+    // Check job location string for profile location
+    const jobLocationLower = job.location.toLowerCase();
+    if (profile.country && jobLocationLower.includes(profile.country.toLowerCase())) {
+      return 60;
+    }
+    if (profile.state && jobLocationLower.includes(profile.state.toLowerCase())) {
+      return 70;
+    }
+    if (profile.currentCity && jobLocationLower.includes(profile.currentCity.toLowerCase())) {
+      return 85;
     }
 
     // Remote only preference but job is not remote
@@ -430,23 +429,21 @@ class JobMatcherService {
     if (params.country) {
       const country = params.country.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some((loc) =>
-          loc.country?.toLowerCase().includes(country)
-        )
+        job.location.toLowerCase().includes(country)
       );
     }
 
     if (params.state) {
       const state = params.state.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some((loc) => loc.state?.toLowerCase().includes(state))
+        job.location.toLowerCase().includes(state)
       );
     }
 
     if (params.city) {
       const city = params.city.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
-        job.locations.some((loc) => loc.city?.toLowerCase().includes(city))
+        job.location.toLowerCase().includes(city)
       );
     }
 

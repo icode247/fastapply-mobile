@@ -131,8 +131,10 @@ function RootLayoutNav() {
     };
   }, [isAuthenticated]);
 
+  // Don't show loader during init - let native splash screen handle it
+  // This prevents the loader from flashing on the welcome screen
   if (!isInitialized) {
-    return <LoadingScreen message="Loading..." />;
+    return null;
   }
 
   return (

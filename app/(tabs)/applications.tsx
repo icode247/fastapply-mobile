@@ -23,12 +23,17 @@ import { borderRadius, spacing } from "../../src/constants/theme";
 // Android renders fonts/icons larger, scale down for consistency
 const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { useTheme } from "../../src/hooks";
-import { applicationService } from "../../src/services/application.service";
+import { automationService } from "../../src/services/automation.service";
 import {
   getPendingSwipedJobs,
   PendingSwipedJob,
 } from "../../src/services/pendingSwipes.service";
-import { Application } from "../../src/types";
+import {
+  ensureCacheLoaded,
+  getAllCachedJobs,
+  SwipedJobDetails,
+} from "../../src/services/swipedJobsCache.service";
+import { AutomationUrl, UrlStatus } from "../../src/types/automation.types";
 
 const { width } = Dimensions.get("window");
 
@@ -52,17 +57,16 @@ type FilterStatus =
   | "all"
   | "pending"
   | "processing"
-  | "submitted"
+  | "completed"
   | "failed"
-  | "cancelled";
+  | "skipped";
 
 const FILTERS: { label: string; value: FilterStatus; color: string }[] = [
   { label: "All", value: "all", color: "#0ea5e9" },
-  { label: "Pending", value: "pending", color: "#64748B" },
-  { label: "Processing", value: "processing", color: "#3B82F6" },
-  { label: "Submitted", value: "submitted", color: "#10B981" },
+  { label: "Pending", value: "pending", color: "#F59E0B" },
+  { label: "Processing", value: "processing", color: "#8B5CF6" },
+  { label: "Completed", value: "completed", color: "#10B981" },
   { label: "Failed", value: "failed", color: "#EF4444" },
-  { label: "Cancelled", value: "cancelled", color: "#9CA3AF" },
 ];
 
 // Animated filter chip
@@ -318,14 +322,17 @@ const ApplicationItem: React.FC<{
     string,
     { color: string; label: string; icon: keyof typeof Ionicons.glyphMap }
   > = {
+    pending: { color: "#F59E0B", label: "Pending", icon: "time" },
+    processing: { color: "#8B5CF6", label: "Processing", icon: "sync" },
+    completed: { color: "#10B981", label: "Completed", icon: "checkmark-done-circle" },
+    failed: { color: "#EF4444", label: "Failed", icon: "alert-circle" },
+    skipped: { color: "#6B7280", label: "Skipped", icon: "remove-circle" },
+    // Legacy statuses for backward compatibility
     applied: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    reviewing: { color: "#F59E0B", label: "In Review", icon: "eye" },
-    interview: { color: "#0284c7", label: "Interview", icon: "calendar" },
-    offer: { color: "#10B981", label: "Offer", icon: "trophy" },
-    rejected: { color: "#EF4444", label: "Rejected", icon: "close-circle" },
+    submitted: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
   };
 
-  const config = statusConfig[status] || statusConfig.applied;
+  const config = statusConfig[status] || statusConfig.pending;
 
   const handlePressIn = () => {
     Animated.spring(scale, {
@@ -601,17 +608,17 @@ export default function ApplicationsScreen() {
   const [activeFilter, setActiveFilter] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshing, setRefreshing] = useState(false);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [urlEntries, setUrlEntries] = useState<AutomationUrl[]>([]);
   const [pendingSwipes, setPendingSwipes] = useState<PendingSwipedJob[]>([]);
+  const [cachedJobs, setCachedJobs] = useState<Record<string, SwipedJobDetails>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
   // Stats State
-  const [offerCount, setOfferCount] = useState(0);
-  const [interviewCount, setInterviewCount] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
+  const [processingCount, setProcessingCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [failedCount, setFailedCount] = useState(0);
 
   // Debounce search
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
@@ -643,59 +650,70 @@ export default function ApplicationsScreen() {
     ]).start();
   }, []);
 
-  const fetchApplications = React.useCallback(
-    async (reset = false) => {
+  const fetchJobUrls = React.useCallback(
+    async () => {
       try {
-        const currentPage = reset ? 1 : page;
-        if (!reset && (!hasMore || isLoadingMore)) return;
+        setIsLoading(true);
 
-        if (reset) setIsLoading(true);
-        else setIsLoadingMore(true);
+        // Map filter to API status
+        const statusFilter: UrlStatus | undefined =
+          activeFilter !== "all" ? activeFilter as UrlStatus : undefined;
 
-        const params: any = {
-          page: currentPage,
-          limit: 15,
-          filters: {
-            search: debouncedSearchQuery || undefined,
-            status: activeFilter !== "all" ? activeFilter : undefined,
-          },
-        };
+        // Ensure cache is loaded first
+        await ensureCacheLoaded();
 
-        const response = await applicationService.getApplications(params);
+        // Fetch URLs, stats, local pending, and cached jobs in parallel
+        const [urlsResponse, statsResponse, localPending, cached] = await Promise.all([
+          automationService.getAllUserUrls(statusFilter),
+          automationService.getUserUrlStats(),
+          getPendingSwipedJobs(),
+          getAllCachedJobs(),
+        ]);
 
-        // Also fetch stats and pending swipes if resetting
-        if (reset) {
-          const [stats, localPending] = await Promise.all([
-            applicationService.getStats(),
-            getPendingSwipedJobs(),
-          ]);
-          setOfferCount(stats.completed || 0);
-          setInterviewCount(stats.processing || 0);
-          setPendingSwipes(localPending);
+        // Update stats
+        if (statsResponse) {
+          setCompletedCount(statsResponse.completed || 0);
+          setProcessingCount(statsResponse.processing || 0);
+          setPendingCount(statsResponse.pending || 0);
+          setFailedCount(statsResponse.failed || 0);
         }
 
-        const newApps = response.data;
+        setPendingSwipes(localPending);
+        setCachedJobs(cached);
 
-        setApplications((prev) => (reset ? newApps : [...prev, ...newApps]));
-        setTotalCount(response.total);
-        setHasMore(response.page < response.totalPages);
-        setPage(currentPage + 1);
+        // Filter by search query if present (search in both backend data and cached data)
+        let filteredUrls = urlsResponse.data || [];
+        if (debouncedSearchQuery) {
+          const query = debouncedSearchQuery.toLowerCase();
+          filteredUrls = filteredUrls.filter((url) => {
+            // Get cached job details for this URL
+            const cachedJob = cached[url.jobUrl];
+            const title = url.jobTitle || cachedJob?.title || "";
+            const company = url.companyName || cachedJob?.company || "";
+
+            return (
+              title.toLowerCase().includes(query) ||
+              company.toLowerCase().includes(query) ||
+              url.jobUrl?.toLowerCase().includes(query)
+            );
+          });
+        }
+
+        setUrlEntries(filteredUrls);
+        setTotalCount(filteredUrls.length);
       } catch (error) {
-        console.error("Failed to fetch applications:", error);
+        console.error("Failed to fetch job URLs:", error);
       } finally {
         setIsLoading(false);
-        setIsLoadingMore(false);
         setRefreshing(false);
       }
     },
-    [page, hasMore, isLoadingMore, activeFilter, debouncedSearchQuery]
+    [activeFilter, debouncedSearchQuery]
   );
 
   // Fetch when filters change
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-    fetchApplications(true);
+    fetchJobUrls();
   }, [activeFilter, debouncedSearchQuery]);
 
   // Refresh pending swipes when screen comes into focus
@@ -711,22 +729,11 @@ export default function ApplicationsScreen() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchApplications(true);
-  };
-
-  const handleLoadMore = () => {
-    if (!isLoadingMore && !isLoading && hasMore) {
-      fetchApplications();
-    }
+    fetchJobUrls();
   };
 
   const renderFooter = () => {
-    if (!isLoadingMore) return <View style={{ height: 100 + insets.bottom }} />;
-    return (
-      <View style={{ paddingVertical: 20, paddingBottom: 100 + insets.bottom }}>
-        <ActivityIndicator size="small" color={colors.primary} />
-      </View>
-    );
+    return <View style={{ height: 100 + insets.bottom }} />;
   };
 
   // Filter pending swipes based on search query
@@ -745,22 +752,22 @@ export default function ApplicationsScreen() {
     );
   }, [pendingSwipes, activeFilter, debouncedSearchQuery]);
 
-  // Combined data: pending swipes first, then applications
+  // Combined data: pending swipes first, then URL entries
   type ListItem =
     | { type: "pending"; data: PendingSwipedJob }
-    | { type: "application"; data: Application };
+    | { type: "url"; data: AutomationUrl };
 
   const combinedData = React.useMemo<ListItem[]>(() => {
     const pending: ListItem[] = filteredPendingSwipes.map((job) => ({
       type: "pending" as const,
       data: job,
     }));
-    const apps: ListItem[] = applications.map((app) => ({
-      type: "application" as const,
-      data: app,
+    const urls: ListItem[] = urlEntries.map((entry) => ({
+      type: "url" as const,
+      data: entry,
     }));
-    return [...pending, ...apps];
-  }, [filteredPendingSwipes, applications]);
+    return [...pending, ...urls];
+  }, [filteredPendingSwipes, urlEntries]);
 
   const renderEmpty = () => {
     if (isLoading) return null;
@@ -804,33 +811,40 @@ export default function ApplicationsScreen() {
         keyExtractor={(item) =>
           item.type === "pending"
             ? `pending-${item.data.id}`
-            : `app-${item.data.id}`
+            : `url-${item.data.id}`
         }
         renderItem={({ item, index }) => {
           if (item.type === "pending") {
             return <PendingSwipeItem job={item.data} index={index} />;
           }
-          const app = item.data;
+          const urlEntry = item.data;
+          // Get cached job details if backend data is missing
+          const cached = cachedJobs[urlEntry.jobUrl];
+          const company = urlEntry.companyName || cached?.company || "Unknown Company";
+          const position = urlEntry.jobTitle || cached?.title || "Position Unknown";
+          const location = cached?.location || urlEntry.platform || "Job Board";
+          const salary = cached?.salary || "";
+
           return (
             <ApplicationItem
-              id={app.id}
-              company={app.company || "Unknown Company"}
-              position={app.jobTitle || "Position Unknown"}
-              location={app.jobLocation || "Remote"}
-              salary={""}
-              status={(app.status as FilterStatus) || "submitted"}
-              appliedAt={getRelativeTime(app.createdAt)}
-              logo={(app.company || "C")[0].toUpperCase()}
+              id={urlEntry.id}
+              company={company}
+              position={position}
+              location={location}
+              salary={salary}
+              status={(urlEntry.status as FilterStatus) || "pending"}
+              appliedAt={getRelativeTime(urlEntry.createdAt || new Date().toISOString())}
+              logo={company[0].toUpperCase()}
               index={index}
-              onPress={() => router.push(`/application/${app.id}`)}
+              onPress={() => {}}
             />
           );
         }}
         ListHeaderComponent={
           <ApplicationsHeader
             totalCount={displayTotalCount}
-            offerCount={offerCount}
-            interviewCount={interviewCount}
+            offerCount={completedCount}
+            interviewCount={processingCount}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             activeFilter={activeFilter}
@@ -857,8 +871,6 @@ export default function ApplicationsScreen() {
             tintColor={colors.primary}
           />
         }
-        onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.3}
       />
     </View>
   );

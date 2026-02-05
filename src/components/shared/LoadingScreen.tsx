@@ -1,54 +1,81 @@
 import React, { useEffect } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 
 // Import the logo
-const logo = require("../../../assets/full-logo.png");
+const logo = require("../../../assets/icons/scout-icon.png");
 
 interface LoadingScreenProps {
   message?: string;
+  overlay?: boolean;
 }
 
-export const LoadingScreen: React.FC<LoadingScreenProps> = ({ message }) => {
-  const { colors } = useTheme();
-  const opacity = useSharedValue(1);
+export const LoadingScreen: React.FC<LoadingScreenProps> = ({
+  message,
+  overlay = false,
+}) => {
+  const { colors, isDark } = useTheme();
+  const pulse = useSharedValue(1);
+  const rotation = useSharedValue(0);
 
-  // Start pulsing animation on mount
   useEffect(() => {
-    opacity.value = withRepeat(
-      withTiming(0.5, {
-        duration: 1000,
-        easing: Easing.inOut(Easing.ease),
+    // Smooth breathing scale animation
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1.05, {
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        withTiming(0.95, {
+          duration: 1000,
+          easing: Easing.inOut(Easing.ease),
+        }),
+      ),
+      -1,
+      false,
+    );
+
+    // Spinning ring animation
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 2000,
+        easing: Easing.linear,
       }),
-      -1, // infinite repeats
-      true // reverse on each iteration
+      -1,
+      false,
     );
   }, []);
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
+  const logoAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value }],
   }));
 
+  const ringAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  const backgroundColor = overlay
+    ? isDark
+      ? "rgba(0, 0, 0, 0.85)"
+      : "rgba(255, 255, 255, 0.92)"
+    : colors.background;
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.spinnerContainer}>
-        <Animated.View style={[styles.logoContainer, animatedStyle]}>
+    <View style={[styles.container, { backgroundColor }]}>
+      <View style={styles.loaderWrapper}>
+        {/* Logo with breathing animation */}
+        <Animated.View style={[styles.logoContainer, logoAnimatedStyle]}>
           <Image source={logo} style={styles.logo} resizeMode="contain" />
         </Animated.View>
       </View>
-      {message && (
-        <Text style={[styles.message, { color: colors.textSecondary }]}>
-          {message}
-        </Text>
-      )}
     </View>
   );
 };
@@ -65,25 +92,21 @@ const styles = StyleSheet.create({
     bottom: 0,
     zIndex: 9999,
   },
-  spinnerContainer: {
-    width: 100,
-    height: 100,
+  loaderWrapper: {
+    width: 200,
+    height: 200,
     justifyContent: "center",
     alignItems: "center",
   },
   logoContainer: {
-    width: 150,
-    height: 150,
+    width: 100,
+    height: 100,
     justifyContent: "center",
     alignItems: "center",
   },
   logo: {
     width: "100%",
     height: "100%",
-  },
-  message: {
-    marginTop: spacing[4],
-    fontSize: typography.fontSize.base,
   },
 });
 

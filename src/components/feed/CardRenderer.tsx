@@ -12,7 +12,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Job } from "../../mocks/jobs";
+import { NormalizedJob } from "../../types/job.types";
 import { JobCard } from "./JobCard";
 
 const fontScale = Platform.OS === "android" ? 0.85 : 1;
@@ -25,7 +25,7 @@ const MemoizedJobCard = memo(
     job,
     onExpandChange,
   }: {
-    job: Job;
+    job: NormalizedJob;
     onExpandChange?: (expanded: boolean) => void;
   }) => {
     return <JobCard job={job} onExpandChange={onExpandChange} />;
@@ -34,7 +34,7 @@ const MemoizedJobCard = memo(
 );
 
 export interface CardRendererProps {
-  job: Job;
+  job: NormalizedJob;
   jobIndex: number;
   currentIndex: number;
   activeCardIndex: SharedValue<number>;
@@ -46,7 +46,7 @@ export interface CardRendererProps {
   }>;
   isCardExpandedShared: SharedValue<boolean>;
   onExpandChange: (expanded: boolean) => void;
-  onSwipe: (direction: "left" | "right", job: Job) => void;
+  onSwipe: (direction: "left" | "right", job: NormalizedJob) => void;
   onSwipingChange?: (isSwiping: boolean) => void;
 }
 

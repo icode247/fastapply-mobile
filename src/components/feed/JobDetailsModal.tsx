@@ -11,14 +11,14 @@ import {
 } from "react-native";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
-import { Job } from "../../mocks/jobs";
+import { NormalizedJob } from "../../types/job.types";
 
 interface JobDetailsModalProps {
   visible: boolean;
-  job: Job | null;
+  job: NormalizedJob | null;
   onClose: () => void;
-  onApply: (job: Job) => void;
-  onReject: (job: Job) => void;
+  onApply: (job: NormalizedJob) => void;
+  onReject: (job: NormalizedJob) => void;
 }
 
 export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({

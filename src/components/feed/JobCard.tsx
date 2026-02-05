@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
-import { Job } from "../../mocks/jobs";
+import { NormalizedJob } from "../../types/job.types";
 
 // Android renders fonts/icons larger, scale down for consistency
 const fontScale = Platform.OS === "android" ? 0.85 : 1;
@@ -20,7 +20,7 @@ const iconSize = Math.round(18 * fontScale);
 const smallIconSize = Math.round(20 * fontScale);
 
 interface JobCardProps {
-  job: Job;
+  job: NormalizedJob;
   onExpandChange?: (expanded: boolean) => void;
 }
 
@@ -154,7 +154,7 @@ const JobCardComponent: React.FC<JobCardProps> = ({ job, onExpandChange }) => {
             <View
               style={[
                 styles.pill,
-                { backgroundColor: "#F3E5F5", marginLeft: 8 },
+                { backgroundColor: "#F3E5F5" },
               ]}
             >
               <Ionicons name="time-outline" size={iconSize} color="#9C27B0" />
@@ -270,18 +270,17 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   section: {
-    marginBottom: spacing[5],
+    marginBottom: spacing[6],
   },
   sectionLabel: {
     fontSize: Math.round(13 * fontScale),
     fontWeight: "600",
-    marginBottom: spacing[2],
-    textTransform: "none",
+    marginBottom: spacing[3],
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
     alignSelf: "flex-start",
@@ -294,9 +293,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
   },
   description: {
-    fontSize: Math.round(16 * fontScale),
+    fontSize: Math.round(15 * fontScale),
     lineHeight: Math.round(24 * fontScale),
+    paddingTop: spacing[1],
   },
 });

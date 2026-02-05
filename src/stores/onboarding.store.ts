@@ -1,10 +1,9 @@
 import { create } from "zustand";
 import {
-  EducationItem,
-  ExperienceItem,
-  JobPreferences,
-  ParsedResume,
-} from "../types";
+  DEFAULT_JOB_PREFERENCES,
+  JobPreferencesFormValues,
+} from "../components/feed/JobPreferencesForm";
+import { EducationItem, ExperienceItem, ParsedResume } from "../types";
 
 interface OnboardingState {
   // Current step
@@ -43,8 +42,8 @@ interface OnboardingState {
   experience: ExperienceItem[];
   education: EducationItem[];
 
-  // Preferences
-  preferences: JobPreferences;
+  // Job Preferences (same as job filters modal)
+  jobPreferences: JobPreferencesFormValues;
 
   // Actions
   setCurrentStep: (step: number) => void;
@@ -67,12 +66,13 @@ interface OnboardingState {
   updateExperience: (experience: ExperienceItem[]) => void;
   updateEducation: (education: EducationItem[]) => void;
   updateSkills: (skills: string[]) => void;
-  updatePreferences: (preferences: Partial<JobPreferences>) => void;
+  updateJobPreferences: (preferences: JobPreferencesFormValues) => void;
+  resetJobPreferences: () => void;
 
   prefillFromResume: (data: ParsedResume) => void;
   reset: () => void;
 
-  getProfileData: () => Partial<ParsedResume & { preferences: JobPreferences }>;
+  getProfileData: () => Partial<ParsedResume>;
 }
 
 const initialState = {
@@ -103,14 +103,7 @@ const initialState = {
   experience: [],
   education: [],
 
-  preferences: {
-    jobType: [],
-    experience: [],
-    salary: [0, 200000] as [number, number],
-    positions: [],
-    remoteOnly: false,
-    locations: [],
-  },
+  jobPreferences: { ...DEFAULT_JOB_PREFERENCES },
 };
 
 export const useOnboardingStore = create<OnboardingState>((set, get) => ({
@@ -145,10 +138,10 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
 
   updateSkills: (skills) => set({ skills }),
 
-  updatePreferences: (preferences) =>
-    set((state) => ({
-      preferences: { ...state.preferences, ...preferences },
-    })),
+  updateJobPreferences: (jobPreferences) => set({ jobPreferences }),
+
+  resetJobPreferences: () =>
+    set({ jobPreferences: { ...DEFAULT_JOB_PREFERENCES } }),
 
   prefillFromResume: (data) => {
     set({
@@ -177,6 +170,8 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
 
   getProfileData: () => {
     const state = get();
+    // Note: jobPreferences are stored locally and used for job filtering
+    // They are not sent to the backend profile API
     return {
       firstName: state.firstName,
       lastName: state.lastName,
@@ -195,7 +190,6 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       yearsOfExperience: state.yearsOfExperience,
       experience: state.experience,
       education: state.education,
-      // Note: preferences excluded as backend CreateJobProfileDto doesn't accept it
     };
   },
 }));

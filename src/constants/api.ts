@@ -81,6 +81,12 @@ export const ENDPOINTS = {
     UPGRADE: "/api/v1/subscriptions/upgrade",
     CANCEL: "/api/v1/subscriptions/cancel",
   },
+  // Jobs
+  JOBS: {
+    SEARCH: "/api/v1/jobs/search",
+    BY_ID: (id: string) => `/api/v1/jobs/${id}`,
+    PREFERENCES: "/api/v1/jobs/preferences",
+  },
   // Automations
   AUTOMATIONS: {
     BASE: "/api/v1/automations",
@@ -91,6 +97,9 @@ export const ENDPOINTS = {
     QUEUE_STATS: (id: string) => `/api/v1/automations/${id}/queue-stats`,
     RUNS: (id: string) => `/api/v1/automations/${id}/runs`,
     STATS: (id: string) => `/api/v1/automations/${id}/stats`,
+    // User-level URL endpoints (no automation ID required)
+    USER_URLS_ALL: "/api/v1/automations/urls/all",
+    USER_URLS_STATS: "/api/v1/automations/urls/stats",
   },
 } as const;
 

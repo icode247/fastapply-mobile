@@ -17,7 +17,7 @@ import {
   UrlStatus,
 } from "../types/automation.types";
 import { storage } from "../utils/storage";
-import api, { getApiErrorMessage, isApiError } from "./api";
+import api, { getApiErrorMessage, isApiError, isNotFoundError } from "./api";
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -528,19 +528,20 @@ class AutomationService {
 
   /**
    * Detect platform from URL
+   * Currently supported platforms: rippling, ashby, workable
    */
   private detectPlatform(url: string): string {
     const urlLower = url.toLowerCase();
+    // Supported platforms
+    if (urlLower.includes("rippling.com")) return "rippling";
+    if (urlLower.includes("ashbyhq.com")) return "ashby";
+    if (urlLower.includes("workable.com")) return "workable";
+    // Other common platforms (for reference)
     if (urlLower.includes("greenhouse.io")) return "greenhouse";
     if (urlLower.includes("lever.co")) return "lever";
     if (urlLower.includes("workday.com")) return "workday";
     if (urlLower.includes("linkedin.com")) return "linkedin";
     if (urlLower.includes("indeed.com")) return "indeed";
-    if (urlLower.includes("glassdoor.com")) return "glassdoor";
-    if (urlLower.includes("ashbyhq.com")) return "ashby";
-    if (urlLower.includes("bamboohr.com")) return "bamboohr";
-    if (urlLower.includes("jobvite.com")) return "jobvite";
-    if (urlLower.includes("smartrecruiters.com")) return "smartrecruiters";
     return "other";
   }
 
@@ -590,7 +591,10 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to get automation:", getApiErrorMessage(error));
+      // 404 is expected when automation doesn't exist yet
+      if (!isNotFoundError(error)) {
+        console.error("Failed to get automation:", getApiErrorMessage(error));
+      }
       return null;
     }
   }
@@ -784,6 +788,47 @@ class AutomationService {
       return response.data;
     } catch (error) {
       console.error("Failed to get stats:", getApiErrorMessage(error));
+      return null;
+    }
+  }
+
+  // ============ User-Level URL Methods ============
+
+  /**
+   * Get all job URLs for the authenticated user
+   * Uses the new /api/v1/automations/urls/all endpoint
+   */
+  async getAllUserUrls(status?: UrlStatus): Promise<UrlListResponse> {
+    try {
+      const response = await api.get<{ success: boolean; data: any[]; total: number }>(
+        ENDPOINTS.AUTOMATIONS.USER_URLS_ALL,
+        { params: status ? { status } : undefined }
+      );
+      // API returns { success, data, total } - extract and normalize
+      const rawData = response.data;
+      return {
+        data: rawData.data || [],
+        total: rawData.total || 0,
+      };
+    } catch (error) {
+      console.error("Failed to get all user URLs:", getApiErrorMessage(error));
+      return { data: [], total: 0 };
+    }
+  }
+
+  /**
+   * Get queue statistics for the authenticated user
+   * Uses the new /api/v1/automations/urls/stats endpoint
+   */
+  async getUserUrlStats(): Promise<AutomationQueueStats | null> {
+    try {
+      const response = await api.get<{ success: boolean; data: AutomationQueueStats }>(
+        ENDPOINTS.AUTOMATIONS.USER_URLS_STATS
+      );
+      // API returns { success, data } - extract the data
+      return response.data.data || null;
+    } catch (error) {
+      console.error("Failed to get user URL stats:", getApiErrorMessage(error));
       return null;
     }
   }
