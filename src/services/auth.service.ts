@@ -8,6 +8,7 @@ import {
   User,
   VerifyOtpDto,
 } from "../types";
+import { logger } from "../utils/logger";
 import { storage } from "../utils/storage";
 import { api, getApiErrorMessage } from "./api";
 
@@ -133,7 +134,7 @@ export const authService = {
     try {
       await api.post(ENDPOINTS.AUTH.LOGOUT);
     } catch (error) {
-      console.warn("Logout API call failed:", getApiErrorMessage(error));
+      logger.warn("Logout API call failed:", getApiErrorMessage(error));
     } finally {
       await storage.clearAll();
     }

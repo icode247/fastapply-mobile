@@ -8,19 +8,16 @@ import {
   Linking,
   Platform,
   RefreshControl,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Text } from "../../src/components/ui/Text";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { Button, LoadingScreen } from "../../src/components";
-import { spacing, typography } from "../../src/constants/theme";
+import { spacing, typography, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { applicationService } from "../../src/services";
 import { getApiErrorMessage } from "../../src/services/api";
@@ -288,6 +285,7 @@ export default function ApplicationDetailScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -759,6 +757,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
   actionBtnText: {
     color: "#FFF",

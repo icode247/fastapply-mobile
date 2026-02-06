@@ -15,16 +15,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { uiScale } from "../../src/constants/theme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Page indicator component
 const PageIndicator: React.FC<{ currentPage: number; totalPages: number }> = ({
@@ -709,7 +707,7 @@ const styles = StyleSheet.create({
   },
   companyCard: {
     borderRadius: 16,
-    overflow: "hidden",
+    ...(Platform.OS === "ios" ? { overflow: "hidden" as const } : {}),
   },
   companyCardInner: {
     flexDirection: "row",

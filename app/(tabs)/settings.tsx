@@ -11,17 +11,15 @@ import {
   ScrollView,
   StyleSheet,
   Switch,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { ConfirmModal } from "../../src/components";
 import { getPlanDisplayName } from "../../src/constants/subscription-limits";
-import { borderRadius, spacing } from "../../src/constants/theme";
+import { borderRadius, spacing, uiScale } from "../../src/constants/theme";
 import { useAuth, useTheme } from "../../src/hooks";
 import { subscriptionService, userService } from "../../src/services";
 import { Subscription, User } from "../../src/types";
@@ -332,7 +330,9 @@ export default function SettingsScreen() {
 
   const handleRateApp = async () => {
     // TODO: Replace with actual App Store / Play Store URLs
-    const url = "https://apps.apple.com/app/fastapply";
+    const url = Platform.OS === "ios"
+      ? "https://apps.apple.com/app/fastapply"
+      : "https://play.google.com/store/apps/details?id=com.fastapply";
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
@@ -557,7 +557,7 @@ export default function SettingsScreen() {
           <SettingItem
             icon="finger-print-outline"
             iconColor="#EC4899"
-            label="Face ID / Touch ID"
+            label={Platform.OS === "ios" ? "Face ID / Touch ID" : "Biometric Login"}
             delay={400}
             colors={colors}
             isDark={isDark}

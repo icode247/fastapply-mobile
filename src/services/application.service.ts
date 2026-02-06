@@ -46,13 +46,23 @@ export const applicationService = {
     }
     // Skip appending 'search' to queryParams to avoid 400 Error
 
-    const response = await api.get<any>(
-      `${ENDPOINTS.APPLICATIONS.BASE}?${queryParams.toString()}`
-    );
+    const response = await api.get<
+      | Application[]
+      | {
+          applications?: Application[];
+          data?: Application[];
+          items?: Application[];
+          results?: Application[];
+          total?: number;
+          page?: number;
+          limit?: number;
+          totalPages?: number;
+        }
+    >(`${ENDPOINTS.APPLICATIONS.BASE}?${queryParams.toString()}`);
 
     // Normalize response to match PaginatedResponse interface
-    const rawData = response.data;
-    let apps = Array.isArray(rawData)
+    const rawData = response.data as any;
+    let apps: Application[] = Array.isArray(rawData)
       ? rawData
       : rawData.applications ||
         rawData.data ||
@@ -179,21 +189,7 @@ export const applicationService = {
       limit,
     });
 
-    // Handle PaginatedResponse (data), direct array, or wrapping properties (applications/items/results)
-    const rawResponse = response as any;
-    let apps: Application[] = [];
-
-    if (Array.isArray(response)) {
-      apps = response;
-    } else if (Array.isArray(rawResponse.applications)) {
-      apps = rawResponse.applications;
-    } else if (Array.isArray(rawResponse.data)) {
-      apps = rawResponse.data;
-    } else if (Array.isArray(rawResponse.items)) {
-      apps = rawResponse.items;
-    } else if (Array.isArray(rawResponse.results)) {
-      apps = rawResponse.results;
-    }
+    const apps: Application[] = response.data;
 
     // Sort to ensure we show the most recent ones first
     apps.sort(

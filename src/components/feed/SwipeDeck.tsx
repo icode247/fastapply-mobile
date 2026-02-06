@@ -14,9 +14,9 @@ import {
   Image,
   Platform,
   StyleSheet,
-  Text,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
 import { spacing } from "../../constants/theme";

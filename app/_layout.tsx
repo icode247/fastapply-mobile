@@ -3,9 +3,18 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
+import {
+  useFonts,
+  Roboto_300Light,
+  Roboto_400Regular,
+  Roboto_500Medium,
+  Roboto_600SemiBold,
+  Roboto_700Bold,
+} from "@expo-google-fonts/roboto";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import * as NavigationBar from "expo-navigation-bar";
 import * as Notifications from "expo-notifications";
+import * as SplashScreen from "expo-splash-screen";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useRef } from "react";
@@ -16,11 +25,25 @@ import { useTheme } from "../src/hooks";
 import { notificationService } from "../src/services";
 import { useAuthStore, useThemeStore } from "../src/stores";
 
+SplashScreen.preventAutoHideAsync();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 2,
+      retry: (failureCount, error) => {
+        // Don't retry on 4xx client errors (except 429)
+        const status = (error as any)?.response?.status;
+        if (status && status >= 400 && status < 500 && status !== 429) {
+          return false;
+        }
+        return failureCount < 2;
+      },
       staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
+      refetchOnWindowFocus: false, // Mobile doesn't benefit from this
+    },
+    mutations: {
+      retry: false,
     },
   },
 });
@@ -177,6 +200,13 @@ function RootLayoutNav() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="live-sessions"
+            options={{
+              headerShown: false,
+              presentation: "modal",
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </>
@@ -184,6 +214,24 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    Roboto_300Light,
+    Roboto_400Regular,
+    Roboto_500Medium,
+    Roboto_600SemiBold,
+    Roboto_700Bold,
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <QueryClientProvider client={queryClient}>

@@ -7,4 +7,5 @@ export { Card } from "./ui/Card";
 export { ConfirmModal } from "./ui/ConfirmModal";
 export { Input } from "./ui/Input";
 export { Select } from "./ui/Select";
+export { Text } from "./ui/Text";
 export { UpgradePrompt } from "./ui/UpgradePrompt";

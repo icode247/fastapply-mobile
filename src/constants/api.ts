@@ -100,6 +100,9 @@ export const ENDPOINTS = {
     // User-level URL endpoints (no automation ID required)
     USER_URLS_ALL: "/api/v1/automations/urls/all",
     USER_URLS_STATS: "/api/v1/automations/urls/stats",
+    // Live sessions (Browserbase)
+    LIVE_SESSIONS: (id: string) => `/api/v1/automations/${id}/live-sessions`,
+    USER_LIVE_SESSIONS: "/api/v1/automations/live-sessions",
   },
 } as const;
 

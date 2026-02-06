@@ -12,16 +12,13 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { borderRadius, spacing } from "../../src/constants/theme";
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
+import { borderRadius, spacing, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { automationService } from "../../src/services/automation.service";
 import {
@@ -869,6 +866,7 @@ export default function ApplicationsScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       />

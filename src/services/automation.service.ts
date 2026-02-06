@@ -13,9 +13,12 @@ import {
   RescheduleUrlDto,
   UpdateAutomationDto,
   UrlInput,
+  LiveSession,
+  LiveSessionsResponse,
   UrlListResponse,
   UrlStatus,
 } from "../types/automation.types";
+import { logger } from "../utils/logger";
 import { storage } from "../utils/storage";
 import api, { getApiErrorMessage, isApiError, isNotFoundError } from "./api";
 
@@ -90,7 +93,7 @@ class AutomationService {
           if (this.isValidIdStatic(automationId as string)) {
             this.profileAutomationMap[profileId] = automationId as string;
           } else {
-            console.warn(`Removing invalid cached automation ID for profile ${profileId}:`, automationId);
+            logger.warn(`Removing invalid cached automation ID for profile ${profileId}:`, automationId);
             hasInvalidEntries = true;
           }
         }
@@ -116,7 +119,7 @@ class AutomationService {
         this.processPendingUrlsQueue();
       }
     } catch (error) {
-      console.error("Failed to initialize automation service:", error);
+      logger.error("Failed to initialize automation service:", error);
       // Continue without cached state
       this.initialized = true;
     }
@@ -134,19 +137,17 @@ class AutomationService {
    */
   private async saveState(): Promise<void> {
     try {
-      await Promise.all([
-        storage.setItem(
-          STORAGE_KEYS.PROFILE_AUTOMATION_MAP,
-          JSON.stringify(this.profileAutomationMap)
-        ),
-        storage.setItem(
-          STORAGE_KEYS.PENDING_URLS,
-          JSON.stringify(this.pendingUrls)
-        ),
-        storage.setItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString()),
-      ]);
+      await storage.setItem(
+        STORAGE_KEYS.PROFILE_AUTOMATION_MAP,
+        JSON.stringify(this.profileAutomationMap)
+      );
+      await storage.setItem(
+        STORAGE_KEYS.PENDING_URLS,
+        JSON.stringify(this.pendingUrls)
+      );
+      await storage.setItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
     } catch (error) {
-      console.error("Failed to save automation state:", error);
+      logger.error("Failed to save automation state:", error);
     }
   }
 
@@ -199,7 +200,7 @@ class AutomationService {
         return profileAutomation;
       }
     } catch (error) {
-      console.warn("Failed to search existing automations:", error);
+      logger.warn("Failed to search existing automations:", error);
     }
 
     return null;
@@ -207,7 +208,6 @@ class AutomationService {
 
   /**
    * Clean up cached data for invalid profiles
-   * Call this when valid profile IDs are known (after fetching from backend)
    */
   async cleanupInvalidProfiles(validProfileIds: string[]): Promise<void> {
     await this.initialize();
@@ -218,7 +218,7 @@ class AutomationService {
     // Remove pending URLs for invalid profiles
     const validPendingUrls = this.pendingUrls.filter((entry) => {
       if (!validSet.has(entry.profileId)) {
-        console.log(
+        logger.debug(
           `Removing cached pending URL for invalid profile: ${entry.profileId}`
         );
         changed = true;
@@ -234,7 +234,7 @@ class AutomationService {
     // Remove profile automation mappings for invalid profiles
     for (const profileId of Object.keys(this.profileAutomationMap)) {
       if (!validSet.has(profileId)) {
-        console.log(
+        logger.debug(
           `Removing cached automation mapping for invalid profile: ${profileId}`
         );
         delete this.profileAutomationMap[profileId];
@@ -260,20 +260,18 @@ class AutomationService {
       ? `${profileName} - Mobile Swipe Queue`
       : `Mobile Swipe Queue - ${new Date().toLocaleDateString()}`;
 
-    const createPayload = {
+    const createPayload: CreateAutomationDto = {
       name: automationName,
       jobProfileId: profileId,
       applicationMode: "direct_urls",
       scheduleType: "daily",
-      scheduleTime: "09:00", // Default to 9 AM
+      scheduleTime: "09:00",
       isActive: true,
       maxApplicationsPerDay: 50,
-      jobUrls: [initialUrl], // Must have at least 1 URL
+      jobUrls: [initialUrl],
     };
 
-    // DEBUG: Log the create automation payload
-    console.log("=== SWIPE: Creating new automation ===");
-    console.log("CREATE AUTOMATION PAYLOAD:", JSON.stringify(createPayload, null, 2));
+    logger.debug("Creating new automation:", createPayload.name);
 
     const newAutomation = await this.createAutomation(createPayload);
 
@@ -281,7 +279,7 @@ class AutomationService {
       this.profileAutomationMap[profileId] = newAutomation.id;
       await this.saveState();
     } else if (newAutomation) {
-      console.error("Created automation has invalid ID:", newAutomation.id);
+      logger.error("Created automation has invalid ID:", newAutomation.id);
       return null;
     }
 
@@ -304,12 +302,7 @@ class AutomationService {
   ): Promise<{ success: boolean; error?: string; automationId?: string }> {
     await this.initialize();
 
-    // DEBUG: Log incoming parameters
-    console.log("=== SWIPE: addJobToQueue called ===");
-    console.log("profileId:", profileId);
-    console.log("jobUrl:", jobUrl);
-    console.log("jobDetails:", JSON.stringify(jobDetails, null, 2));
-    console.log("profileName:", profileName);
+    logger.debug("[AutomationService] addJobToQueue:", { profileId, jobUrl, jobDetails: jobDetails?.title });
 
     const urlInput: UrlInput = {
       url: jobUrl,
@@ -317,8 +310,6 @@ class AutomationService {
       company: jobDetails?.company,
       platform: jobDetails?.platform || this.detectPlatform(jobUrl),
     };
-
-    console.log("urlInput:", JSON.stringify(urlInput, null, 2));
 
     // Add to pending queue first (optimistic update)
     const pendingEntry: PendingUrlEntry = {
@@ -337,7 +328,6 @@ class AutomationService {
 
       if (!automation) {
         // Create automation with this URL as the initial URL
-        // Backend requires at least 1 URL for direct_urls mode
         automation = await this.createAutomationForProfile(
           profileId,
           jobUrl,
@@ -365,8 +355,7 @@ class AutomationService {
 
       // Validate automation has a valid ID before proceeding
       if (!this.isValidId(automation.id)) {
-        console.error("Retrieved automation has invalid ID:", automation.id);
-        // Clear invalid cache and retry by creating new automation
+        logger.error("Retrieved automation has invalid ID:", automation.id);
         delete this.profileAutomationMap[profileId];
         await this.saveState();
         return {
@@ -397,7 +386,7 @@ class AutomationService {
       }
     } catch (error) {
       const errorMessage = getApiErrorMessage(error);
-      console.error("Failed to add job to queue:", errorMessage);
+      logger.error("Failed to add job to queue:", errorMessage);
 
       // Keep in pending queue for retry
       return {
@@ -415,20 +404,15 @@ class AutomationService {
     automationId: string,
     urls: UrlInput[]
   ): Promise<{ success: boolean; error?: string; data?: AddUrlsResponse }> {
-    // Validate automation ID before making API call
     if (!this.isValidId(automationId)) {
-      console.error("addUrlsWithRetry called with invalid automationId:", automationId);
+      logger.error("addUrlsWithRetry called with invalid automationId:", automationId);
       return { success: false, error: "Invalid automation ID" };
     }
 
-    // Extract just the URL strings for the API
     const jobUrls = urls.map((u) => u.url);
-
-    // DEBUG: Log add URLs payload
     const endpoint = ENDPOINTS.AUTOMATIONS.URLS(automationId);
-    console.log("=== API: POST addUrls ===");
-    console.log("Endpoint:", endpoint);
-    console.log("Request body:", JSON.stringify({ jobUrls }, null, 2));
+
+    logger.debug("[AutomationService] addUrls:", { endpoint, urlCount: jobUrls.length });
 
     let lastError: string | undefined;
 
@@ -438,11 +422,10 @@ class AutomationService {
           endpoint,
           { jobUrls }
         );
-        console.log("Response:", JSON.stringify(response.data, null, 2));
         return { success: true, data: response.data };
       } catch (error) {
-        console.error("API Error:", getApiErrorMessage(error));
         lastError = getApiErrorMessage(error);
+        logger.error(`addUrls attempt ${attempt + 1} failed:`, lastError);
 
         // Don't retry on client errors (4xx) except 429 (rate limit)
         if (isApiError(error)) {
@@ -483,11 +466,9 @@ class AutomationService {
         }
 
         try {
-          // First try to get existing automation
           let automation = await this.getAutomationForProfile(entry.profileId);
 
           if (!automation) {
-            // Create automation with this URL
             automation = await this.createAutomationForProfile(
               entry.profileId,
               entry.url.url,
@@ -496,23 +477,19 @@ class AutomationService {
           }
 
           if (automation) {
-            // If automation was just created with this URL, it's already added
-            // Otherwise add the URL to existing automation
             const result = await this.addUrlsWithRetry(automation.id, [
               entry.url,
             ]);
 
             if (result.success) {
-              // Remove from queue
               this.pendingUrls = this.pendingUrls.filter(
                 (p) => p !== entry
               );
             } else {
-              // Increment retry count
               entry.retryCount++;
             }
           }
-        } catch (error) {
+        } catch {
           entry.retryCount++;
         }
 
@@ -528,15 +505,12 @@ class AutomationService {
 
   /**
    * Detect platform from URL
-   * Currently supported platforms: rippling, ashby, workable
    */
   private detectPlatform(url: string): string {
     const urlLower = url.toLowerCase();
-    // Supported platforms
     if (urlLower.includes("rippling.com")) return "rippling";
     if (urlLower.includes("ashbyhq.com")) return "ashby";
     if (urlLower.includes("workable.com")) return "workable";
-    // Other common platforms (for reference)
     if (urlLower.includes("greenhouse.io")) return "greenhouse";
     if (urlLower.includes("lever.co")) return "lever";
     if (urlLower.includes("workday.com")) return "workday";
@@ -554,25 +528,18 @@ class AutomationService {
     data: CreateAutomationDto
   ): Promise<Automation | null> {
     try {
-      console.log("=== API: POST createAutomation ===");
-      console.log("Endpoint:", ENDPOINTS.AUTOMATIONS.BASE);
-      console.log("Request body:", JSON.stringify(data, null, 2));
-
       const response = await api.post<Automation>(
         ENDPOINTS.AUTOMATIONS.BASE,
         data
       );
 
-      console.log("Response:", JSON.stringify(response.data, null, 2));
-
-      // Validate the response has a valid ID
       if (!this.isValidId(response.data?.id)) {
-        console.error("Created automation returned invalid ID:", response.data?.id);
+        logger.error("Created automation returned invalid ID:", response.data?.id);
         return null;
       }
       return response.data;
     } catch (error) {
-      console.error("Failed to create automation:", getApiErrorMessage(error));
+      logger.error("Failed to create automation:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -582,7 +549,7 @@ class AutomationService {
    */
   async getAutomation(id: string): Promise<Automation | null> {
     if (!this.isValidId(id)) {
-      console.warn("getAutomation called with invalid id:", id);
+      logger.warn("getAutomation called with invalid id:", id);
       return null;
     }
     try {
@@ -591,9 +558,8 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      // 404 is expected when automation doesn't exist yet
       if (!isNotFoundError(error)) {
-        console.error("Failed to get automation:", getApiErrorMessage(error));
+        logger.error("Failed to get automation:", getApiErrorMessage(error));
       }
       return null;
     }
@@ -615,7 +581,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to list automations:", getApiErrorMessage(error));
+      logger.error("Failed to list automations:", getApiErrorMessage(error));
       return { data: [], total: 0, page: 1, limit: 10, hasMore: false };
     }
   }
@@ -628,24 +594,17 @@ class AutomationService {
     data: UpdateAutomationDto
   ): Promise<Automation | null> {
     if (!this.isValidId(id)) {
-      console.warn("updateAutomation called with invalid id:", id);
+      logger.warn("updateAutomation called with invalid id:", id);
       return null;
     }
     try {
-      const endpoint = ENDPOINTS.AUTOMATIONS.BY_ID(id);
-      console.log("=== API: PATCH updateAutomation ===");
-      console.log("Endpoint:", endpoint);
-      console.log("Request body:", JSON.stringify(data, null, 2));
-
       const response = await api.patch<Automation>(
-        endpoint,
+        ENDPOINTS.AUTOMATIONS.BY_ID(id),
         data
       );
-
-      console.log("Response:", JSON.stringify(response.data, null, 2));
       return response.data;
     } catch (error) {
-      console.error("Failed to update automation:", getApiErrorMessage(error));
+      logger.error("Failed to update automation:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -667,7 +626,7 @@ class AutomationService {
       await this.saveState();
       return true;
     } catch (error) {
-      console.error("Failed to delete automation:", getApiErrorMessage(error));
+      logger.error("Failed to delete automation:", getApiErrorMessage(error));
       return false;
     }
   }
@@ -682,7 +641,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to toggle automation:", getApiErrorMessage(error));
+      logger.error("Failed to toggle automation:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -699,7 +658,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to add URLs:", getApiErrorMessage(error));
+      logger.error("Failed to add URLs:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -718,7 +677,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to get URLs:", getApiErrorMessage(error));
+      logger.error("Failed to get URLs:", getApiErrorMessage(error));
       return { data: [], total: 0 };
     }
   }
@@ -728,7 +687,7 @@ class AutomationService {
    */
   async getQueueStats(id: string): Promise<AutomationQueueStats | null> {
     if (!this.isValidId(id)) {
-      console.warn("getQueueStats called with invalid id:", id);
+      logger.warn("getQueueStats called with invalid id:", id);
       return null;
     }
     try {
@@ -737,7 +696,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to get queue stats:", getApiErrorMessage(error));
+      logger.error("Failed to get queue stats:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -753,7 +712,7 @@ class AutomationService {
       await api.post(ENDPOINTS.AUTOMATIONS.URLS_RETRY(id), data);
       return true;
     } catch (error) {
-      console.error("Failed to retry URLs:", getApiErrorMessage(error));
+      logger.error("Failed to retry URLs:", getApiErrorMessage(error));
       return false;
     }
   }
@@ -772,7 +731,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to get runs:", getApiErrorMessage(error));
+      logger.error("Failed to get runs:", getApiErrorMessage(error));
       return { data: [], total: 0, page: 1, limit: 10 };
     }
   }
@@ -787,7 +746,7 @@ class AutomationService {
       );
       return response.data;
     } catch (error) {
-      console.error("Failed to get stats:", getApiErrorMessage(error));
+      logger.error("Failed to get stats:", getApiErrorMessage(error));
       return null;
     }
   }
@@ -796,7 +755,6 @@ class AutomationService {
 
   /**
    * Get all job URLs for the authenticated user
-   * Uses the new /api/v1/automations/urls/all endpoint
    */
   async getAllUserUrls(status?: UrlStatus): Promise<UrlListResponse> {
     try {
@@ -804,32 +762,61 @@ class AutomationService {
         ENDPOINTS.AUTOMATIONS.USER_URLS_ALL,
         { params: status ? { status } : undefined }
       );
-      // API returns { success, data, total } - extract and normalize
       const rawData = response.data;
       return {
         data: rawData.data || [],
         total: rawData.total || 0,
       };
     } catch (error) {
-      console.error("Failed to get all user URLs:", getApiErrorMessage(error));
+      logger.error("Failed to get all user URLs:", getApiErrorMessage(error));
       return { data: [], total: 0 };
     }
   }
 
   /**
    * Get queue statistics for the authenticated user
-   * Uses the new /api/v1/automations/urls/stats endpoint
    */
   async getUserUrlStats(): Promise<AutomationQueueStats | null> {
     try {
       const response = await api.get<{ success: boolean; data: AutomationQueueStats }>(
         ENDPOINTS.AUTOMATIONS.USER_URLS_STATS
       );
-      // API returns { success, data } - extract the data
       return response.data.data || null;
     } catch (error) {
-      console.error("Failed to get user URL stats:", getApiErrorMessage(error));
+      logger.error("Failed to get user URL stats:", getApiErrorMessage(error));
       return null;
+    }
+  }
+
+  // ============ Live Sessions (Browserbase) ============
+
+  /**
+   * Get all active live sessions across all automations for the authenticated user
+   */
+  async getLiveSessions(): Promise<LiveSession[]> {
+    try {
+      const response = await api.get<{ success: boolean; data: LiveSession[] }>(
+        ENDPOINTS.AUTOMATIONS.USER_LIVE_SESSIONS
+      );
+      return response.data.data || [];
+    } catch (error) {
+      logger.error("Failed to get live sessions:", getApiErrorMessage(error));
+      return [];
+    }
+  }
+
+  /**
+   * Get live sessions for a specific automation
+   */
+  async getLiveSessionsForAutomation(automationId: string): Promise<LiveSession[]> {
+    try {
+      const response = await api.get<{ success: boolean; data: LiveSession[] }>(
+        ENDPOINTS.AUTOMATIONS.LIVE_SESSIONS(automationId)
+      );
+      return response.data.data || [];
+    } catch (error) {
+      logger.error("Failed to get live sessions for automation:", getApiErrorMessage(error));
+      return [];
     }
   }
 

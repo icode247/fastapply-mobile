@@ -14,13 +14,15 @@ export const subscriptionService = {
    * Get current user's subscription
    */
   async getCurrentSubscription(): Promise<Subscription> {
-    const response = await api.get<any>(ENDPOINTS.SUBSCRIPTIONS.CURRENT);
+    const response = await api.get<Subscription & { planType?: string }>(
+      ENDPOINTS.SUBSCRIPTIONS.CURRENT
+    );
 
     const data = response.data;
 
     // Map planType to tier if tier is missing
-    if (data && !data.tier && data.planType) {
-      data.tier = data.planType;
+    if (data && !(data as any).tier && data.planType) {
+      (data as any).tier = data.planType;
     }
 
     return data as Subscription;

@@ -3,10 +3,10 @@ import React, { useState } from "react";
 import {
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import {
@@ -50,6 +50,7 @@ export const JobFiltersModal: React.FC<JobFiltersModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}

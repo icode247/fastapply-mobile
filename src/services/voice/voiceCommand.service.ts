@@ -1,5 +1,6 @@
 // Voice Command Service - Orchestrates the entire voice command flow
 
+import { logger } from "../../utils/logger";
 import { NormalizedJob } from "../../types/job.types";
 import { JobProfile } from "../../types/profile.types";
 import {
@@ -94,7 +95,7 @@ class VoiceCommandService {
    */
   async startListening(): Promise<boolean> {
     if (this.sessionState.recording.isRecording) {
-      console.warn("Already recording");
+      logger.warn("Already recording");
       return false;
     }
 

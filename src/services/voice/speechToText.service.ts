@@ -3,6 +3,7 @@
 import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system/legacy";
 import { TranscriptionResult } from "../../types/voice.types";
+import { logger } from "../../utils/logger";
 
 // Get API key from environment variables
 const OPENAI_API_KEY =
@@ -47,7 +48,7 @@ class SpeechToTextService {
     options?: TranscriptionOptions,
   ): Promise<TranscriptionResult> {
     if (!this.isConfigured()) {
-      console.error("OpenAI API key not configured");
+      logger.error("OpenAI API key not configured");
       return {
         text: "",
         confidence: 0,
@@ -112,7 +113,7 @@ class SpeechToTextService {
         language: options?.language || "en",
       };
     } catch (error) {
-      console.error("Transcription error:", error);
+      logger.error("Transcription error:", error);
       return {
         text: "",
         confidence: 0,

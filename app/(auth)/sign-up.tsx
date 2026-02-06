@@ -12,20 +12,20 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
   Dimensions,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { uiScale } from "../../src/constants/theme";
 import { getApiErrorMessage } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
+import { googleSignIn, googleSignOut } from "../../src/services/google-auth";
+import { useAuth } from "../../src/hooks/useAuth";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Input Field Component matching Figma design
 const InputField: React.FC<{
@@ -105,10 +105,12 @@ export default function SignUpScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const { handleGoogleCallback } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   // Animations
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -149,8 +151,27 @@ export default function SignUpScreen() {
     }
   };
 
-  const handleGoogleSignUp = () => {
-    // Google sign up
+  const handleGoogleSignUp = async () => {
+    setGoogleLoading(true);
+
+    try {
+      const serverAuthCode = await googleSignIn();
+      if (!serverAuthCode) {
+        // User cancelled
+        return;
+      }
+
+      const result = await handleGoogleCallback(serverAuthCode);
+      if (!result.success) {
+        await googleSignOut();
+        Alert.alert("Error", result.error || "Google sign-up failed");
+      }
+    } catch (err) {
+      await googleSignOut();
+      Alert.alert("Error", getApiErrorMessage(err));
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -305,16 +326,19 @@ export default function SignUpScreen() {
             ]}
           >
             <TouchableOpacity
-              style={styles.googleButton}
+              style={[styles.googleButton, googleLoading && { opacity: 0.7 }]}
               onPress={handleGoogleSignUp}
               activeOpacity={0.9}
+              disabled={googleLoading || loading}
             >
               <Image
                 source={require("../../assets/icons/g-icon.png")}
                 style={styles.googleIcon}
                 resizeMode="contain"
               />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
+              <Text style={styles.googleButtonText}>
+                {googleLoading ? "Signing up..." : "Continue with Google"}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -426,6 +450,7 @@ const styles = StyleSheet.create({
     lineHeight: Math.round(22 * uiScale),
     padding: 0,
     margin: 0,
+    ...(Platform.OS === "android" ? { includeFontPadding: false, textAlignVertical: "center" as const } : {}),
   },
   // Terms
   termsText: {
@@ -446,7 +471,7 @@ const styles = StyleSheet.create({
   // Create Account Button
   createAccountButton: {
     backgroundColor: "#FBFBFB",
-    borderRadius: 50,
+    borderRadius: 100,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
@@ -495,15 +520,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#0D4982",
-    borderRadius: 50,
+    borderRadius: 100,
     paddingVertical: 16,
     gap: 8,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
   googleIcon: {
-    width: Math.round(40 * uiScale),
-    height: Math.round(40 * uiScale),
+    width: Math.round(24 * uiScale),
+    height: Math.round(24 * uiScale),
   },
   googleButtonText: {
     fontSize: Math.round(16 * uiScale),

@@ -5,11 +5,11 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { borderRadius, spacing } from "../../constants/theme";
+import { Text } from "./Text";
+import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 
 interface SelectOption {
@@ -74,7 +74,7 @@ export const Select: React.FC<SelectProps> = ({
           <View
             style={[styles.modalContent, { backgroundColor: colors.surface }]}
           >
-            <Text style={[styles.modalTitle, { color: colors.text }]}>
+            <Text style={[styles.modalTitle, { color: colors.text, borderBottomColor: colors.border }]}>
               {label}
             </Text>
             <FlatList
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing[4],
   },
   label: {
-    fontSize: 14,
+    fontSize: typography.fontSize.sm,
     fontWeight: "600",
     marginBottom: spacing[2],
   },
@@ -134,13 +134,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 50,
+    minHeight: 48,
+    paddingVertical: spacing[3],
     paddingHorizontal: spacing[4],
     borderWidth: 1,
     borderRadius: borderRadius.md,
   },
   selectText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.base,
   },
   modalOverlay: {
     flex: 1,
@@ -154,12 +155,11 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[4],
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: typography.fontSize.lg,
     fontWeight: "700",
     paddingHorizontal: spacing[4],
     paddingBottom: spacing[3],
     borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
   },
   optionItem: {
     flexDirection: "row",
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
   },
   optionText: {
-    fontSize: 16,
+    fontSize: typography.fontSize.base,
   },
 });
 

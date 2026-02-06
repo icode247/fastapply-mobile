@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
+  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing, typography } from "../../constants/theme";
+import { filterCities } from "../../constants/cities";
 import { useTheme } from "../../hooks";
 
 export interface LocationItem {
@@ -40,20 +42,37 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
   const insets = useSafeAreaInsets();
   const [inputValue, setInputValue] = useState("");
 
-  const addLocation = () => {
-    const trimmed = inputValue.trim();
-    if (trimmed && selectedLocations.length < maxLocations) {
-      const id = trimmed.toLowerCase().replace(/\s+/g, "-");
-      if (!selectedLocations.some((l) => l.id === id)) {
-        onLocationsChange([...selectedLocations, { id, name: trimmed }]);
-        setInputValue("");
+  const selectedIds = useMemo(
+    () => new Set(selectedLocations.map((l) => l.id)),
+    [selectedLocations],
+  );
+
+  const suggestions = useMemo(() => {
+    const results = filterCities(inputValue);
+    return results.filter(
+      (city) => !selectedIds.has(city.toLowerCase().replace(/\s+/g, "-")),
+    );
+  }, [inputValue, selectedIds]);
+
+  const addLocation = useCallback(
+    (name?: string) => {
+      const trimmed = (name || inputValue).trim();
+      if (trimmed && selectedLocations.length < maxLocations) {
+        const id = trimmed.toLowerCase().replace(/\s+/g, "-");
+        if (!selectedIds.has(id)) {
+          onLocationsChange([...selectedLocations, { id, name: trimmed }]);
+          setInputValue("");
+        }
       }
-    }
-  };
+    },
+    [inputValue, selectedLocations, maxLocations, selectedIds, onLocationsChange],
+  );
 
   const removeLocation = (id: string) => {
     onLocationsChange(selectedLocations.filter((l) => l.id !== id));
   };
+
+  const hasSuggestions = suggestions.length > 0;
 
   return (
     <Modal
@@ -73,6 +92,7 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
               {
                 backgroundColor: colors.background,
                 paddingBottom: insets.bottom + spacing[4],
+                maxHeight: hasSuggestions ? "75%" : "60%",
               },
             ]}
             onPress={(e) => e.stopPropagation()}
@@ -117,11 +137,11 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
                   placeholderTextColor={colors.textTertiary}
                   value={inputValue}
                   onChangeText={setInputValue}
-                  onSubmitEditing={addLocation}
+                  onSubmitEditing={() => addLocation()}
                   returnKeyType="done"
                 />
                 <TouchableOpacity
-                  onPress={addLocation}
+                  onPress={() => addLocation()}
                   style={[styles.addButton, { backgroundColor: colors.success }]}
                   disabled={!inputValue.trim()}
                 >
@@ -129,6 +149,42 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Autocomplete Suggestions */}
+            {hasSuggestions && (
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item, index) => `${index}-${item}`}
+                keyboardShouldPersistTaps="handled"
+                style={styles.suggestionsContainer}
+                contentContainerStyle={styles.suggestionsContent}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.suggestionItem,
+                      { borderBottomColor: colors.border },
+                    ]}
+                    onPress={() => addLocation(item)}
+                  >
+                    <Ionicons
+                      name="location-outline"
+                      size={18}
+                      color={colors.textSecondary}
+                      style={styles.suggestionIcon}
+                    />
+                    <Text
+                      style={[
+                        styles.suggestionText,
+                        { color: colors.text },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
 
             {/* Counter */}
             <View style={styles.counterContainer}>
@@ -145,6 +201,7 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
               style={styles.listContainer}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {selectedLocations.map((item) => (
                 <View
@@ -188,7 +245,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     minHeight: 350,
-    maxHeight: "60%",
   },
   handleContainer: {
     alignItems: "center",
@@ -247,9 +303,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  suggestionsContainer: {
+    maxHeight: 200,
+  },
+  suggestionsContent: {
+    paddingHorizontal: spacing[5],
+  },
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing[3],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  suggestionIcon: {
+    marginRight: spacing[3],
+  },
+  suggestionText: {
+    fontSize: typography.fontSize.base,
+    flex: 1,
+  },
   counterContainer: {
     paddingHorizontal: spacing[5],
     paddingBottom: spacing[2],
+    paddingTop: spacing[2],
   },
   counterText: {
     fontSize: typography.fontSize.sm,

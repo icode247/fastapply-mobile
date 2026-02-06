@@ -6,10 +6,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { NormalizedJob } from "../../types/job.types";

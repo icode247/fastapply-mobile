@@ -14,6 +14,7 @@ import {
   normalizeApiJob,
   WorkplaceType,
 } from "../types/job.types";
+import { logger } from "../utils/logger";
 import api from "./api";
 
 // Supported ATS platforms - must match backend allowed values
@@ -117,8 +118,6 @@ class JobService {
       payload.companyBlacklist = prefs.companyBlacklist;
     }
 
-    // Note: API doesn't support excludeIds - we filter duplicates client-side
-
     return payload;
   }
 
@@ -166,7 +165,7 @@ class JobService {
 
     try {
       const payload = this.buildPayload();
-      console.log("[JobService] Fetching jobs:", {
+      logger.debug("[JobService] Fetching jobs:", {
         existingCount: this.jobs.length,
         excludeCount: this.fetchedJobIds.size,
       });
@@ -185,8 +184,7 @@ class JobService {
         );
 
         if (uniqueJobs.length === 0) {
-          // All returned jobs were duplicates - no more new jobs
-          console.log("[JobService] No new unique jobs found");
+          logger.debug("[JobService] No new unique jobs found");
           this.hasMoreJobs = false;
           this.notifyListeners();
           return [];
@@ -204,7 +202,7 @@ class JobService {
           this.hasMoreJobs = false;
         }
 
-        console.log("[JobService] Fetched jobs:", {
+        logger.debug("[JobService] Fetched jobs:", {
           newJobs: normalizedJobs.length,
           totalJobs: this.jobs.length,
           hasMore: this.hasMoreJobs,
@@ -213,18 +211,17 @@ class JobService {
         this.notifyListeners();
         return normalizedJobs;
       } else {
-        console.log("[JobService] API returned no jobs");
+        logger.debug("[JobService] API returned no jobs");
         this.hasMoreJobs = false;
         this.notifyListeners();
         return [];
       }
     } catch (error) {
-      console.error("[JobService] Failed to fetch jobs:", error);
+      logger.error("[JobService] Failed to fetch jobs:", error);
       this.lastError =
         error instanceof Error ? error.message : "Failed to fetch jobs";
 
       // Stop trying to fetch more on API errors (e.g., 400 Bad Request)
-      // This prevents repeated failed requests
       this.hasMoreJobs = false;
 
       this.notifyListeners();
@@ -243,10 +240,6 @@ class JobService {
   prefetchIfNeeded(currentIndex: number): void {
     const remainingJobs = this.jobs.length - currentIndex;
 
-    // Only prefetch if:
-    // 1. Not already fetching/prefetching
-    // 2. There are more jobs available
-    // 3. Remaining jobs are at or below threshold
     if (
       this.isFetching ||
       this.isPrefetching ||
@@ -256,18 +249,17 @@ class JobService {
       return;
     }
 
-    console.log("[JobService] Starting prefetch, remaining jobs:", remainingJobs);
+    logger.debug("[JobService] Starting prefetch, remaining jobs:", remainingJobs);
     this.isPrefetching = true;
 
-    // Fetch in background without blocking
     this.fetchJobsBatch()
       .then((newJobs) => {
         if (newJobs.length > 0) {
-          console.log("[JobService] Prefetch complete:", newJobs.length, "new jobs");
+          logger.debug("[JobService] Prefetch complete:", newJobs.length, "new jobs");
         }
       })
       .catch((error) => {
-        console.error("[JobService] Prefetch failed:", error);
+        logger.error("[JobService] Prefetch failed:", error);
       })
       .finally(() => {
         this.isPrefetching = false;
@@ -283,7 +275,6 @@ class JobService {
 
   /**
    * Get jobs starting from a specific index
-   * Useful for getting only remaining jobs
    */
   getJobsFrom(startIndex: number): NormalizedJob[] {
     return this.jobs.slice(startIndex);
@@ -444,7 +435,6 @@ class JobService {
   }): NormalizedJob[] {
     let filteredJobs = [...this.jobs];
 
-    // Job title search
     if (params.jobTitle) {
       const titleQuery = params.jobTitle.toLowerCase();
       filteredJobs = filteredJobs.filter(
@@ -454,14 +444,12 @@ class JobService {
       );
     }
 
-    // Remote filter
     if (params.remote) {
       filteredJobs = filteredJobs.filter(
         (job) => job.isRemote || job.workMode.toLowerCase() === "remote"
       );
     }
 
-    // Location filter
     if (params.location) {
       const locationQuery = params.location.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
@@ -469,7 +457,6 @@ class JobService {
       );
     }
 
-    // Company filter
     if (params.company) {
       const companyQuery = params.company.toLowerCase();
       filteredJobs = filteredJobs.filter((job) =>
@@ -477,7 +464,6 @@ class JobService {
       );
     }
 
-    // Skills filter
     if (params.skills && params.skills.length > 0) {
       const skills = params.skills.map((s) => s.toLowerCase());
       filteredJobs = filteredJobs.filter(

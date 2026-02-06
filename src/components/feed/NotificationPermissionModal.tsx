@@ -7,10 +7,10 @@ import {
   Modal,
   Platform,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
@@ -130,7 +130,7 @@ export const NotificationPermissionModal: React.FC<
   ];
 
   return (
-    <Modal visible={visible} transparent animationType="none">
+    <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
       {/* Backdrop */}
       <Animated.View
         style={[

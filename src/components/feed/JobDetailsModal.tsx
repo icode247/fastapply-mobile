@@ -5,10 +5,10 @@ import {
   Modal,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { NormalizedJob } from "../../types/job.types";
@@ -37,6 +37,7 @@ export const JobDetailsModal: React.FC<JobDetailsModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
+      onRequestClose={onClose}
     >
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}

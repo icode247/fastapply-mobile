@@ -2,13 +2,13 @@ import React from "react";
 import {
   ActivityIndicator,
   StyleSheet,
-  Text,
   TextStyle,
   TouchableOpacity,
   TouchableOpacityProps,
   ViewStyle,
 } from "react-native";
-import { borderRadius, spacing } from "../../constants/theme";
+import { Text } from "./Text";
+import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 
 type ButtonVariant = "primary" | "secondary" | "outline" | "ghost" | "danger";
@@ -80,9 +80,9 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getTextStyle = (): TextStyle => {
     const sizeStyles: Record<ButtonSize, TextStyle> = {
-      sm: { fontSize: 14 },
-      md: { fontSize: 16 },
-      lg: { fontSize: 18 },
+      sm: { fontSize: typography.fontSize.sm },
+      md: { fontSize: typography.fontSize.base },
+      lg: { fontSize: typography.fontSize.lg },
     };
 
     const variantStyles: Record<ButtonVariant, TextStyle> = {

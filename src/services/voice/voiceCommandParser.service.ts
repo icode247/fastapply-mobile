@@ -1,6 +1,7 @@
 // Voice Command Parser Service - NLU using OpenAI GPT
 
 import Constants from "expo-constants";
+import { logger } from "../../utils/logger";
 import {
   ParsedVoiceCommand,
   VoiceCommandIntent,
@@ -142,7 +143,7 @@ class VoiceCommandParserService {
         const gptResult = await this.parseWithGPT(text);
         return gptResult;
       } catch (error) {
-        console.error("GPT parsing failed, falling back to regex:", error);
+        logger.error("GPT parsing failed, falling back to regex:", error);
         return this.parseWithRegex(text);
       }
     }
@@ -194,7 +195,7 @@ class VoiceCommandParserService {
       };
     } catch {
       // If JSON parsing fails, try to extract from text
-      console.error("Failed to parse GPT response as JSON:", content);
+      logger.error("Failed to parse GPT response as JSON:", content);
       return this.parseWithRegex(text);
     }
   }

@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { automationService } from "../services/automation.service";
+import { logger } from "../utils/logger";
 import {
   Automation,
   AutomationQueueStats,
@@ -96,7 +97,7 @@ export function useAutomation(
           }
         }
       } catch (error) {
-        console.error("Failed to initialize automation:", error);
+        logger.error("Failed to initialize automation:", error);
         if (mounted) {
           setIsReady(true); // Still ready, just no automation yet
         }
@@ -120,7 +121,7 @@ export function useAutomation(
 
       if (!currentProfileId) {
         const errorMsg = "No profile selected";
-        console.warn("queueJob:", errorMsg);
+        logger.warn("queueJob:", errorMsg);
         onError?.(job, errorMsg);
         return false;
       }
@@ -130,7 +131,7 @@ export function useAutomation(
 
       if (!jobUrl) {
         const errorMsg = "Job has no application URL";
-        console.warn("queueJob:", errorMsg);
+        logger.warn("queueJob:", errorMsg);
         onError?.(job, errorMsg);
         return false;
       }
@@ -164,14 +165,14 @@ export function useAutomation(
           onSuccess?.(job, result.automationId!);
           return true;
         } else {
-          console.warn("queueJob failed:", result.error);
+          logger.warn("queueJob failed:", result.error);
           onError?.(job, result.error || "Failed to queue job");
           return false;
         }
       } catch (error) {
         const errorMsg =
           error instanceof Error ? error.message : "Failed to queue job";
-        console.error("queueJob error:", errorMsg);
+        logger.error("queueJob error:", errorMsg);
         onError?.(job, errorMsg);
         return false;
       }
@@ -237,7 +238,7 @@ export function useAutomation(
       }
       setPendingCount(automationService.getPendingUrlsCount());
     } catch (error) {
-      console.error("Failed to refresh stats:", error);
+      logger.error("Failed to refresh stats:", error);
     }
   }, [currentAutomation]);
 
@@ -249,7 +250,7 @@ export function useAutomation(
       await automationService.syncPendingUrls();
       setPendingCount(automationService.getPendingUrlsCount());
     } catch (error) {
-      console.error("Failed to sync pending jobs:", error);
+      logger.error("Failed to sync pending jobs:", error);
     }
   }, []);
 

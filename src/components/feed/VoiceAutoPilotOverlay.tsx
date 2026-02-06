@@ -15,11 +15,11 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import { useTheme } from "../../../src/hooks";
@@ -32,6 +32,7 @@ import {
   voiceRecordingService,
 } from "../../../src/services/voice";
 import { ParsedVoiceCommand } from "../../../src/types/voice.types";
+import { logger } from "../../../src/utils/logger";
 
 // Example suggestions
 const SUGGESTIONS = [
@@ -279,13 +280,13 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
   const stopAndProcess = useCallback(async () => {
     setPhase("processing");
     setIsRecording(false);
-    console.log("VoiceAutoPilotOverlay: Starting processing (v2)");
+    logger.debug("VoiceAutoPilotOverlay: Starting processing (v2)");
     try {
       const result = await voiceRecordingService.stopRecording();
 
       // If no voice was detected at all (silent recording), just close
       if (result.isSilent) {
-        console.log("Empty recording detected - cancelling");
+        logger.debug("Empty recording detected - cancelling");
         setPhase("listening"); // Reset phase just in case
         onClose();
         return;
@@ -314,7 +315,7 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
         setPhase("listening");
       }
     } catch (error) {
-      console.error("Processing error:", error);
+      logger.error("Processing error:", error);
       Alert.alert("Error", "Failed to process voice command.");
       setPhase("listening");
     }
@@ -532,15 +533,24 @@ export const VoiceAutoPilotOverlay: React.FC<VoiceAutoPilotOverlayProps> = ({
       onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.container}
       >
         {/* Glass Background */}
-        <BlurView
-          intensity={Platform.OS === "ios" ? 40 : 100}
-          tint={isDark ? "dark" : "light"}
-          style={StyleSheet.absoluteFill}
-        />
+        {Platform.OS === "ios" ? (
+          <BlurView
+            intensity={40}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+          />
+        ) : (
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: isDark ? "rgba(0,0,0,0.88)" : "rgba(255,255,255,0.92)" },
+            ]}
+          />
+        )}
 
         {/* Close Button */}
         <TouchableOpacity

@@ -1,19 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
+  FlatList,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing, typography } from "../../constants/theme";
+import { filterJobTitles } from "../../constants/jobTitles";
 import { useTheme } from "../../hooks";
 
 interface JobTitlesPickerModalProps {
@@ -35,17 +37,36 @@ export const JobTitlesPickerModal: React.FC<JobTitlesPickerModalProps> = ({
   const insets = useSafeAreaInsets();
   const [inputValue, setInputValue] = useState("");
 
-  const addTitle = () => {
-    const trimmed = inputValue.trim();
-    if (trimmed && !selectedTitles.includes(trimmed) && selectedTitles.length < maxTitles) {
-      onTitlesChange([...selectedTitles, trimmed]);
-      setInputValue("");
-    }
-  };
+  const selectedSet = useMemo(
+    () => new Set(selectedTitles.map((t) => t.toLowerCase())),
+    [selectedTitles],
+  );
+
+  const suggestions = useMemo(() => {
+    const results = filterJobTitles(inputValue);
+    return results.filter((title) => !selectedSet.has(title.toLowerCase()));
+  }, [inputValue, selectedSet]);
+
+  const addTitle = useCallback(
+    (name?: string) => {
+      const trimmed = (name || inputValue).trim();
+      if (
+        trimmed &&
+        !selectedSet.has(trimmed.toLowerCase()) &&
+        selectedTitles.length < maxTitles
+      ) {
+        onTitlesChange([...selectedTitles, trimmed]);
+        setInputValue("");
+      }
+    },
+    [inputValue, selectedTitles, maxTitles, selectedSet, onTitlesChange],
+  );
 
   const removeTitle = (title: string) => {
     onTitlesChange(selectedTitles.filter((t) => t !== title));
   };
+
+  const hasSuggestions = suggestions.length > 0;
 
   return (
     <Modal
@@ -65,6 +86,7 @@ export const JobTitlesPickerModal: React.FC<JobTitlesPickerModalProps> = ({
               {
                 backgroundColor: colors.background,
                 paddingBottom: insets.bottom + spacing[4],
+                maxHeight: hasSuggestions ? "75%" : "60%",
               },
             ]}
             onPress={(e) => e.stopPropagation()}
@@ -109,11 +131,11 @@ export const JobTitlesPickerModal: React.FC<JobTitlesPickerModalProps> = ({
                   placeholderTextColor={colors.textTertiary}
                   value={inputValue}
                   onChangeText={setInputValue}
-                  onSubmitEditing={addTitle}
+                  onSubmitEditing={() => addTitle()}
                   returnKeyType="done"
                 />
                 <TouchableOpacity
-                  onPress={addTitle}
+                  onPress={() => addTitle()}
                   style={[styles.addButton, { backgroundColor: colors.success }]}
                   disabled={!inputValue.trim()}
                 >
@@ -121,6 +143,42 @@ export const JobTitlesPickerModal: React.FC<JobTitlesPickerModalProps> = ({
                 </TouchableOpacity>
               </View>
             </View>
+
+            {/* Autocomplete Suggestions */}
+            {hasSuggestions && (
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item, index) => `${index}-${item}`}
+                keyboardShouldPersistTaps="handled"
+                style={styles.suggestionsContainer}
+                contentContainerStyle={styles.suggestionsContent}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.suggestionItem,
+                      { borderBottomColor: colors.border },
+                    ]}
+                    onPress={() => addTitle(item)}
+                  >
+                    <Ionicons
+                      name="briefcase-outline"
+                      size={18}
+                      color={colors.textSecondary}
+                      style={styles.suggestionIcon}
+                    />
+                    <Text
+                      style={[
+                        styles.suggestionText,
+                        { color: colors.text },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
 
             {/* Counter */}
             <View style={styles.counterContainer}>
@@ -137,6 +195,7 @@ export const JobTitlesPickerModal: React.FC<JobTitlesPickerModalProps> = ({
               style={styles.listContainer}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
             >
               {selectedTitles.map((title) => (
                 <View
@@ -180,7 +239,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     minHeight: 350,
-    maxHeight: "60%",
   },
   handleContainer: {
     alignItems: "center",
@@ -239,9 +297,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  suggestionsContainer: {
+    maxHeight: 200,
+  },
+  suggestionsContent: {
+    paddingHorizontal: spacing[5],
+  },
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing[3],
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
+  suggestionIcon: {
+    marginRight: spacing[3],
+  },
+  suggestionText: {
+    fontSize: typography.fontSize.base,
+    flex: 1,
+  },
   counterContainer: {
     paddingHorizontal: spacing[5],
     paddingBottom: spacing[2],
+    paddingTop: spacing[2],
   },
   counterText: {
     fontSize: typography.fontSize.sm,

@@ -8,10 +8,10 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Button,
@@ -172,7 +172,7 @@ export default function EditProfileScreen() {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView

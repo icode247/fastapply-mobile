@@ -1,6 +1,7 @@
 // Pending Swipes Service - Read-only access to pending swiped jobs
 // Used by the applications screen to show jobs waiting to be queued
 
+import { logger } from "../utils/logger";
 import { storage } from "../utils/storage";
 
 const STORAGE_KEY = "swipe_batch_pending_jobs";
@@ -25,7 +26,7 @@ export async function getPendingSwipedJobs(): Promise<PendingSwipedJob[]> {
     }
     return [];
   } catch (error) {
-    console.error("Failed to get pending swiped jobs:", error);
+    logger.error("Failed to get pending swiped jobs:", error);
     return [];
   }
 }

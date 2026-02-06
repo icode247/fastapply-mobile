@@ -5,18 +5,22 @@ import * as Linking from "expo-linking";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { uiScale } from "../../src/constants/theme";
 import { useAuth } from "../../src/hooks";
 import { getApiErrorMessage } from "../../src/services/api";
+import { authService } from "../../src/services/auth.service";
 
 // Gradient Text Component
 const GradientText: React.FC<{ children: string; style?: any }> = ({
@@ -67,6 +71,8 @@ export default function VerifyScreen() {
   const [isVerifying, setIsVerifying] = useState(false);
   const [countdown, setCountdown] = useState(52);
   const [canResend, setCanResend] = useState(false);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const inputRef = useRef<TextInput>(null);
   const email = params.email as string | undefined;
@@ -120,16 +126,14 @@ export default function VerifyScreen() {
 
   const handleMagicLinkVerification = async (token: string) => {
     setIsVerifying(true);
+    setError("");
     try {
       const result = await verifyMagicLink(token);
       if (!result.success) {
-        Alert.alert(
-          "Verification Failed",
-          result.error || "Invalid or expired link"
-        );
+        setError(result.error || "Invalid or expired link");
       }
-    } catch (error) {
-      Alert.alert("Error", "Something went wrong during verification");
+    } catch (err) {
+      setError("Something went wrong during verification");
     } finally {
       setIsVerifying(false);
     }
@@ -140,30 +144,44 @@ export default function VerifyScreen() {
     const numericText = text.replace(/[^0-9]/g, "");
     if (numericText.length <= 6) {
       setOtp(numericText);
+      if (error) setError("");
+      if (successMessage) setSuccessMessage("");
     }
   };
 
   const handleVerifyCode = async () => {
     if (!email || otp.length !== 6) return;
+    setError("");
+    setSuccessMessage("");
     setIsVerifying(true);
 
     try {
       await verifyOtp({ email, otp });
       // Success - will redirect via auth hook
-    } catch (error) {
-      Alert.alert("Verification Failed", getApiErrorMessage(error));
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+      setOtp("");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleResendCode = () => {
-    if (!canResend) return;
-    // Reset countdown and trigger resend
+  const handleResendCode = async () => {
+    if (!canResend || !email) return;
+    setError("");
+    setSuccessMessage("");
     setCountdown(52);
     setCanResend(false);
-    // TODO: Call resend API
-    router.push("/(auth)/sign-in");
+    setOtp("");
+
+    try {
+      await authService.signIn({ email, device: "mobile" });
+      setSuccessMessage("A new code has been sent to your email");
+    } catch (err) {
+      setError(getApiErrorMessage(err));
+      setCanResend(true);
+      setCountdown(0);
+    }
   };
 
   const focusInput = () => {
@@ -181,120 +199,149 @@ export default function VerifyScreen() {
       />
 
       {/* Decorative circle */}
-      <View style={styles.decorativeCircle} />
+      <View style={[styles.decorativeCircle, { top: insets.top + 20 }]} />
 
-      <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
-        {/* Back Button */}
-        <Animated.View
-          style={[
-            styles.backButtonContainer,
-            {
-              opacity: fadeIn,
-              transform: [{ translateY: slideUp }],
-            },
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.scrollContent,
+            { paddingTop: insets.top + 12 },
           ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => router.back()}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
-          </TouchableOpacity>
-        </Animated.View>
-
-        {/* Header */}
-        <Animated.View
-          style={[
-            styles.header,
-            {
-              opacity: fadeIn,
-              transform: [{ translateY: slideUp }],
-            },
-          ]}
-        >
-          <GradientText>Verify Your Email</GradientText>
-          <Text style={styles.subtitle}>
-            Enter the 6-digit code sent to your email{"\n"}
-            <Text style={styles.emailText}>{email || "hello@fastapply.co"}</Text>
-          </Text>
-        </Animated.View>
-
-        {/* OTP Card */}
-        <Animated.View
-          style={[
-            styles.otpCard,
-            {
-              opacity: fadeIn,
-              transform: [{ translateY: slideUp }],
-            },
-          ]}
-        >
-          {/* Hidden TextInput for keyboard */}
-          <TextInput
-            ref={inputRef}
-            style={styles.hiddenInput}
-            value={otp}
-            onChangeText={handleOtpChange}
-            keyboardType="number-pad"
-            maxLength={6}
-            autoFocus
-          />
-
-          {/* OTP Boxes */}
-          <TouchableOpacity
-            style={styles.otpContainer}
-            onPress={focusInput}
-            activeOpacity={1}
-          >
-            {[0, 1, 2, 3, 4, 5].map((index) => (
-              <OTPBox
-                key={index}
-                value={otp[index] || ""}
-                isFocused={otp.length === index}
-                isFirst={index === 0}
-              />
-            ))}
-          </TouchableOpacity>
-
-          {/* Resend Code Text */}
-          <View style={styles.resendContainer}>
-            {canResend ? (
-              <Text style={styles.resendText}>
-                <Text style={styles.resendTextLight}>Didn't get a code? </Text>
-                <Text style={styles.resendLink} onPress={handleResendCode}>
-                  Resend Code
-                </Text>
-              </Text>
-            ) : (
-              <Text style={styles.countdownText}>
-                Resend Code in {countdown}s..
-              </Text>
-            )}
-          </View>
-
-          {/* Verify Code Button */}
-          <TouchableOpacity
+          {/* Back Button */}
+          <Animated.View
             style={[
-              styles.verifyButton,
-              otp.length !== 6 && styles.verifyButtonDisabled,
+              styles.backButtonContainer,
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
             ]}
-            onPress={handleVerifyCode}
-            activeOpacity={0.9}
-            disabled={otp.length !== 6 || isVerifying}
           >
-            {isVerifying ? (
-              <View style={styles.loadingContainer}>
-                <View style={styles.loadingDot} />
-                <View style={[styles.loadingDot, { opacity: 0.7 }]} />
-                <View style={[styles.loadingDot, { opacity: 0.4 }]} />
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="arrow-back" size={Math.round(20 * uiScale)} color="#FFFFFF" />
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Header */}
+          <Animated.View
+            style={[
+              styles.header,
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
+          >
+            <GradientText>Verify Your Email</GradientText>
+            <Text style={styles.subtitle}>
+              Enter the 6-digit code sent to your email{"\n"}
+              <Text style={styles.emailText}>{email || "hello@fastapply.co"}</Text>
+            </Text>
+          </Animated.View>
+
+          {/* OTP Card */}
+          <Animated.View
+            style={[
+              styles.otpCard,
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
+          >
+            {/* Hidden TextInput for keyboard */}
+            <TextInput
+              ref={inputRef}
+              style={styles.hiddenInput}
+              value={otp}
+              onChangeText={handleOtpChange}
+              keyboardType="number-pad"
+              maxLength={6}
+              autoFocus
+            />
+
+            {/* OTP Boxes */}
+            <TouchableOpacity
+              style={styles.otpContainer}
+              onPress={focusInput}
+              activeOpacity={1}
+            >
+              {[0, 1, 2, 3, 4, 5].map((index) => (
+                <OTPBox
+                  key={index}
+                  value={otp[index] || ""}
+                  isFocused={otp.length === index}
+                  isFirst={index === 0}
+                />
+              ))}
+            </TouchableOpacity>
+
+            {/* Error Message */}
+            {error ? (
+              <View style={styles.messageContainer}>
+                <Ionicons name="alert-circle" size={Math.round(16 * uiScale)} color="#FF6B6B" />
+                <Text style={styles.errorText}>{error}</Text>
               </View>
-            ) : (
-              <Text style={styles.verifyButtonText}>Verify Code</Text>
-            )}
-          </TouchableOpacity>
-        </Animated.View>
-      </View>
+            ) : null}
+
+            {/* Success Message */}
+            {successMessage ? (
+              <View style={styles.messageContainer}>
+                <Ionicons name="checkmark-circle" size={Math.round(16 * uiScale)} color="#4ADE80" />
+                <Text style={styles.successText}>{successMessage}</Text>
+              </View>
+            ) : null}
+
+            {/* Resend Code Text */}
+            <View style={styles.resendContainer}>
+              {canResend ? (
+                <Text style={styles.resendText}>
+                  <Text style={styles.resendTextLight}>Didn't get a code? </Text>
+                  <Text style={styles.resendLink} onPress={handleResendCode}>
+                    Resend Code
+                  </Text>
+                </Text>
+              ) : (
+                <Text style={styles.countdownText}>
+                  Resend Code in {countdown}s..
+                </Text>
+              )}
+            </View>
+
+            {/* Verify Code Button */}
+            <TouchableOpacity
+              style={[
+                styles.verifyButton,
+                otp.length !== 6 && styles.verifyButtonDisabled,
+              ]}
+              onPress={handleVerifyCode}
+              activeOpacity={0.9}
+              disabled={otp.length !== 6 || isVerifying}
+            >
+              {isVerifying ? (
+                <View style={styles.loadingContainer}>
+                  <View style={styles.loadingDot} />
+                  <View style={[styles.loadingDot, { opacity: 0.7 }]} />
+                  <View style={[styles.loadingDot, { opacity: 0.4 }]} />
+                </View>
+              ) : (
+                <Text style={styles.verifyButtonText}>Verify Code</Text>
+              )}
+            </TouchableOpacity>
+          </Animated.View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -303,26 +350,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    flexGrow: 1,
+  },
   decorativeCircle: {
     position: "absolute",
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: "rgba(255,255,255,0.12)",
-    top: 77,
     left: 8,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
   },
   // Back Button
   backButtonContainer: {
     marginBottom: 16,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: Math.round(40 * uiScale),
+    height: Math.round(40 * uiScale),
     borderRadius: 1000,
     backgroundColor: "rgba(255,255,255,0.05)",
     justifyContent: "center",
@@ -333,15 +385,15 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   title: {
-    fontSize: 40,
+    fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
-    lineHeight: 48,
+    lineHeight: Math.round(48 * uiScale),
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "#FFFFFF",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
     marginTop: 8,
   },
   emailText: {
@@ -358,8 +410,8 @@ const styles = StyleSheet.create({
   hiddenInput: {
     position: "absolute",
     opacity: 0,
-    height: 0,
-    width: 0,
+    height: 1,
+    width: 1,
   },
   otpContainer: {
     flexDirection: "row",
@@ -367,8 +419,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   otpBox: {
-    width: 48,
-    height: 48,
+    width: Math.round(48 * uiScale),
+    height: Math.round(48 * uiScale),
     borderRadius: 8,
     backgroundColor: "rgba(255,255,255,0.2)",
     borderWidth: 1,
@@ -383,17 +435,35 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.8)",
   },
   otpText: {
-    fontSize: 24,
+    fontSize: Math.round(24 * uiScale),
     fontWeight: "600",
     color: "#FFFFFF",
+  },
+  // Messages
+  messageContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  errorText: {
+    fontSize: Math.round(14 * uiScale),
+    color: "#FF6B6B",
+    flex: 1,
+    lineHeight: Math.round(20 * uiScale),
+  },
+  successText: {
+    fontSize: Math.round(14 * uiScale),
+    color: "#4ADE80",
+    flex: 1,
+    lineHeight: Math.round(20 * uiScale),
   },
   // Resend
   resendContainer: {
     alignItems: "center",
   },
   resendText: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: Math.round(14 * uiScale),
+    lineHeight: Math.round(22 * uiScale),
   },
   resendTextLight: {
     color: "rgba(255,255,255,0.6)",
@@ -403,9 +473,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   countdownText: {
-    fontSize: 14,
+    fontSize: Math.round(14 * uiScale),
     color: "rgba(255,255,255,0.6)",
-    lineHeight: 22,
+    lineHeight: Math.round(22 * uiScale),
   },
   // Verify Button
   verifyButton: {
@@ -424,7 +494,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   verifyButtonText: {
-    fontSize: 16,
+    fontSize: Math.round(16 * uiScale),
     fontWeight: "500",
     color: "#0D4982",
   },

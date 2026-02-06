@@ -6,11 +6,12 @@ import React, { useEffect } from "react";
 import {
   Dimensions,
   Modal,
+  Platform,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../ui/Text";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -135,7 +136,7 @@ export const VoiceCommandOverlay: React.FC<VoiceCommandOverlayProps> = ({
   onClose,
   onStopListening,
 }) => {
-  const { colors, isDarkMode } = useTheme();
+  const { colors, isDark } = useTheme();
 
   // Animation for main button
   const buttonScale = useSharedValue(1);
@@ -179,9 +180,14 @@ export const VoiceCommandOverlay: React.FC<VoiceCommandOverlayProps> = ({
       onRequestClose={onClose}
     >
       <BlurView
-        intensity={isDarkMode ? 80 : 60}
-        tint={isDarkMode ? "dark" : "light"}
-        style={styles.container}
+        intensity={isDark ? 80 : 60}
+        tint={isDark ? "dark" : "light"}
+        style={[
+          styles.container,
+          Platform.OS === "android" && {
+            backgroundColor: isDark ? "rgba(0,0,0,0.85)" : "rgba(255,255,255,0.92)",
+          },
+        ]}
       >
         {/* Close button */}
         <TouchableOpacity

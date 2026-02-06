@@ -1,14 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  Platform,
   StyleSheet,
-  Text,
   TextInput,
   TextInputProps,
   TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
+import { Text } from "./Text";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: typography.fontSize.base,
     paddingVertical: spacing[3],
+    ...(Platform.OS === "android" ? { includeFontPadding: false, textAlignVertical: "center" as const } : {}),
   },
   leftIcon: {
     marginLeft: spacing[3],

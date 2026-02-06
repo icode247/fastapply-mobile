@@ -10,16 +10,14 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 import { UpgradePrompt } from "../../src/components";
-import { borderRadius, spacing } from "../../src/constants/theme";
+import { borderRadius, spacing, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 
 const { width } = Dimensions.get("window");
@@ -520,6 +518,7 @@ export default function ProfilesScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -681,7 +680,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     borderRadius: 16,
-    overflow: "hidden",
+    ...(Platform.OS === "ios" ? { overflow: "hidden" as const } : {}),
     shadowColor: "#0ea5e9",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
@@ -716,7 +715,7 @@ const styles = StyleSheet.create({
   profileCard: {
     marginBottom: spacing[5],
     borderRadius: borderRadius.xl,
-    overflow: "hidden",
+    ...(Platform.OS === "ios" ? { overflow: "hidden" as const } : {}),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,

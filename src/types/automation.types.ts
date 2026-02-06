@@ -180,6 +180,25 @@ export interface AutomationRunsResponse {
   limit: number;
 }
 
+// Browserbase live session for watching automation in real-time
+export interface LiveSession {
+  id: string;
+  automationId: string;
+  runId: string;
+  liveViewUrl: string;
+  jobTitle?: string;
+  companyName?: string;
+  platform?: string;
+  status: "active" | "completed" | "disconnected";
+  startedAt: string;
+  currentUrl?: string;
+}
+
+export interface LiveSessionsResponse {
+  data: LiveSession[];
+  total: number;
+}
+
 // Local state for managing automation in the app
 export interface AutomationState {
   currentAutomationId: string | null;

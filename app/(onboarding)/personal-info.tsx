@@ -5,13 +5,13 @@ import { Controller, useForm } from "react-hook-form";
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Input } from "../../src/components";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
@@ -98,7 +98,7 @@ export default function PersonalInfoScreen() {
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.keyboardView}
       >
         <ScrollView

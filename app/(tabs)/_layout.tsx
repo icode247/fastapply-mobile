@@ -4,9 +4,6 @@ import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../../src/hooks";
 
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
-
 export default function TabLayout() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();

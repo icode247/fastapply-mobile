@@ -1,6 +1,7 @@
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
+import { logger } from "../utils/logger";
 import userService from "./user.service";
 
 // Check if running in Expo Go (where push notifications are not supported in SDK 53+)
@@ -13,7 +14,7 @@ if (!isExpoGo) {
   Notifications = require("expo-notifications");
 
   // Configure notification handler
-  Notifications.setNotificationHandler({
+  Notifications!.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,
       shouldPlaySound: true,
@@ -23,7 +24,7 @@ if (!isExpoGo) {
     }),
   });
 } else {
-  console.log(
+  logger.info(
     "expo-notifications: Running in Expo Go - push notifications disabled. Use a development build for full functionality."
   );
 }
@@ -35,7 +36,7 @@ export const notificationService = {
    */
   async registerForPushNotificationsAsync(): Promise<string | null> {
     if (!Notifications) {
-      console.log("Push notifications not available in Expo Go");
+      logger.info("Push notifications not available in Expo Go");
       return null;
     }
 
@@ -61,7 +62,7 @@ export const notificationService = {
       }
 
       if (finalStatus !== "granted") {
-        console.log("Failed to get push token for push notification!");
+        logger.info("Failed to get push token for push notification!");
         return null;
       }
 
@@ -70,9 +71,8 @@ export const notificationService = {
           Constants?.expoConfig?.extra?.eas?.projectId ||
           Constants?.easConfig?.projectId;
 
-        // Simplify web handling
         if (Platform.OS === "web") {
-          console.log(
+          logger.info(
             "Push notifications on web require VAPID key. Skipping for now to avoid errors."
           );
           return null;
@@ -82,12 +82,12 @@ export const notificationService = {
           projectId,
         });
         token = tokenData.data;
-        console.log("Expo Push Token:", token);
-      } catch (e: any) {
-        console.log("Error fetching push token", e);
+        logger.debug("Expo Push Token:", token);
+      } catch (e) {
+        logger.error("Error fetching push token", e);
       }
     } else {
-      console.log("Must use physical device for Push Notifications");
+      logger.info("Must use physical device for Push Notifications");
     }
 
     return token;
@@ -99,9 +99,9 @@ export const notificationService = {
   async updateServerToken(token: string) {
     try {
       await userService.updatePushToken(token);
-      console.log("Push token updated on server");
+      logger.debug("Push token updated on server");
     } catch (error) {
-      console.log("Failed to update push token on server", error);
+      logger.error("Failed to update push token on server", error);
     }
   },
 

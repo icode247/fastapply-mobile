@@ -6,10 +6,10 @@ import {
   Modal,
   Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "./Text";
 import {
   getPlanDisplayName,
   isUnlimited,

@@ -3,6 +3,7 @@
 
 import { Audio } from "expo-av";
 import * as FileSystem from "expo-file-system/legacy";
+import { logger } from "../../utils/logger";
 
 export interface RecordingConfig {
   maxDuration?: number; // in milliseconds, default 30 seconds
@@ -69,7 +70,7 @@ class VoiceRecordingService {
       const { status } = await Audio.requestPermissionsAsync();
       return status === "granted";
     } catch (error) {
-      console.error("Error requesting audio permissions:", error);
+      logger.error("Error requesting audio permissions:", error);
       return false;
     }
   }
@@ -82,7 +83,7 @@ class VoiceRecordingService {
       const { status } = await Audio.getPermissionsAsync();
       return status === "granted";
     } catch (error) {
-      console.error("Error checking audio permissions:", error);
+      logger.error("Error checking audio permissions:", error);
       return false;
     }
   }
@@ -107,7 +108,7 @@ class VoiceRecordingService {
       if (!hasPermission) {
         const granted = await this.requestPermissions();
         if (!granted) {
-          console.error("Microphone permission not granted");
+          logger.error("Microphone permission not granted");
           return false;
         }
       }
@@ -143,14 +144,14 @@ class VoiceRecordingService {
       // Auto-stop after max duration
       this.timeoutId = setTimeout(() => {
         if (this.isRecording) {
-          console.log("Max recording duration reached, auto-stopping");
+          logger.debug("Max recording duration reached, auto-stopping");
           this.stopRecording();
         }
       }, this.maxDuration);
 
       return true;
     } catch (error) {
-      console.error("Error starting recording:", error);
+      logger.error("Error starting recording:", error);
       this.isRecording = false;
       return false;
     }
@@ -224,7 +225,7 @@ class VoiceRecordingService {
         isSilent: this.maxVolume < -25, // Consider silent if max volume never exceeded threshold
       };
     } catch (error) {
-      console.error("Error stopping recording:", error);
+      logger.error("Error stopping recording:", error);
       this.isRecording = false;
       return {
         success: false,
@@ -268,7 +269,7 @@ class VoiceRecordingService {
         playsInSilentModeIOS: true,
       });
     } catch (error) {
-      console.error("Error canceling recording:", error);
+      logger.error("Error canceling recording:", error);
       this.isRecording = false;
       this.recording = null;
       if (this.meteringIntervalId) {
@@ -331,7 +332,7 @@ class VoiceRecordingService {
             this.silenceDuration >= this.silenceThresholdMs &&
             this.onSilenceDetected
           ) {
-            console.log("Silence detected (VAD), auto-stopping");
+            logger.debug("Silence detected (VAD), auto-stopping");
             this.onSilenceDetected();
             // Clear interval to prevent multiple triggers
             if (this.meteringIntervalId) {
@@ -375,7 +376,7 @@ class VoiceRecordingService {
     try {
       await FileSystem.deleteAsync(uri, { idempotent: true });
     } catch (error) {
-      console.error("Error deleting recording:", error);
+      logger.error("Error deleting recording:", error);
     }
   }
 

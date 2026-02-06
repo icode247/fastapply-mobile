@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../src/components";
 import { borderRadius, spacing, typography } from "../../src/constants/theme";

@@ -13,7 +13,9 @@ export const profileService = {
    * Get all job profiles for the current user
    */
   async getProfiles(): Promise<JobProfile[]> {
-    const response = await api.get<any>(ENDPOINTS.PROFILES.BASE);
+    const response = await api.get<
+      JobProfile[] | { profiles?: JobProfile[]; data?: JobProfile[]; items?: JobProfile[] }
+    >(ENDPOINTS.PROFILES.BASE);
     const data = response.data;
 
     let profiles: JobProfile[] = [];
@@ -24,9 +26,9 @@ export const profileService = {
     }
 
     // Map isDefault to isPrimary if isPrimary is missing
-    return profiles.map((p: any) => ({
+    return profiles.map((p) => ({
       ...p,
-      isPrimary: p.isPrimary ?? p.isDefault,
+      isPrimary: p.isPrimary ?? (p as any).isDefault,
     }));
   },
 

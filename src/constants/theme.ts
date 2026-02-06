@@ -1,16 +1,20 @@
 import { Platform } from "react-native";
 
-// Android renders fonts larger, so we scale them down
+// Android renders fonts/icons larger, so we scale them down
 const fontScale = Platform.OS === "android" ? 0.85 : 1;
+
+// Export the scale factor for use in screens that need to scale non-font elements (icons, containers)
+export const uiScale = fontScale;
 
 // Typography scale
 export const typography = {
   // Font families
   fontFamily: {
-    regular: "System",
-    medium: "System",
-    semibold: "System",
-    bold: "System",
+    light: "Roboto_300Light",
+    regular: "Roboto_400Regular",
+    medium: "Roboto_500Medium",
+    semibold: "Roboto_600SemiBold",
+    bold: "Roboto_700Bold",
   },
 
   // Font sizes (scaled for platform)

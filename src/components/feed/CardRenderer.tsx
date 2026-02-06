@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { memo, useMemo } from "react";
-import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Platform, StyleSheet, View } from "react-native";
+import { Text } from "../ui/Text";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   SharedValue,

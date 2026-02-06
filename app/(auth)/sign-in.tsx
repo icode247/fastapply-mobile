@@ -4,7 +4,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Animated,
   Easing,
   Image,
@@ -12,17 +11,17 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { uiScale } from "../../src/constants/theme";
 import { getApiErrorMessage } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
+import { googleSignIn, googleSignOut } from "../../src/services/google-auth";
+import { useAuth } from "../../src/hooks/useAuth";
 
 // Input Field Component
 const InputField: React.FC<{
@@ -102,8 +101,11 @@ export default function SignInScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
+  const { handleGoogleCallback } = useAuth();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Animations
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -127,20 +129,41 @@ export default function SignInScreen() {
 
   const handleSignIn = async () => {
     if (!email) return;
+    setError("");
     setLoading(true);
 
     try {
       await authService.signIn({ email, device: "mobile" });
       router.push({ pathname: "/(auth)/verify", params: { email } });
-    } catch (error) {
-      Alert.alert("Error", getApiErrorMessage(error));
+    } catch (err) {
+      setError(getApiErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // Google sign in
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setGoogleLoading(true);
+
+    try {
+      const serverAuthCode = await googleSignIn();
+      if (!serverAuthCode) {
+        // User cancelled
+        return;
+      }
+
+      const result = await handleGoogleCallback(serverAuthCode);
+      if (!result.success) {
+        await googleSignOut();
+        setError(result.error || "Google sign-in failed");
+      }
+    } catch (err) {
+      await googleSignOut();
+      setError(getApiErrorMessage(err));
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   return (
@@ -216,15 +239,20 @@ export default function SignInScreen() {
               label="Email address"
               placeholder="example@gmail.com"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => { setEmail(text); setError(""); }}
               keyboardType="email-address"
               autoCapitalize="none"
               textContentType="emailAddress"
             />
           </Animated.View>
 
-          {/* Spacer to push buttons to bottom */}
-          <View style={styles.spacer} />
+          {/* Error Message */}
+          {error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={Math.round(16 * uiScale)} color="#FF6B6B" />
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
 
           {/* Sign In Button */}
           <Animated.View
@@ -232,6 +260,7 @@ export default function SignInScreen() {
               {
                 opacity: fadeIn,
                 transform: [{ translateY: slideUp }],
+                marginTop: 24,
               },
             ]}
           >
@@ -250,6 +279,46 @@ export default function SignInScreen() {
               ) : (
                 <Text style={styles.signInButtonText}>Sign in</Text>
               )}
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Divider */}
+          <Animated.View
+            style={[
+              styles.dividerContainer,
+              {
+                opacity: fadeIn,
+              },
+            ]}
+          >
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.dividerLine} />
+          </Animated.View>
+
+          {/* Continue with Google Button */}
+          <Animated.View
+            style={[
+              {
+                opacity: fadeIn,
+                transform: [{ translateY: slideUp }],
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[styles.googleButton, googleLoading && { opacity: 0.7 }]}
+              onPress={handleGoogleSignIn}
+              activeOpacity={0.9}
+              disabled={googleLoading || loading}
+            >
+              <Image
+                source={require("../../assets/icons/g-icon.png")}
+                style={styles.googleIcon}
+                resizeMode="contain"
+              />
+              <Text style={styles.googleButtonText}>
+                {googleLoading ? "Signing in..." : "Continue with Google"}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -275,43 +344,8 @@ export default function SignInScreen() {
             </Text>
           </Animated.View>
 
-          {/* Divider */}
-          <Animated.View
-            style={[
-              styles.dividerContainer,
-              {
-                opacity: fadeIn,
-              },
-            ]}
-          >
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or</Text>
-            <View style={styles.dividerLine} />
-          </Animated.View>
-
-          {/* Continue with Google Button */}
-          <Animated.View
-            style={[
-              {
-                opacity: fadeIn,
-                transform: [{ translateY: slideUp }],
-                paddingBottom: insets.bottom + 20,
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={styles.googleButton}
-              onPress={handleGoogleSignIn}
-              activeOpacity={0.9}
-            >
-              <Image
-                source={require("../../assets/icons/g-icon.png")}
-                style={styles.googleIcon}
-                resizeMode="contain"
-              />
-              <Text style={styles.googleButtonText}>Continue with Google</Text>
-            </TouchableOpacity>
-          </Animated.View>
+          {/* Spacer pushes everything up, empty space at bottom */}
+          <View style={styles.spacer} />
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -394,11 +428,25 @@ const styles = StyleSheet.create({
     lineHeight: Math.round(22 * uiScale),
     padding: 0,
     margin: 0,
+    ...(Platform.OS === "android" ? { includeFontPadding: false, textAlignVertical: "center" as const } : {}),
+  },
+  // Error
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 8,
+  },
+  errorText: {
+    fontSize: Math.round(14 * uiScale),
+    color: "#FF6B6B",
+    flex: 1,
+    lineHeight: Math.round(20 * uiScale),
   },
   // Spacer
   spacer: {
     flex: 1,
-    minHeight: 180,
+    minHeight: 40,
   },
   // Sign In Button
   signInButton: {
@@ -430,7 +478,7 @@ const styles = StyleSheet.create({
   },
   // Create Account
   createAccountContainer: {
-    marginTop: 24,
+    marginTop: 16,
     alignItems: "center",
   },
   createAccountText: {
@@ -449,7 +497,7 @@ const styles = StyleSheet.create({
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 24,
+    marginVertical: 16,
     gap: 7,
   },
   dividerLine: {
@@ -476,8 +524,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)",
   },
   googleIcon: {
-    width: Math.round(40 * uiScale),
-    height: Math.round(40 * uiScale),
+    width: Math.round(24 * uiScale),
+    height: Math.round(24 * uiScale),
   },
   googleButtonText: {
     fontSize: Math.round(14 * uiScale),

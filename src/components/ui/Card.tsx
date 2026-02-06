@@ -1,11 +1,12 @@
 import {
+  Platform,
   StyleProp,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   ViewStyle,
 } from "react-native";
+import { Text } from "./Text";
 import {
   borderRadius,
   shadows,
@@ -90,7 +91,8 @@ export const Card: React.FC<CardProps> = ({
 const styles = StyleSheet.create({
   card: {
     borderRadius: borderRadius.lg,
-    overflow: "hidden",
+    // overflow:hidden clips elevation shadows on Android
+    ...(Platform.OS === "ios" ? { overflow: "hidden" as const } : {}),
   },
   header: {
     paddingHorizontal: spacing[4],

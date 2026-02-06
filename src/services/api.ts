@@ -23,6 +23,13 @@ export const setSessionExpiredHandler = (handler: () => void) => {
   onSessionExpired = handler;
 };
 
+// Validate that the API URL is configured
+if (!API_BASE_URL) {
+  throw new Error(
+    "EXPO_PUBLIC_API_URL is not set. Cannot start without a configured API URL."
+  );
+}
+
 // Create axios instance
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -32,16 +39,36 @@ export const api: AxiosInstance = axios.create({
   },
 });
 
-// Flag to prevent multiple token refresh calls
-let isRefreshing = false;
-let refreshSubscribers: ((token: string) => void)[] = [];
+// Dedicated axios instance for token refresh — no interceptors, but has timeout
+const refreshClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 15000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-const subscribeTokenRefresh = (callback: (token: string) => void) => {
-  refreshSubscribers.push(callback);
+// Token refresh state
+let isRefreshing = false;
+let refreshSubscribers: {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}[] = [];
+
+const subscribeTokenRefresh = (
+  resolve: (token: string) => void,
+  reject: (error: unknown) => void
+) => {
+  refreshSubscribers.push({ resolve, reject });
 };
 
 const onTokenRefreshed = (token: string) => {
-  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers.forEach(({ resolve }) => resolve(token));
+  refreshSubscribers = [];
+};
+
+const onTokenRefreshFailed = (error: unknown) => {
+  refreshSubscribers.forEach(({ reject }) => reject(error));
   refreshSubscribers = [];
 };
 
@@ -76,12 +103,17 @@ api.interceptors.response.use(
       !originalRequest.url?.includes("/auth/refresh")
     ) {
       if (isRefreshing) {
-        // Wait for token refresh
-        return new Promise((resolve) => {
-          subscribeTokenRefresh((token: string) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            resolve(api(originalRequest));
-          });
+        // Wait for the in-flight refresh to complete
+        return new Promise((resolve, reject) => {
+          subscribeTokenRefresh(
+            (token: string) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              resolve(api(originalRequest));
+            },
+            (refreshError: unknown) => {
+              reject(refreshError);
+            }
+          );
         });
       }
 
@@ -94,9 +126,9 @@ api.interceptors.response.use(
           throw new Error("No refresh token available");
         }
 
-        // Call refresh endpoint
-        const response = await axios.post(
-          `${API_BASE_URL}/api/v1/auth/refresh`,
+        // Use dedicated refresh client (no interceptors, has timeout)
+        const response = await refreshClient.post(
+          "/api/v1/auth/refresh",
           {},
           {
             headers: {
@@ -107,17 +139,20 @@ api.interceptors.response.use(
 
         const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-        // Store new tokens
+        // Store new tokens sequentially for atomicity
         await storage.setTokens(accessToken, newRefreshToken);
 
         // Update authorization header
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
-        // Notify subscribers
+        // Notify all queued subscribers
         onTokenRefreshed(accessToken);
 
         return api(originalRequest);
       } catch (refreshError) {
+        // Reject all queued subscribers
+        onTokenRefreshFailed(refreshError);
+
         // Clear tokens and redirect to login
         await storage.clearAll();
 
@@ -145,7 +180,7 @@ export interface FileData {
 }
 
 // Helper for multipart form data (file uploads)
-// Using fetch instead of axios for better React Native FormData compatibility
+// Using fetch for React Native FormData compatibility, but with auth token from storage
 export const uploadFile = async (
   url: string,
   fileData: FileData,
@@ -172,11 +207,9 @@ export const uploadFile = async (
     }
   } else {
     // For React Native (iOS/Android)
-    // Handle file:// prefix - some backends don't accept it
     let uri = fileData.uri;
     if (Platform.OS === "ios" && uri.startsWith("file://")) {
       // Keep file:// for React Native FormData - it needs it
-      // The FormData polyfill will handle the actual file reading
     }
 
     // Create file object in the format React Native expects
@@ -189,23 +222,34 @@ export const uploadFile = async (
 
   const token = await storage.getAccessToken();
 
-  // Use fetch instead of axios for FormData - more reliable in React Native
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    method: "POST",
-    headers: {
-      // Don't set Content-Type - fetch will set it with boundary automatically
-      ...(token && { Authorization: `Bearer ${token}` }),
-    },
-    body: formData,
-  });
+  // Use fetch for FormData — more reliable in React Native
+  // Note: We manually attach the auth token. If the token is expired and this
+  // call returns 401, the caller should retry after a token refresh.
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout for uploads
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || `Upload failed: ${response.status}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "POST",
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Upload failed: ${response.status}`
+      );
+    }
+
+    const data = await response.json();
+    return { data };
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  const data = await response.json();
-  return { data };
 };
 
 // Error type guard

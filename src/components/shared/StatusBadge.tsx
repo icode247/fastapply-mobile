@@ -1,6 +1,7 @@
 import React from "react";
-import { StyleSheet, Text, View, ViewStyle } from "react-native";
-import { borderRadius } from "../../constants/theme";
+import { StyleSheet, View, ViewStyle } from "react-native";
+import { Text } from "../ui/Text";
+import { borderRadius, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { ApplicationStatus } from "../../types";
 
@@ -39,9 +40,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
 
   const getSizeStyle = () => {
     const sizes = {
-      sm: { paddingVertical: 2, paddingHorizontal: 6, fontSize: 10 },
-      md: { paddingVertical: 4, paddingHorizontal: 10, fontSize: 12 },
-      lg: { paddingVertical: 6, paddingHorizontal: 14, fontSize: 14 },
+      sm: { paddingVertical: 2, paddingHorizontal: 6, fontSize: typography.fontSize.xs },
+      md: { paddingVertical: 4, paddingHorizontal: 10, fontSize: typography.fontSize.xs },
+      lg: { paddingVertical: 6, paddingHorizontal: 14, fontSize: typography.fontSize.sm },
     };
     return sizes[size];
   };

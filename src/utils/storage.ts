@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
+import { logger } from "./logger";
 
 const STORAGE_KEYS = {
   ACCESS_TOKEN: "fastapply_access_token",
@@ -29,7 +30,7 @@ export const storage = {
     try {
       // Validate that value is a non-null string
       if (value === null || value === undefined) {
-        console.warn(`Attempted to store null/undefined for ${key}, skipping`);
+        logger.warn(`Attempted to store null/undefined for ${key}, skipping`);
         return;
       }
       const stringValue = typeof value === "string" ? value : String(value);
@@ -44,7 +45,7 @@ export const storage = {
         await AsyncStorage.setItem(key, stringValue);
       }
     } catch (error) {
-      console.error(`Error storing ${key}:`, error);
+      logger.error(`Error storing ${key}:`, error);
       throw error;
     }
   },
@@ -59,7 +60,7 @@ export const storage = {
       }
       return await AsyncStorage.getItem(key);
     } catch (error) {
-      console.error(`Error retrieving ${key}:`, error);
+      logger.error(`Error retrieving ${key}:`, error);
       return null;
     }
   },
@@ -74,16 +75,20 @@ export const storage = {
         await AsyncStorage.removeItem(key);
       }
     } catch (error) {
-      console.error(`Error removing ${key}:`, error);
+      logger.error(`Error removing ${key}:`, error);
     }
   },
 
-  // Token management
+  // Token management — sequential writes for atomicity detection
   async setTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await Promise.all([
-      this.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken),
-      this.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken),
-    ]);
+    try {
+      await this.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+      await this.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    } catch (error) {
+      // On any write failure, clear both to avoid partial state
+      await this.clearTokens();
+      throw error;
+    }
   },
 
   async getAccessToken(): Promise<string | null> {

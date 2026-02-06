@@ -2,12 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import {
   ActivityIndicator,
-  SafeAreaView,
+  Platform,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../src/components";
 import { borderRadius, spacing, typography } from "../../src/constants/theme";
 import { useResumeUpload, useTheme } from "../../src/hooks";
@@ -279,7 +280,7 @@ const styles = StyleSheet.create({
   },
   uploadArea: {
     borderWidth: 2,
-    borderStyle: "dashed",
+    borderStyle: Platform.OS === "ios" ? "dashed" : "solid",
     borderRadius: borderRadius.xl,
     padding: spacing[8],
     alignItems: "center",

@@ -1,6 +1,7 @@
 // Swiped Jobs Cache Service - Stores job details for all swiped jobs
 // Used to enrich backend records that may not have job details yet
 
+import { logger } from "../utils/logger";
 import { storage } from "../utils/storage";
 
 const STORAGE_KEY = "swiped_jobs_cache";
@@ -32,7 +33,7 @@ async function loadCache(): Promise<void> {
     }
     isLoaded = true;
   } catch (error) {
-    console.error("Failed to load swiped jobs cache:", error);
+    logger.error("Failed to load swiped jobs cache:", error);
     memoryCache = {};
     isLoaded = true;
   }
@@ -45,7 +46,7 @@ async function saveCache(): Promise<void> {
   try {
     await storage.setItem(STORAGE_KEY, JSON.stringify(memoryCache));
   } catch (error) {
-    console.error("Failed to save swiped jobs cache:", error);
+    logger.error("Failed to save swiped jobs cache:", error);
   }
 }
 

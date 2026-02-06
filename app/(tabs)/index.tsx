@@ -1,6 +1,8 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as NavigationBar from "expo-navigation-bar";
+import { useRouter } from "expo-router";
+import { ChartNoAxesCombined, Gift, MonitorPlay, SlidersHorizontal } from "lucide-react-native";
 import React, {
   useCallback,
   useEffect,
@@ -10,12 +12,21 @@ import React, {
 } from "react";
 import {
   Alert,
+  Image,
   Platform,
+  Pressable,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -33,12 +44,13 @@ import {
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
 import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { LoadingScreen } from "../../src/components/shared/LoadingScreen";
-import { spacing, typography } from "../../src/constants/theme";
+import { spacing, typography, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { useAutomation } from "../../src/hooks/useAutomation";
 import { useSwipeBatchQueue } from "../../src/hooks/useSwipeBatchQueue";
 import { automationService } from "../../src/services/automation.service";
 import { notificationService } from "../../src/services/notification.service";
+import { subscriptionService } from "../../src/services/subscription.service";
 import { storage } from "../../src/utils/storage";
 import { jobService, JobPreferences } from "../../src/services/job.service";
 import { profileService } from "../../src/services/profile.service";
@@ -49,9 +61,6 @@ import {
 } from "../../src/types/job.types";
 import { JobProfile } from "../../src/types/profile.types";
 import { ParsedVoiceCommand } from "../../src/types/voice.types";
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Profile interface for ProfileSelectorModal
 interface Profile {
@@ -183,6 +192,7 @@ function buildJobPreferencesFromProfile(profile?: JobProfile): JobPreferences | 
 export default function FeedScreen() {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
   // Actions container bottom offset
@@ -193,6 +203,9 @@ export default function FeedScreen() {
   const [currentJobIndex, setCurrentJobIndex] = useState(0);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
 
+  // Credits state
+  const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null);
+
   // Auto-pilot state
   const [isAutoPilotActive, setIsAutoPilotActive] = useState(false);
   const [autoPilotProgress, setAutoPilotProgress] = useState({
@@ -200,6 +213,9 @@ export default function FeedScreen() {
     total: 0,
   });
   const autoPilotRef = useRef<number | null>(null);
+
+  // Live session pulse animation
+  const livePulse = useSharedValue(1);
 
   // Card expanded state (full screen mode)
   const [isCardExpanded, setIsCardExpanded] = useState(false);
@@ -219,6 +235,19 @@ export default function FeedScreen() {
       );
     }
   }, [colors.background]);
+
+  // Fetch credits on mount
+  useEffect(() => {
+    const loadCredits = async () => {
+      try {
+        const usage = await subscriptionService.getUsageStats();
+        setCreditsRemaining(usage.creditsRemaining);
+      } catch (error) {
+        console.error("Failed to load credits:", error);
+      }
+    };
+    loadCredits();
+  }, []);
 
   // Modal states
   const [showFilters, setShowFilters] = useState(false);
@@ -289,6 +318,29 @@ export default function FeedScreen() {
     profileId: selectedProfileId,
     profileName: selectedProfile?.name,
   });
+
+  // Determine if automation is actively processing
+  const isAutomationLive = !!(queueStats?.processing && queueStats.processing > 0);
+
+  // Live pulse animation when automation is processing
+  const livePulseStyle = useAnimatedStyle(() => ({
+    opacity: livePulse.value,
+  }));
+
+  useEffect(() => {
+    if (isAutomationLive) {
+      livePulse.value = withRepeat(
+        withSequence(
+          withTiming(0.3, { duration: 800 }),
+          withTiming(1, { duration: 800 }),
+        ),
+        -1,
+        true,
+      );
+    } else {
+      livePulse.value = withTiming(1, { duration: 300 });
+    }
+  }, [isAutomationLive]);
 
   // Batch queue hook - handles debounced batching of swiped jobs (silent/invisible to user)
   const {
@@ -732,34 +784,81 @@ export default function FeedScreen() {
       {/* Header - hide when card is expanded */}
       {!isCardExpanded && (
         <View style={styles.header}>
-          <View>
-            <Text style={[styles.headerTitle, { color: colors.text }]}>
-              Discover
-            </Text>
-            <Text
-              style={[styles.headerSubtitle, { color: colors.textSecondary }]}
-            >
-              {profilesLoading
-                ? "Loading profiles..."
-                : profiles.length === 0
-                  ? "No profile selected"
-                  : selectedProfile
-                    ? selectedProfile.name
-                    : "Select a profile"}
-            </Text>
-          </View>
-          <View style={styles.headerActions}>
-            <TouchableOpacity
+          {/* Left icons: TV (sessions) + Usage */}
+          <View style={styles.headerSide}>
+            {/* Live Session - TV icon */}
+            <Pressable
               style={[
-                styles.filterButton,
-                { backgroundColor: colors.surfaceSecondary },
-              ]}
+                styles.headerIconButton,
+                              ]}
+              onPress={() => router.push("/live-sessions" as any)}
+            >
+              <Animated.View style={isAutomationLive ? livePulseStyle : undefined}>
+                <MonitorPlay
+                  size={Math.round(26 * uiScale)}
+                  color={isAutomationLive ? "#10B981" : colors.textTertiary}
+                  strokeWidth={1.8}
+                />
+              </Animated.View>
+              {isAutomationLive && queueStats?.processing ? (
+                <View style={[styles.headerBadge, { backgroundColor: "#10B981" }]}>
+                  <Text style={styles.headerBadgeText}>{queueStats.processing}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+
+            {/* Usage */}
+            <Pressable
+              style={[
+                styles.headerIconButton,
+                              ]}
+              onPress={() => router.push("/settings/subscription" as any)}
+            >
+              <ChartNoAxesCombined
+                size={Math.round(26 * uiScale)}
+                color={colors.textTertiary}
+                strokeWidth={1.8}
+              />
+            </Pressable>
+          </View>
+
+          {/* Center: Logo */}
+          <Image
+            source={require("../../assets/full-logo-cropped.png")}
+            style={[
+              styles.brandLogo,
+              { tintColor: isDark ? "#FFFFFF" : colors.text },
+            ]}
+            resizeMode="contain"
+          />
+
+          {/* Right icons: Gift (credits) + Filter */}
+          <View style={styles.headerSide}>
+            {/* Credits - Gift icon */}
+            <Pressable
+              style={[
+                styles.headerIconButton,
+                              ]}
+              onPress={() => router.push("/settings/subscription" as any)}
+            >
+              <Gift
+                size={Math.round(26 * uiScale)}
+                color={colors.textTertiary}
+                strokeWidth={1.8}
+              />
+            </Pressable>
+
+            {/* Filter */}
+            <Pressable
+              style={[
+                styles.headerIconButton,
+                              ]}
               onPress={() => setShowFilters(true)}
             >
-              <Ionicons
-                name="options-outline"
-                size={Math.round(22 * uiScale)}
-                color={colors.text}
+              <SlidersHorizontal
+                size={Math.round(26 * uiScale)}
+                color={colors.textTertiary}
+                strokeWidth={1.8}
               />
               {filters && (
                 <View
@@ -769,7 +868,7 @@ export default function FeedScreen() {
                   ]}
                 />
               )}
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       )}
@@ -791,9 +890,9 @@ export default function FeedScreen() {
               styles.glassBanner,
               {
                 borderColor: colors.border,
-                backgroundColor: isDark
-                  ? "rgba(30,30,30,0.5)"
-                  : "rgba(255,255,255,0.5)",
+                backgroundColor: Platform.OS === "android"
+                  ? (isDark ? "rgba(30,30,30,0.92)" : "rgba(255,255,255,0.95)")
+                  : (isDark ? "rgba(30,30,30,0.5)" : "rgba(255,255,255,0.5)"),
               },
             ]}
           >
@@ -890,7 +989,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="arrow-undo"
-              size={Math.round(20 * uiScale)}
+              size={Math.round(26 * uiScale)}
               color="#FBC02D"
             />
           </TouchableOpacity>
@@ -958,7 +1057,7 @@ export default function FeedScreen() {
           >
             <Ionicons
               name="person-circle-outline"
-              size={Math.round(20 * uiScale)}
+              size={Math.round(26 * uiScale)}
               color="#FF9800"
             />
           </TouchableOpacity>
@@ -1013,37 +1112,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: spacing[6],
+    paddingHorizontal: spacing[4],
     paddingTop: spacing[2],
     paddingBottom: spacing[2],
   },
-  headerTitle: {
-    fontSize: typography.fontSize["3xl"],
-    fontWeight: "800",
+  brandLogo: {
+    height: 28,
+    width: 105,
   },
-  headerSubtitle: {
-    fontSize: typography.fontSize.sm,
-    marginTop: 2,
+  headerSide: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
-  filterButton: {
-    width: Math.round(44 * uiScale),
-    height: Math.round(44 * uiScale),
-    borderRadius: Math.round(22 * uiScale),
+  headerIconButton: {
+    width: Math.round(34 * uiScale),
+    height: Math.round(34 * uiScale),
     justifyContent: "center",
     alignItems: "center",
   },
+  headerBadge: {
+    position: "absolute",
+    top: -2,
+    right: -2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  headerBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700",
+  },
   filterBadge: {
     position: "absolute",
-    top: 8,
-    right: 8,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    top: 4,
+    right: 4,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   autoPilotBanner: {
     flexDirection: "row",

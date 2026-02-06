@@ -3,6 +3,7 @@
 // all pending URLs are batched and sent to create an automation.
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { logger } from "../utils/logger";
 import { ENDPOINTS } from "../constants/api";
 import api, { getApiErrorMessage } from "../services/api";
 import { cacheSwipedJob, SwipedJobDetails } from "../services/swipedJobsCache.service";
@@ -111,7 +112,7 @@ export function useSwipeBatchQueue(
           }
         }
       } catch (error) {
-        console.error("Failed to load pending swipes:", error);
+        logger.error("Failed to load pending swipes:", error);
       }
       pendingJobsLoadedRef.current = true;
     };
@@ -135,7 +136,7 @@ export function useSwipeBatchQueue(
       try {
         await storage.setItem(STORAGE_KEY, JSON.stringify(pendingJobs));
       } catch (error) {
-        console.error("Failed to save pending swipes:", error);
+        logger.error("Failed to save pending swipes:", error);
       }
     };
 
@@ -249,15 +250,15 @@ export function useSwipeBatchQueue(
           payload.useTailoredResume = false;
         }
 
-        console.log("=== BATCH: Creating automation with swiped jobs ===");
-        console.log("Payload:", JSON.stringify(payload, null, 2));
+        logger.debug("=== BATCH: Creating automation with swiped jobs ===");
+        logger.debug("Payload:", JSON.stringify(payload, null, 2));
 
         const response = await api.post<Automation>(
           ENDPOINTS.AUTOMATIONS.BASE,
           payload
         );
 
-        console.log("Automation created:", response.data.id);
+        logger.debug("Automation created:", response.data.id);
 
         // Clear pending jobs on success
         setPendingJobs([]);
@@ -266,7 +267,7 @@ export function useSwipeBatchQueue(
         onBatchSent?.(response.data, jobs.length);
       } catch (error) {
         const errorMsg = getApiErrorMessage(error);
-        console.error("Failed to create automation batch:", errorMsg);
+        logger.error("Failed to create automation batch:", errorMsg);
         setLastError(errorMsg);
         onBatchError?.(errorMsg);
       } finally {
@@ -281,7 +282,7 @@ export function useSwipeBatchQueue(
     if (profileId && pendingJobsToSendRef.current && pendingJobsToSendRef.current.length > 0) {
       const jobsToSend = pendingJobsToSendRef.current;
       pendingJobsToSendRef.current = null; // Clear ref to prevent double-send
-      console.log("Profile now available, sending deferred batch:", jobsToSend.length, "jobs");
+      logger.debug("Profile now available, sending deferred batch:", jobsToSend.length, "jobs");
       sendBatch(jobsToSend);
     }
   }, [profileId, sendBatch]);
@@ -294,7 +295,7 @@ export function useSwipeBatchQueue(
       const url = job.applyUrl || job.listingUrl;
 
       if (!url) {
-        console.warn("Job has no URL, skipping:", job.title);
+        logger.warn("Job has no URL, skipping:", job.title);
         return;
       }
 
@@ -320,17 +321,17 @@ export function useSwipeBatchQueue(
         swipedAt: swipedAt,
       };
       cacheSwipedJob(cachedJob).catch((err) =>
-        console.error("Failed to cache swiped job:", err)
+        logger.error("Failed to cache swiped job:", err)
       );
 
       // Add to pending jobs (avoid duplicates)
       setPendingJobs((prev) => {
         const exists = prev.some((p) => p.url === url);
         if (exists) {
-          console.log("Job already in pending queue:", job.title);
+          logger.debug("Job already in pending queue:", job.title);
           return prev;
         }
-        console.log("Added job to pending queue:", job.title);
+        logger.debug("Added job to pending queue:", job.title);
         return [...prev, pendingJob];
       });
 

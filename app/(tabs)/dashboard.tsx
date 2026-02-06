@@ -11,12 +11,12 @@ import {
   RefreshControl,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { borderRadius, spacing } from "../../src/constants/theme";
+import { borderRadius, spacing, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { automationService } from "../../src/services/automation.service";
 import { subscriptionService } from "../../src/services/subscription.service";
@@ -35,9 +35,6 @@ import { AutomationQueueStats, AutomationUrl } from "../../src/types/automation.
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - spacing[6] * 2 - spacing[4]) / 2;
-
-// Android renders fonts/icons larger, scale down for consistency
-const uiScale = Platform.OS === "android" ? 0.85 : 1;
 
 // Helper function to format relative time
 const getRelativeTime = (dateString: string): string => {
@@ -586,19 +583,19 @@ export default function DashboardScreen() {
       icon: "add-circle" as const,
       label: "New Application",
       color: "#0ea5e9",
-      onPress: () => router.push("/(tabs)/"),
+      onPress: () => router.push("/(tabs)/" as any),
     },
     {
       icon: "document-text" as const,
       label: "Update Resume",
       color: "#10B981",
-      onPress: () => router.push("/(tabs)/profiles"),
+      onPress: () => router.push("/(tabs)/profiles" as any),
     },
     {
       icon: "analytics" as const,
       label: "View Analytics",
       color: "#F59E0B",
-      onPress: () => router.push("/(tabs)/applications"),
+      onPress: () => router.push("/(tabs)/applications" as any),
     },
   ];
 
@@ -631,6 +628,7 @@ export default function DashboardScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
@@ -651,18 +649,31 @@ export default function DashboardScreen() {
             </Text>
           </View>
           <TouchableOpacity style={styles.notificationBtn}>
-            <BlurView
-              intensity={20}
-              tint={isDark ? "dark" : "light"}
-              style={[styles.notificationBtnBlur, { borderColor: colors.border }]}
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={Math.round(22 * uiScale)}
-                color={colors.text}
-              />
-              <View style={[styles.notificationDot, { borderColor: colors.background }]} />
-            </BlurView>
+            {Platform.OS === "ios" ? (
+              <BlurView
+                intensity={20}
+                tint={isDark ? "dark" : "light"}
+                style={[styles.notificationBtnBlur, { borderColor: colors.border }]}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={Math.round(22 * uiScale)}
+                  color={colors.text}
+                />
+                <View style={[styles.notificationDot, { borderColor: colors.background }]} />
+              </BlurView>
+            ) : (
+              <View
+                style={[styles.notificationBtnBlur, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}
+              >
+                <Ionicons
+                  name="notifications-outline"
+                  size={Math.round(22 * uiScale)}
+                  color={colors.text}
+                />
+                <View style={[styles.notificationDot, { borderColor: colors.background }]} />
+              </View>
+            )}
           </TouchableOpacity>
         </Animated.View>
 
@@ -686,7 +697,12 @@ export default function DashboardScreen() {
           <BlurView
             intensity={isDark ? 30 : 50}
             tint={isDark ? "dark" : "light"}
-            style={styles.creditsSectionBlur}
+            style={[
+              styles.creditsSectionBlur,
+              Platform.OS === "android" && {
+                backgroundColor: isDark ? colors.surfaceSecondary : colors.level1,
+              },
+            ]}
           >
             <CreditRing
               used={usageStats?.creditsUsed ?? 0}
@@ -743,7 +759,7 @@ export default function DashboardScreen() {
               Recent Jobs
             </Text>
             <TouchableOpacity
-              onPress={() => router.push("/(tabs)/applications")}
+              onPress={() => router.push("/(tabs)/applications" as any)}
             >
               <Text style={styles.seeAllText}>See all</Text>
             </TouchableOpacity>
@@ -754,7 +770,7 @@ export default function DashboardScreen() {
                 key={app.id}
                 {...app}
                 delay={800 + index * 100}
-                onPress={() => router.push(`/application/${index + 1}`)}
+                onPress={() => router.push(`/application/${index + 1}` as any)}
               />
             ))}
           </View>

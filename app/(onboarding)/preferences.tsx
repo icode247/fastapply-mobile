@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Text } from "../../src/components/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../src/components";
 import { JobPreferencesForm } from "../../src/components/feed/JobPreferencesForm";

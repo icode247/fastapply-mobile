@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { authService, profileService } from "../services";
 import { setSessionExpiredHandler } from "../services/api";
 import { AuthTokens, JobProfile, User } from "../types";
+import { logger } from "../utils/logger";
 import { storage } from "../utils/storage";
 
 interface AuthState {
@@ -16,10 +17,10 @@ interface AuthState {
 
   // Actions
   initialize: () => Promise<void>;
-  setUser: (user: User | null) => void;
-  setTokens: (tokens: AuthTokens | null) => void;
-  setPrimaryJobProfile: (profile: JobProfile | null) => void;
-  setHasCompletedOnboarding: (completed: boolean) => void;
+  setUser: (user: User | null) => Promise<void>;
+  setTokens: (tokens: AuthTokens | null) => Promise<void>;
+  setPrimaryJobProfile: (profile: JobProfile | null) => Promise<void>;
+  setHasCompletedOnboarding: (completed: boolean) => Promise<void>;
   login: (
     tokens: AuthTokens,
     user: User,
@@ -28,6 +29,9 @@ interface AuthState {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
+
+// Initialization guard — prevents concurrent initialize() calls
+let initializePromise: Promise<void> | null = null;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   // Initial state
@@ -39,108 +43,119 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isInitialized: false,
   hasCompletedOnboarding: false,
 
-  // Initialize auth state from storage
+  // Initialize auth state from storage — guarded against concurrent calls
   initialize: async () => {
-    try {
-      set({ isLoading: true });
+    // If already initialized, skip
+    if (get().isInitialized) return;
 
-      // Register session expiration handler
-      setSessionExpiredHandler(() => {
-        console.log("Session expired, logging out...");
-        get().logout();
-      });
+    // If already initializing, return the existing promise
+    if (initializePromise) return initializePromise;
 
-      const [accessToken, user, storedProfile] = await Promise.all([
-        storage.getAccessToken(),
-        storage.getUser<User>(),
-        storage.getPrimaryJobProfile<JobProfile>(),
-      ]);
+    initializePromise = (async () => {
+      try {
+        set({ isLoading: true });
 
-      if (accessToken && user) {
-        let primaryJobProfile = storedProfile;
-
-        // If no profile in storage, try fetching from API (migration for existing sessions)
-        if (!primaryJobProfile) {
-          try {
-            primaryJobProfile = await profileService.getPrimaryProfile();
-            if (primaryJobProfile) {
-              await storage.setPrimaryJobProfile(primaryJobProfile);
-            }
-          } catch (error) {
-            console.warn("Failed to fetch primary profile:", error);
-          }
-        }
-
-        // Determine onboarding completion based on profile existence
-        const hasCompletedOnboarding = primaryJobProfile !== null;
-
-        // Sync storage if it was out of date
-        await storage.setOnboardingComplete(hasCompletedOnboarding);
-
-        set({
-          user,
-          primaryJobProfile,
-          isAuthenticated: true,
-          hasCompletedOnboarding,
+        // Register session expiration handler
+        setSessionExpiredHandler(() => {
+          logger.info("Session expired, logging out...");
+          get().logout();
         });
 
-        // Optionally refresh user data in background
-        get().refreshUser().catch(console.warn);
+        const [accessToken, user, storedProfile] = await Promise.all([
+          storage.getAccessToken(),
+          storage.getUser<User>(),
+          storage.getPrimaryJobProfile<JobProfile>(),
+        ]);
+
+        if (accessToken && user) {
+          let primaryJobProfile = storedProfile;
+
+          // If no profile in storage, try fetching from API (migration for existing sessions)
+          if (!primaryJobProfile) {
+            try {
+              primaryJobProfile = await profileService.getPrimaryProfile();
+              if (primaryJobProfile) {
+                await storage.setPrimaryJobProfile(primaryJobProfile);
+              }
+            } catch (error) {
+              logger.warn("Failed to fetch primary profile:", error);
+            }
+          }
+
+          // Determine onboarding completion based on profile existence
+          const hasCompletedOnboarding = primaryJobProfile !== null;
+
+          // Sync storage if it was out of date
+          await storage.setOnboardingComplete(hasCompletedOnboarding);
+
+          set({
+            user,
+            primaryJobProfile,
+            isAuthenticated: true,
+            hasCompletedOnboarding,
+          });
+
+          // Optionally refresh user data in background
+          get().refreshUser().catch((e) => logger.warn("Background refresh failed:", e));
+        }
+      } catch (error) {
+        logger.error("Error initializing auth:", error);
+        // Clear potentially corrupted state
+        await storage.clearAll();
+      } finally {
+        set({ isLoading: false, isInitialized: true });
+        initializePromise = null;
       }
-    } catch (error) {
-      console.error("Error initializing auth:", error);
-      // Clear potentially corrupted state
-      await storage.clearAll();
-    } finally {
-      set({ isLoading: false, isInitialized: true });
-    }
+    })();
+
+    return initializePromise;
   },
 
-  setUser: (user) => {
+  setUser: async (user) => {
     set({ user, isAuthenticated: !!user });
     if (user) {
-      storage.setUser(user);
+      await storage.setUser(user);
     } else {
-      storage.clearUser();
+      await storage.clearUser();
     }
   },
 
-  setTokens: (tokens) => {
+  setTokens: async (tokens) => {
     set({ tokens });
     if (tokens) {
-      storage.setTokens(tokens.accessToken, tokens.refreshToken);
+      await storage.setTokens(tokens.accessToken, tokens.refreshToken);
     } else {
-      storage.clearTokens();
+      await storage.clearTokens();
     }
   },
 
-  setPrimaryJobProfile: (profile) => {
+  setPrimaryJobProfile: async (profile) => {
     set({ primaryJobProfile: profile });
     if (profile) {
-      storage.setPrimaryJobProfile(profile);
+      await storage.setPrimaryJobProfile(profile);
     } else {
-      storage.clearPrimaryJobProfile();
+      await storage.clearPrimaryJobProfile();
     }
   },
 
-  setHasCompletedOnboarding: (completed) => {
+  setHasCompletedOnboarding: async (completed) => {
     set({ hasCompletedOnboarding: completed });
-    storage.setOnboardingComplete(completed);
+    await storage.setOnboardingComplete(completed);
   },
 
   login: async (tokens, user, primaryJobProfile) => {
+    // Persist tokens first, then user — ensures storage completes before state update
     await storage.setTokens(tokens.accessToken, tokens.refreshToken);
     await storage.setUser(user);
 
-    // Store primary job profile if it exists
     if (primaryJobProfile) {
       await storage.setPrimaryJobProfile(primaryJobProfile);
     }
 
-    // Determine onboarding status based on whether a profile exists
     const hasProfile = primaryJobProfile !== null;
     await storage.setOnboardingComplete(hasProfile);
 
+    // Only update Zustand state after all storage writes succeed
     set({
       user,
       tokens,
@@ -154,7 +169,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       await authService.logout();
     } catch (error) {
-      console.warn("Logout API failed:", error);
+      logger.warn("Logout API failed:", error);
     }
 
     await storage.clearAll();
@@ -174,7 +189,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user });
       await storage.setUser(user);
     } catch (error) {
-      console.warn("Failed to refresh user:", error);
+      logger.warn("Failed to refresh user:", error);
       // If token is invalid, logout
       if (
         (error as { response?: { status?: number } })?.response?.status === 401
