@@ -68,7 +68,7 @@ export const PreferencesSection: React.FC<PreferencesSectionProps> = ({
         Work Preferences
       </Text>
 
-      <Input
+      {/* <Input
         label="Desired Annual Salary"
         value={
           preferences.desiredSalary ? String(preferences.desiredSalary) : ""
@@ -76,7 +76,7 @@ export const PreferencesSection: React.FC<PreferencesSectionProps> = ({
         onChangeText={(t) => updatePref("desiredSalary", parseInt(t) || 0)}
         keyboardType="numeric"
         placeholder="120000"
-      />
+      /> */}
 
       <Select
         label="Work Authorization Status"

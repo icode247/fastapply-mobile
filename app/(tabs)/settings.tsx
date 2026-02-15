@@ -21,7 +21,11 @@ import { ConfirmModal } from "../../src/components";
 import { getPlanDisplayName } from "../../src/constants/subscription-limits";
 import { borderRadius, spacing, uiScale } from "../../src/constants/theme";
 import { useAuth, useTheme } from "../../src/hooks";
-import { subscriptionService, userService } from "../../src/services";
+import {
+  notificationService,
+  subscriptionService,
+  userService,
+} from "../../src/services";
 import { Subscription, User } from "../../src/types";
 import { storage } from "../../src/utils/storage";
 
@@ -200,9 +204,7 @@ export default function SettingsScreen() {
   const { colors, isDark, setMode, mode } = useTheme();
   const { logout } = useAuth();
 
-  const [notifications, setNotifications] = useState(true);
-  const [biometrics, setBiometrics] = useState(false);
-  const [autoApply, setAutoApply] = useState(true);
+  const [notifications, setNotifications] = useState(false);
 
   // User and subscription data
   const [user, setUser] = useState<User | null>(null);
@@ -220,14 +222,8 @@ export default function SettingsScreen() {
   // Load preferences from storage
   const loadPreferences = useCallback(async () => {
     try {
-      const [notifPref, bioPref, autoPref] = await Promise.all([
-        storage.getItem("pref_notifications"),
-        storage.getItem("pref_biometrics"),
-        storage.getItem("pref_auto_apply"),
-      ]);
+      const notifPref = await storage.getItem("pref_notifications");
       if (notifPref !== null) setNotifications(notifPref === "true");
-      if (bioPref !== null) setBiometrics(bioPref === "true");
-      if (autoPref !== null) setAutoApply(autoPref === "true");
     } catch (error) {
       console.error("Failed to load preferences:", error);
     }
@@ -282,25 +278,25 @@ export default function SettingsScreen() {
     ]).start();
   }, []);
 
-  // Preference handlers with persistence
+  // Push notification handler
   const handleNotificationsChange = async (value: boolean) => {
-    setNotifications(value);
-    await storage.setItem("pref_notifications", String(value));
-  };
-
-  const handleBiometricsChange = async (value: boolean) => {
-    setBiometrics(value);
-    await storage.setItem("pref_biometrics", String(value));
-  };
-
-  const handleAutoApplyChange = async (value: boolean) => {
-    setAutoApply(value);
-    await storage.setItem("pref_auto_apply", String(value));
-  };
-
-  // Navigation handlers
-  const handleEditProfile = () => {
-    router.push("/settings/edit-profile");
+    if (value) {
+      const token =
+        await notificationService.registerForPushNotificationsAsync();
+      if (token) {
+        await notificationService.updateServerToken(token);
+        setNotifications(true);
+        await storage.setItem("pref_notifications", "true");
+      } else {
+        Alert.alert(
+          "Notifications",
+          "Unable to enable push notifications. Please check your device settings."
+        );
+      }
+    } else {
+      setNotifications(false);
+      await storage.setItem("pref_notifications", "false");
+    }
   };
 
   const handleSubscription = () => {
@@ -317,14 +313,18 @@ export default function SettingsScreen() {
   };
 
   const handleContactSupport = async () => {
-    const email = "support@fastapply.co";
-    const subject = "FastApply Support Request";
-    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+    // Replace with your actual WhatsApp Business number (digits only, with country code)
+    const whatsappNumber = "14XXXXXXXXX"; // TODO: Replace with actual number
+    const message = "Hi, I need help with FastApply.";
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
       await Linking.openURL(url);
     } else {
-      Alert.alert("Contact Support", `Please email us at ${email}`);
+      Alert.alert(
+        "Contact Support",
+        "WhatsApp is not installed. Please install WhatsApp to contact support."
+      );
     }
   };
 
@@ -439,7 +439,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={styles.profileCardInner}
             activeOpacity={0.7}
-            onPress={handleEditProfile}
+            onPress={handleSubscription}
           >
             <LinearGradient
               colors={[colors.primary, colors.primaryDark]}
@@ -449,7 +449,7 @@ export default function SettingsScreen() {
             </LinearGradient>
             <View style={styles.profileInfo}>
               <Text style={[styles.profileName, { color: colors.text }]}>
-                {user?.name || "User"}
+                {user?.name || user?.email?.split("@")[0] || "User"}
               </Text>
               <Text
                 style={[styles.profileEmail, { color: colors.textSecondary }]}
@@ -521,20 +521,11 @@ export default function SettingsScreen() {
         {/* Account Section */}
         <SettingsSection title="ACCOUNT" delay={100} colors={colors}>
           <SettingItem
-            icon="person-outline"
-            iconColor="#0ea5e9"
-            label="Edit Profile"
-            delay={150}
-            colors={colors}
-            isDark={isDark}
-            onPress={handleEditProfile}
-          />
-          <SettingItem
             icon="card-outline"
             iconColor="#10B981"
             label="Subscription"
             value={getPlanName()}
-            delay={200}
+            delay={150}
             colors={colors}
             isDark={isDark}
             onPress={handleSubscription}
@@ -554,7 +545,7 @@ export default function SettingsScreen() {
             switchValue={notifications}
             onSwitchChange={handleNotificationsChange}
           />
-          <SettingItem
+          {/* <SettingItem
             icon="finger-print-outline"
             iconColor="#EC4899"
             label={Platform.OS === "ios" ? "Face ID / Touch ID" : "Biometric Login"}
@@ -562,25 +553,14 @@ export default function SettingsScreen() {
             colors={colors}
             isDark={isDark}
             isSwitch
-            switchValue={biometrics}
-            onSwitchChange={handleBiometricsChange}
-          />
-          <SettingItem
-            icon="flash-outline"
-            iconColor="#3B82F6"
-            label="Quick Apply"
-            delay={450}
-            colors={colors}
-            isDark={isDark}
-            isSwitch
-            switchValue={autoApply}
-            onSwitchChange={handleAutoApplyChange}
-          />
+            switchValue={false}
+            onSwitchChange={() => {}}
+          /> */}
           <SettingItem
             icon={isDark ? "moon-outline" : "sunny-outline"}
             iconColor={isDark ? "#F59E0B" : "#0ea5e9"}
             label="Dark Mode"
-            delay={500}
+            delay={400}
             colors={colors}
             isDark={isDark}
             isSwitch
@@ -601,8 +581,8 @@ export default function SettingsScreen() {
             onPress={handleHelpCenter}
           />
           <SettingItem
-            icon="chatbubble-ellipses-outline"
-            iconColor="#10B981"
+            icon="logo-whatsapp"
+            iconColor="#25D366"
             label="Contact Support"
             delay={650}
             colors={colors}

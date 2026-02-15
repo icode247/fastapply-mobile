@@ -40,7 +40,7 @@ interface SwipeDeckProps {
 export interface SwipeDeckRef {
   swipeLeft: () => void;
   swipeRight: () => void;
-  undo: () => void;
+  undo: () => boolean;
   getCurrentJob: () => NormalizedJob | null;
 }
 
@@ -137,10 +137,14 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
       [jobs, handleSwipe, activeCardIndex, swipeCommand, activeTranslateX],
     );
 
-    const undo = useCallback(() => {
-      if (swipeHistory.length === 0 || currentIndex === 0) return;
+    const undo = useCallback((): boolean => {
+      if (swipeHistory.length === 0 || currentIndex === 0) return false;
 
       const lastSwipe = swipeHistory[swipeHistory.length - 1];
+
+      // Only undo rejects — liked jobs are queued for automation
+      if (lastSwipe.direction === "right") return false;
+
       const previousIndex = currentIndex - 1;
 
       swipeCommand.value = {
@@ -154,6 +158,7 @@ export const SwipeDeck = forwardRef<SwipeDeckRef, SwipeDeckProps>(
 
       setSwipeHistory((prev) => prev.slice(0, -1));
       setCurrentIndex((prev) => prev - 1);
+      return true;
     }, [
       swipeHistory,
       currentIndex,

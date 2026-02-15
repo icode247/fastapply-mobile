@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Text } from "../../src/components/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Input } from "../../src/components";
+import { Button, Input, Select } from "../../src/components";
 import { spacing, typography } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
 import { useOnboardingStore } from "../../src/stores";
@@ -20,6 +20,25 @@ import {
   PersonalInfoFormData,
   personalInfoSchema,
 } from "../../src/utils/validators";
+
+const TIMEZONE_OPTIONS = [
+  { label: "EST (Eastern Standard Time)", value: "EST" },
+  { label: "CST (Central Standard Time)", value: "CST" },
+  { label: "MST (Mountain Standard Time)", value: "MST" },
+  { label: "PST (Pacific Standard Time)", value: "PST" },
+  { label: "AKST (Alaska Standard Time)", value: "AKST" },
+  { label: "HST (Hawaii Standard Time)", value: "HST" },
+  { label: "GMT (Greenwich Mean Time)", value: "GMT" },
+  { label: "CET (Central European Time)", value: "CET" },
+  { label: "EET (Eastern European Time)", value: "EET" },
+  { label: "GST (Gulf Standard Time)", value: "GST" },
+  { label: "IST (India Standard Time)", value: "IST" },
+  { label: "SGT (Singapore Time)", value: "SGT" },
+  { label: "JST (Japan Standard Time)", value: "JST" },
+  { label: "AEST (Australian Eastern Time)", value: "AEST" },
+  { label: "NZST (New Zealand Standard Time)", value: "NZST" },
+  { label: "None of the time zones listed", value: "other" },
+];
 
 export default function PersonalInfoScreen() {
   const router = useRouter();
@@ -35,6 +54,7 @@ export default function PersonalInfoScreen() {
     currentCity,
     state,
     country,
+    timezone,
     linkedinURL,
     githubURL,
     website,
@@ -259,6 +279,14 @@ export default function PersonalInfoScreen() {
                   onBlur={onBlur}
                 />
               )}
+            />
+
+            <Select
+              label="Timezone"
+              value={timezone}
+              options={TIMEZONE_OPTIONS}
+              onSelect={(val) => updatePersonalInfo({ timezone: val })}
+              placeholder="Select your timezone"
             />
 
             <View style={styles.sectionTitle}>

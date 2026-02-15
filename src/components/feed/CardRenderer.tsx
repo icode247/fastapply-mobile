@@ -13,6 +13,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
+import { spacing } from "../../constants/theme";
 import { NormalizedJob } from "../../types/job.types";
 import { JobCard } from "./JobCard";
 
@@ -381,6 +382,7 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.95,
     height: "100%",
     position: "absolute",
+    padding: spacing[2],
   },
   iconOverlay: {
     position: "absolute",

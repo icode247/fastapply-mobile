@@ -4,7 +4,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
   Animated,
   Easing,
   Image,
@@ -20,7 +19,7 @@ import {
 import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { uiScale } from "../../src/constants/theme";
-import { getApiErrorMessage } from "../../src/services/api";
+import { getApiErrorMessage, getApiErrorStatus } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
 import { googleSignIn, googleSignOut } from "../../src/services/google-auth";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -33,6 +32,7 @@ const InputField: React.FC<{
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
+  error?: string;
   keyboardType?: "default" | "email-address";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
@@ -42,6 +42,7 @@ const InputField: React.FC<{
   placeholder,
   value,
   onChangeText,
+  error,
   keyboardType = "default",
   autoCapitalize = "none",
   autoCorrect = false,
@@ -56,6 +57,7 @@ const InputField: React.FC<{
         style={[
           styles.inputContainer,
           isFocused && styles.inputContainerFocused,
+          !!error && styles.inputContainerError,
         ]}
       >
         <TextInput
@@ -77,6 +79,12 @@ const InputField: React.FC<{
           enablesReturnKeyAutomatically
         />
       </View>
+      {error ? (
+        <View style={styles.fieldErrorContainer}>
+          <Ionicons name="alert-circle" size={Math.round(14 * uiScale)} color="#FF6B6B" />
+          <Text style={styles.fieldErrorText}>{error}</Text>
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -111,6 +119,8 @@ export default function SignUpScreen() {
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   // Animations
   const fadeIn = useRef(new Animated.Value(0)).current;
@@ -132,26 +142,59 @@ export default function SignUpScreen() {
     ]).start();
   }, []);
 
+  const clearErrors = () => {
+    setNameError("");
+    setEmailError("");
+  };
+
   const handleSignUp = async () => {
-    if (!name || !email) return;
+    clearErrors();
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    let hasError = false;
+    if (!trimmedName) {
+      setNameError("Please enter your name.");
+      hasError = true;
+    } else if (trimmedName.length < 2) {
+      setNameError("Name must be at least 2 characters.");
+      hasError = true;
+    }
+    if (!trimmedEmail) {
+      setEmailError("Please enter your email address.");
+      hasError = true;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      setEmailError("Please enter a valid email address.");
+      hasError = true;
+    }
+    if (hasError) return;
+
     setLoading(true);
 
     try {
       await authService.register({
-        name,
-        email,
-        referralCode,
+        name: trimmedName,
+        email: trimmedEmail,
+        referralCode: referralCode.trim(),
         device: "mobile",
       });
-      router.push({ pathname: "/(auth)/verify", params: { email } });
-    } catch (error) {
-      Alert.alert("Error", getApiErrorMessage(error));
+      router.push({ pathname: "/(auth)/verify", params: { email: trimmedEmail } });
+    } catch (err) {
+      const status = getApiErrorStatus(err);
+      if (status === 409) {
+        setEmailError("An account with this email already exists. Try signing in instead.");
+      } else if (status === 429) {
+        setEmailError("Too many attempts. Please wait a moment and try again.");
+      } else {
+        setEmailError(getApiErrorMessage(err));
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleSignUp = async () => {
+    clearErrors();
     setGoogleLoading(true);
 
     try {
@@ -164,11 +207,11 @@ export default function SignUpScreen() {
       const result = await handleGoogleCallback(serverAuthCode);
       if (!result.success) {
         await googleSignOut();
-        Alert.alert("Error", result.error || "Google sign-up failed");
+        setEmailError(result.error || "Google sign-up failed");
       }
     } catch (err) {
       await googleSignOut();
-      Alert.alert("Error", getApiErrorMessage(err));
+      setEmailError(getApiErrorMessage(err));
     } finally {
       setGoogleLoading(false);
     }
@@ -178,21 +221,21 @@ export default function SignUpScreen() {
     <View style={styles.container}>
       {/* Background gradient matching Figma: 173deg */}
       <LinearGradient
-        colors={["#1263B2", "#0D4982", "#082A4C"]}
+        colors={["#126ba3", "#0E5680", "#0A3F5E"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={[styles.keyboardView, { paddingTop: insets.top }]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 12 },
+            { paddingTop: 12 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -248,7 +291,8 @@ export default function SignUpScreen() {
                 label="Full Name"
                 placeholder="e.g John Doe"
                 value={name}
-                onChangeText={setName}
+                onChangeText={(text) => { setName(text); setNameError(""); }}
+                error={nameError}
                 autoCapitalize="words"
                 textContentType="name"
               />
@@ -257,7 +301,8 @@ export default function SignUpScreen() {
                 label="Email address"
                 placeholder="example@gmail.com"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => { setEmail(text); setEmailError(""); }}
+                error={emailError}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 textContentType="emailAddress"
@@ -404,7 +449,7 @@ const styles = StyleSheet.create({
     fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
-    lineHeight: Math.round(48 * uiScale),
+    lineHeight: Math.round(44 * uiScale),
   },
   subtitle: {
     fontSize: Math.round(14 * uiScale),
@@ -443,6 +488,9 @@ const styles = StyleSheet.create({
   inputContainerFocused: {
     borderColor: "rgba(255,255,255,0.5)",
     backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  inputContainerError: {
+    borderColor: "rgba(255,107,107,0.6)",
   },
   input: {
     fontSize: Math.round(16 * uiScale),
@@ -496,6 +544,18 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#0D4982",
   },
+  // Field Error
+  fieldErrorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  fieldErrorText: {
+    fontSize: Math.round(13 * uiScale),
+    color: "#FF6B6B",
+    flex: 1,
+    lineHeight: Math.round(18 * uiScale),
+  },
   // Divider
   dividerContainer: {
     flexDirection: "row",
@@ -519,12 +579,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0D4982",
-    borderRadius: 100,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderRadius: 1000,
     paddingVertical: 16,
-    gap: 8,
+    gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(255,255,255,0.3)",
   },
   googleIcon: {
     width: Math.round(24 * uiScale),

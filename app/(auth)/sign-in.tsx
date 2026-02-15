@@ -18,7 +18,7 @@ import {
 import { Text } from "../../src/components/ui/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { uiScale } from "../../src/constants/theme";
-import { getApiErrorMessage } from "../../src/services/api";
+import { getApiErrorMessage, getApiErrorStatus } from "../../src/services/api";
 import { authService } from "../../src/services/auth.service";
 import { googleSignIn, googleSignOut } from "../../src/services/google-auth";
 import { useAuth } from "../../src/hooks/useAuth";
@@ -29,6 +29,7 @@ const InputField: React.FC<{
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
+  error?: string;
   keyboardType?: "default" | "email-address";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
@@ -38,6 +39,7 @@ const InputField: React.FC<{
   placeholder,
   value,
   onChangeText,
+  error,
   keyboardType = "default",
   autoCapitalize = "none",
   autoCorrect = false,
@@ -52,6 +54,7 @@ const InputField: React.FC<{
         style={[
           styles.inputContainer,
           isFocused && styles.inputContainerFocused,
+          !!error && styles.inputContainerError,
         ]}
       >
         <TextInput
@@ -73,6 +76,12 @@ const InputField: React.FC<{
           enablesReturnKeyAutomatically
         />
       </View>
+      {error ? (
+        <View style={styles.fieldErrorContainer}>
+          <Ionicons name="alert-circle" size={Math.round(14 * uiScale)} color="#FF6B6B" />
+          <Text style={styles.fieldErrorText}>{error}</Text>
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -128,15 +137,30 @@ export default function SignInScreen() {
   }, []);
 
   const handleSignIn = async () => {
-    if (!email) return;
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setError("Please enter your email address.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     setError("");
     setLoading(true);
 
     try {
-      await authService.signIn({ email, device: "mobile" });
-      router.push({ pathname: "/(auth)/verify", params: { email } });
+      await authService.signIn({ email: trimmed, device: "mobile" });
+      router.push({ pathname: "/(auth)/verify", params: { email: trimmed } });
     } catch (err) {
-      setError(getApiErrorMessage(err));
+      const status = getApiErrorStatus(err);
+      if (status === 404) {
+        setError("No account found with this email. Try creating an account.");
+      } else if (status === 429) {
+        setError("Too many attempts. Please wait a moment and try again.");
+      } else {
+        setError(getApiErrorMessage(err));
+      }
     } finally {
       setLoading(false);
     }
@@ -170,21 +194,21 @@ export default function SignInScreen() {
     <View style={styles.container}>
       {/* Background gradient matching Figma: 173deg */}
       <LinearGradient
-        colors={["#1263B2", "#0D4982", "#082A4C"]}
+        colors={["#126ba3", "#0E5680", "#0A3F5E"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={[styles.keyboardView, { paddingTop: insets.top }]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 12 },
+            { paddingTop: 12 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -240,19 +264,12 @@ export default function SignInScreen() {
               placeholder="example@gmail.com"
               value={email}
               onChangeText={(text) => { setEmail(text); setError(""); }}
+              error={error}
               keyboardType="email-address"
               autoCapitalize="none"
               textContentType="emailAddress"
             />
           </Animated.View>
-
-          {/* Error Message */}
-          {error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={Math.round(16 * uiScale)} color="#FF6B6B" />
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
-          ) : null}
 
           {/* Sign In Button */}
           <Animated.View
@@ -386,7 +403,7 @@ const styles = StyleSheet.create({
     fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
-    lineHeight: Math.round(48 * uiScale),
+    lineHeight: Math.round(44 * uiScale),
   },
   subtitle: {
     fontSize: Math.round(14 * uiScale),
@@ -422,6 +439,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.5)",
     backgroundColor: "rgba(255,255,255,0.18)",
   },
+  inputContainerError: {
+    borderColor: "rgba(255,107,107,0.6)",
+  },
   input: {
     fontSize: Math.round(16 * uiScale),
     color: "#FFFFFF",
@@ -430,18 +450,17 @@ const styles = StyleSheet.create({
     margin: 0,
     ...(Platform.OS === "android" ? { includeFontPadding: false, textAlignVertical: "center" as const } : {}),
   },
-  // Error
-  errorContainer: {
+  // Field Error
+  fieldErrorContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-    gap: 8,
+    gap: 6,
   },
-  errorText: {
-    fontSize: Math.round(14 * uiScale),
+  fieldErrorText: {
+    fontSize: Math.round(13 * uiScale),
     color: "#FF6B6B",
     flex: 1,
-    lineHeight: Math.round(20 * uiScale),
+    lineHeight: Math.round(18 * uiScale),
   },
   // Spacer
   spacer: {

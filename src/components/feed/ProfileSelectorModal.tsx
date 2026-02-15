@@ -1,7 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
-  Modal,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
 import { Text } from "../ui/Text";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
+import { BottomSheet } from "../ui/BottomSheet";
 
 interface Profile {
   id: string;
@@ -93,326 +93,292 @@ export const ProfileSelectorModal: React.FC<ProfileSelectorModalProps> = ({
   };
 
   return (
-    <Modal
+    <BottomSheet
       visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onClose={onClose}
+      maxHeight="90%"
+      title="Select Profile"
     >
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={28} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Select Profile
-          </Text>
-          <View style={{ width: 28 }} />
-        </View>
+      {/* Description */}
+      <Text style={[styles.description, { color: colors.textSecondary }]}>
+        Choose which profile to use when applying to jobs. Your selected
+        profile's information will be auto-filled in applications.
+      </Text>
 
-        {/* Description */}
-        <View style={styles.descriptionContainer}>
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            Choose which profile to use when applying to jobs. Your selected
-            profile's information will be auto-filled in applications.
-          </Text>
-        </View>
-
-        {/* Profile List */}
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {profiles.map((profile) => {
-            const isSelected = selected === profile.id;
-            return (
-              <TouchableOpacity
-                key={profile.id}
-                style={[
-                  styles.profileCard,
-                  {
-                    backgroundColor: isSelected
-                      ? colors.primary + "10"
-                      : colors.surface,
-                    borderColor: isSelected ? colors.primary : colors.border,
-                  },
-                ]}
-                onPress={() => handleSelect(profile)}
-              >
-                <View style={styles.profileInfo}>
-                  <View style={styles.profileHeader}>
-                    <Text style={[styles.profileName, { color: colors.text }]}>
-                      {profile.name}
-                    </Text>
-                    {!profile.isComplete && (
-                      <View
-                        style={[
-                          styles.incompleteBadge,
-                          { backgroundColor: colors.warning + "20" },
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.incompleteBadgeText,
-                            { color: colors.warning },
-                          ]}
-                        >
-                          Incomplete
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  {profile.headline && (
-                    <Text
+      {/* Profile List */}
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {profiles.map((profile) => {
+          const isSelected = selected === profile.id;
+          return (
+            <TouchableOpacity
+              key={profile.id}
+              style={[
+                styles.profileCard,
+                {
+                  backgroundColor: isSelected
+                    ? colors.primary + "10"
+                    : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => handleSelect(profile)}
+            >
+              <View style={styles.profileInfo}>
+                <View style={styles.profileHeader}>
+                  <Text style={[styles.profileName, { color: colors.text }]}>
+                    {profile.name}
+                  </Text>
+                  {!profile.isComplete && (
+                    <View
                       style={[
-                        styles.profileHeadline,
-                        { color: colors.textSecondary },
+                        styles.incompleteBadge,
+                        { backgroundColor: colors.warning + "20" },
                       ]}
                     >
-                      {profile.headline}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.incompleteBadgeText,
+                          { color: colors.warning },
+                        ]}
+                      >
+                        Incomplete
+                      </Text>
+                    </View>
                   )}
                 </View>
+                {profile.headline && (
+                  <Text
+                    style={[
+                      styles.profileHeadline,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    {profile.headline}
+                  </Text>
+                )}
+              </View>
 
-                <View
-                  style={[
-                    styles.radio,
-                    {
-                      borderColor: isSelected ? colors.primary : colors.border,
-                      backgroundColor: isSelected
-                        ? colors.primary
-                        : "transparent",
-                    },
-                  ]}
-                >
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={16} color="#FFF" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-
-          {/* Tailored Resume Section */}
-          <View style={styles.tailoredSection}>
-            {/* Checkbox */}
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => {
-                setUseTailoredResume(!useTailoredResume);
-                if (useTailoredResume) {
-                  setResumeType(null);
-                  setSelectedTemplate(null);
-                }
-              }}
-            >
               <View
                 style={[
-                  styles.checkbox,
+                  styles.radio,
                   {
-                    borderColor: useTailoredResume
-                      ? colors.primary
-                      : colors.border,
-                    backgroundColor: useTailoredResume
+                    borderColor: isSelected ? colors.primary : colors.border,
+                    backgroundColor: isSelected
                       ? colors.primary
                       : "transparent",
                   },
                 ]}
               >
-                {useTailoredResume && (
-                  <Ionicons name="checkmark" size={14} color="#FFF" />
+                {isSelected && (
+                  <Ionicons name="checkmark" size={16} color="#FFF" />
                 )}
               </View>
-              <Text style={[styles.checkboxLabel, { color: colors.text }]}>
-                Use Tailored Resume
-              </Text>
             </TouchableOpacity>
+          );
+        })}
 
-            {/* Resume Type Selection */}
-            {useTailoredResume && (
-              <View style={styles.resumeTypeSection}>
-                <Text
-                  style={[styles.sectionLabel, { color: colors.textSecondary }]}
+        {/* Tailored Resume Section */}
+        <View style={[styles.tailoredSection, { borderTopColor: colors.border }]}>
+          {/* Checkbox */}
+          <TouchableOpacity
+            style={styles.checkboxRow}
+            onPress={() => {
+              setUseTailoredResume(!useTailoredResume);
+              if (useTailoredResume) {
+                setResumeType(null);
+                setSelectedTemplate(null);
+              }
+            }}
+          >
+            <View
+              style={[
+                styles.checkbox,
+                {
+                  borderColor: useTailoredResume
+                    ? colors.primary
+                    : colors.border,
+                  backgroundColor: useTailoredResume
+                    ? colors.primary
+                    : "transparent",
+                },
+              ]}
+            >
+              {useTailoredResume && (
+                <Ionicons name="checkmark" size={14} color="#FFF" />
+              )}
+            </View>
+            <Text style={[styles.checkboxLabel, { color: colors.text }]}>
+              Use Tailored Resume
+            </Text>
+          </TouchableOpacity>
+
+          {/* Resume Type Selection */}
+          {useTailoredResume && (
+            <View style={styles.resumeTypeSection}>
+              <Text
+                style={[styles.sectionLabel, { color: colors.textSecondary }]}
+              >
+                Resume Type
+              </Text>
+              <View style={styles.typePillsRow}>
+                <TouchableOpacity
+                  style={[
+                    styles.typePill,
+                    {
+                      backgroundColor:
+                        resumeType === "pdf"
+                          ? colors.primary
+                          : colors.surface,
+                      borderColor:
+                        resumeType === "pdf" ? colors.primary : colors.border,
+                    },
+                  ]}
+                  onPress={() => {
+                    setResumeType("pdf");
+                    setSelectedTemplate(null);
+                  }}
                 >
-                  Resume Type
-                </Text>
-                <View style={styles.typePillsRow}>
-                  <TouchableOpacity
+                  <Ionicons
+                    name="document-text"
+                    size={16}
+                    color={resumeType === "pdf" ? "#FFF" : colors.text}
+                  />
+                  <Text
                     style={[
-                      styles.typePill,
-                      {
-                        backgroundColor:
-                          resumeType === "pdf"
-                            ? colors.primary
-                            : colors.surface,
-                        borderColor:
-                          resumeType === "pdf" ? colors.primary : colors.border,
-                      },
+                      styles.typePillText,
+                      { color: resumeType === "pdf" ? "#FFF" : colors.text },
                     ]}
-                    onPress={() => {
-                      setResumeType("pdf");
-                      setSelectedTemplate(null);
-                    }}
                   >
-                    <Ionicons
-                      name="document-text"
-                      size={16}
-                      color={resumeType === "pdf" ? "#FFF" : colors.text}
-                    />
-                    <Text
-                      style={[
-                        styles.typePillText,
-                        { color: resumeType === "pdf" ? "#FFF" : colors.text },
-                      ]}
-                    >
-                      PDF
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                    PDF
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.typePill,
+                    {
+                      backgroundColor:
+                        resumeType === "docx"
+                          ? colors.primary
+                          : colors.surface,
+                      borderColor:
+                        resumeType === "docx"
+                          ? colors.primary
+                          : colors.border,
+                    },
+                  ]}
+                  onPress={() => {
+                    setResumeType("docx");
+                    setSelectedTemplate(null);
+                  }}
+                >
+                  <Ionicons
+                    name="document"
+                    size={16}
+                    color={resumeType === "docx" ? "#FFF" : colors.text}
+                  />
+                  <Text
                     style={[
-                      styles.typePill,
-                      {
-                        backgroundColor:
-                          resumeType === "docx"
-                            ? colors.primary
-                            : colors.surface,
-                        borderColor:
-                          resumeType === "docx"
-                            ? colors.primary
-                            : colors.border,
-                      },
+                      styles.typePillText,
+                      { color: resumeType === "docx" ? "#FFF" : colors.text },
                     ]}
-                    onPress={() => {
-                      setResumeType("docx");
-                      setSelectedTemplate(null);
-                    }}
                   >
-                    <Ionicons
-                      name="document"
-                      size={16}
-                      color={resumeType === "docx" ? "#FFF" : colors.text}
-                    />
-                    <Text
-                      style={[
-                        styles.typePillText,
-                        { color: resumeType === "docx" ? "#FFF" : colors.text },
-                      ]}
-                    >
-                      DOCX
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                    DOCX
+                  </Text>
+                </TouchableOpacity>
               </View>
-            )}
+            </View>
+          )}
 
-            {/* Template Selection */}
-            {useTailoredResume && resumeType && (
-              <View style={styles.templateSection}>
-                <Text
-                  style={[styles.sectionLabel, { color: colors.textSecondary }]}
-                >
-                  Select Template
-                </Text>
-                <View style={styles.templateGrid}>
-                  {(resumeType === "pdf" ? pdfTemplates : docxTemplates).map(
-                    (template) => (
-                      <TouchableOpacity
-                        key={template}
-                        style={[
-                          styles.templateCard,
-                          {
-                            backgroundColor:
-                              selectedTemplate === template
-                                ? colors.primary + "15"
-                                : colors.surface,
-                            borderColor:
-                              selectedTemplate === template
-                                ? colors.primary
-                                : colors.border,
-                          },
-                        ]}
-                        onPress={() => setSelectedTemplate(template)}
-                      >
-                        <Ionicons
-                          name="document-text-outline"
-                          size={24}
-                          color={
+          {/* Template Selection */}
+          {useTailoredResume && resumeType && (
+            <View style={styles.templateSection}>
+              <Text
+                style={[styles.sectionLabel, { color: colors.textSecondary }]}
+              >
+                Select Template
+              </Text>
+              <View style={styles.templateGrid}>
+                {(resumeType === "pdf" ? pdfTemplates : docxTemplates).map(
+                  (template) => (
+                    <TouchableOpacity
+                      key={template}
+                      style={[
+                        styles.templateCard,
+                        {
+                          backgroundColor:
+                            selectedTemplate === template
+                              ? colors.primary + "15"
+                              : colors.surface,
+                          borderColor:
                             selectedTemplate === template
                               ? colors.primary
-                              : colors.textSecondary
-                          }
-                        />
-                        <Text
+                              : colors.border,
+                        },
+                      ]}
+                      onPress={() => setSelectedTemplate(template)}
+                    >
+                      <Ionicons
+                        name="document-text-outline"
+                        size={24}
+                        color={
+                          selectedTemplate === template
+                            ? colors.primary
+                            : colors.textSecondary
+                        }
+                      />
+                      <Text
+                        style={[
+                          styles.templateName,
+                          {
+                            color:
+                              selectedTemplate === template
+                                ? colors.primary
+                                : colors.text,
+                          },
+                        ]}
+                      >
+                        {template}
+                      </Text>
+                      {selectedTemplate === template && (
+                        <View
                           style={[
-                            styles.templateName,
-                            {
-                              color:
-                                selectedTemplate === template
-                                  ? colors.primary
-                                  : colors.text,
-                            },
+                            styles.templateCheck,
+                            { backgroundColor: colors.primary },
                           ]}
                         >
-                          {template}
-                        </Text>
-                        {selectedTemplate === template && (
-                          <View
-                            style={[
-                              styles.templateCheck,
-                              { backgroundColor: colors.primary },
-                            ]}
-                          >
-                            <Ionicons name="checkmark" size={12} color="#FFF" />
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    ),
-                  )}
-                </View>
+                          <Ionicons name="checkmark" size={12} color="#FFF" />
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ),
+                )}
               </View>
-            )}
-          </View>
-        </ScrollView>
-
-        {/* Confirm Button */}
-        <View style={[styles.footer, { borderTopColor: colors.border }]}>
-          <TouchableOpacity
-            style={[styles.confirmButton, { backgroundColor: colors.primary }]}
-            onPress={handleConfirm}
-          >
-            <Text style={styles.confirmButtonText}>Use This Profile</Text>
-          </TouchableOpacity>
+            </View>
+          )}
         </View>
+      </ScrollView>
+
+      {/* Confirm Button */}
+      <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        <TouchableOpacity
+          style={[styles.confirmButton, { backgroundColor: colors.primary }]}
+          onPress={handleConfirm}
+        >
+          <Text style={styles.confirmButtonText}>Use This Profile</Text>
+        </TouchableOpacity>
       </View>
-    </Modal>
+    </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: "700",
-  },
-  descriptionContainer: {
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-  },
   description: {
     fontSize: typography.fontSize.base,
     lineHeight: 22,
+    marginBottom: spacing[4],
   },
   content: {
     flex: 1,
-    paddingHorizontal: spacing[5],
   },
   profileCard: {
     flexDirection: "row",
@@ -457,8 +423,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   footer: {
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
+    paddingTop: spacing[4],
     borderTopWidth: 1,
   },
   confirmButton: {
@@ -476,7 +441,6 @@ const styles = StyleSheet.create({
     marginTop: spacing[4],
     paddingTop: spacing[4],
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.1)",
   },
   checkboxRow: {
     flexDirection: "row",

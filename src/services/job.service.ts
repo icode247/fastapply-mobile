@@ -22,7 +22,7 @@ const SUPPORTED_PLATFORMS: JobPlatform[] = ["rippling", "ashby", "workable"];
 
 // Configuration
 const BATCH_SIZE = 50; // Jobs per API request
-const PREFETCH_THRESHOLD = 10; // Start prefetch when this many jobs remain
+const PREFETCH_THRESHOLD = 30; // Start prefetch when this many jobs remain
 
 // Job preferences for API search
 export interface JobPreferences {
@@ -54,6 +54,7 @@ class JobService {
   // Core job data
   private jobs: NormalizedJob[] = [];
   private fetchedJobIds = new Set<string>();
+  private swipedUrls = new Set<string>();
 
   // Pagination state
   private hasMoreJobs = true;
@@ -78,6 +79,13 @@ class JobService {
   }
 
   /**
+   * Set URLs of previously swiped (liked) jobs to filter from results
+   */
+  setSwipedUrls(urls: Set<string>): void {
+    this.swipedUrls = urls;
+  }
+
+  /**
    * Notify all listeners of state change
    */
   private notifyListeners(): void {
@@ -91,14 +99,18 @@ class JobService {
     const prefs = preferences || this.currentPreferences;
 
     const payload: Record<string, unknown> = {
-      keywords: prefs?.keywords || ["Software Engineer"],
       limit: prefs?.limit || BATCH_SIZE,
       platforms:
         prefs?.platforms?.filter((p) => SUPPORTED_PLATFORMS.includes(p)) ||
         SUPPORTED_PLATFORMS,
     };
 
-    // Add optional fields only if they have values
+    // keywords is required by the API (min 1 element) — must come from user preferences
+    if (prefs?.keywords && prefs.keywords.length > 0) {
+      payload.keywords = prefs.keywords;
+    } else {
+      logger.warn("[JobService] No keywords in preferences — API requires at least one");
+    }
     if (prefs?.locations && prefs.locations.length > 0) {
       payload.locations = prefs.locations;
     }
@@ -193,9 +205,14 @@ class JobService {
         // Track fetched IDs
         uniqueJobs.forEach((job) => this.fetchedJobIds.add(job.id));
 
-        // Normalize and append
+        // Normalize and filter out previously liked jobs
         const normalizedJobs = uniqueJobs.map((job) => normalizeApiJob(job));
-        this.jobs = [...this.jobs, ...normalizedJobs];
+        const freshJobs = this.swipedUrls.size > 0
+          ? normalizedJobs.filter(
+              (job) => !this.swipedUrls.has(job.applyUrl) && !this.swipedUrls.has(job.listingUrl)
+            )
+          : normalizedJobs;
+        this.jobs = [...this.jobs, ...freshJobs];
 
         // Check if we got fewer jobs than requested (indicates no more available)
         if (newApiJobs.length < BATCH_SIZE) {
@@ -203,13 +220,14 @@ class JobService {
         }
 
         logger.debug("[JobService] Fetched jobs:", {
-          newJobs: normalizedJobs.length,
+          newJobs: freshJobs.length,
+          filtered: normalizedJobs.length - freshJobs.length,
           totalJobs: this.jobs.length,
           hasMore: this.hasMoreJobs,
         });
 
         this.notifyListeners();
-        return normalizedJobs;
+        return freshJobs;
       } else {
         logger.debug("[JobService] API returned no jobs");
         this.hasMoreJobs = false;

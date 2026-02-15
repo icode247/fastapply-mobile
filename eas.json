@@ -1,0 +1,28 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "autoIncrement": true
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal"
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./google-service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}

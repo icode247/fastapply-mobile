@@ -155,15 +155,12 @@ export default function VerifyScreen() {
     setSuccessMessage("");
     setIsVerifying(true);
 
-    try {
-      await verifyOtp({ email, otp });
-      // Success - will redirect via auth hook
-    } catch (err) {
-      setError(getApiErrorMessage(err));
+    const result = await verifyOtp({ email, otp });
+    if (!result.success) {
+      setError(result.error || "Invalid or expired code. Please try again.");
       setOtp("");
-    } finally {
-      setIsVerifying(false);
     }
+    setIsVerifying(false);
   };
 
   const handleResendCode = async () => {
@@ -192,7 +189,7 @@ export default function VerifyScreen() {
     <View style={styles.container}>
       {/* Background gradient */}
       <LinearGradient
-        colors={["#1263B2", "#0D4982", "#082A4C"]}
+        colors={["#126ba3", "#0E5680", "#0A3F5E"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -202,14 +199,14 @@ export default function VerifyScreen() {
       <View style={[styles.decorativeCircle, { top: insets.top + 20 }]} />
 
       <KeyboardAvoidingView
-        style={styles.keyboardView}
+        style={[styles.keyboardView, { paddingTop: insets.top }]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingTop: insets.top + 12 },
+            { paddingTop: 12 },
           ]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -388,7 +385,7 @@ const styles = StyleSheet.create({
     fontSize: Math.round(40 * uiScale),
     fontWeight: "700",
     color: "#FFFFFF",
-    lineHeight: Math.round(48 * uiScale),
+    lineHeight: Math.round(44 * uiScale),
   },
   subtitle: {
     fontSize: Math.round(14 * uiScale),

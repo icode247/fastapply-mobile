@@ -44,7 +44,7 @@ export const subscriptionService = {
     limit = 20
   ): Promise<PaginatedResponse<CreditHistory>> {
     const response = await api.get<PaginatedResponse<CreditHistory>>(
-      `${ENDPOINTS.SUBSCRIPTIONS.CURRENT}/credit-history?page=${page}&limit=${limit}`
+      `${ENDPOINTS.SUBSCRIPTIONS.CREDIT_HISTORY}?page=${page}&limit=${limit}`
     );
     return response.data;
   },

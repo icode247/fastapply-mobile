@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -40,11 +40,13 @@ export default function ProfileDetailsScreen() {
     limit: number;
   } | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      fetchData();
-    }
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        fetchData();
+      }
+    }, [id])
+  );
 
   const fetchData = async () => {
     try {
@@ -192,23 +194,16 @@ export default function ProfileDetailsScreen() {
   }
 
   return (
-    <>
-      {/* Status bar background */}
-      <View
-        style={[
-          styles.statusBarBackground,
-          { backgroundColor: colors.background, height: insets.top },
-        ]}
-      />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
-        style={[styles.container, { backgroundColor: colors.background }]}
+        style={{ flex: 1 }}
         contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       >
         {/* Header */}
         <View
           style={[
             styles.header,
-            { paddingTop: 20, borderBottomColor: colors.border },
+            { paddingTop: insets.top + spacing[2], borderBottomColor: colors.border },
           ]}
         >
           <TouchableOpacity
@@ -241,15 +236,17 @@ export default function ProfileDetailsScreen() {
           >
             <Ionicons name="create-outline" size={24} color={colors.text} />
           </TouchableOpacity>
-          {!profile.isPrimary && (
-            <TouchableOpacity onPress={handleSetPrimary} style={{ padding: 8 }}>
-              <Ionicons
-                name="star-outline"
-                size={24}
-                color={colors.textSecondary}
-              />
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity
+            onPress={profile.isPrimary ? undefined : handleSetPrimary}
+            style={{ padding: 8 }}
+            disabled={profile.isPrimary}
+          >
+            <Ionicons
+              name={profile.isPrimary ? "star" : "star-outline"}
+              size={24}
+              color={profile.isPrimary ? colors.primary : colors.textSecondary}
+            />
+          </TouchableOpacity>
         </View>
 
         <View style={styles.content}>
@@ -269,6 +266,11 @@ export default function ProfileDetailsScreen() {
                   {profile.currentCity || "No Location"} •{" "}
                   {profile.yearsOfExperience || 0} Years Exp
                 </Text>
+                {profile.timezone && (
+                  <Text style={[styles.subtext, { color: colors.textSecondary, marginTop: 2 }]}>
+                    Timezone: {profile.timezone}
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -326,6 +328,65 @@ export default function ProfileDetailsScreen() {
               </View>
             </View>
           </Card>
+
+          {/* Education Section */}
+          {profile.education && profile.education.length > 0 && (
+            <Card style={styles.card} variant="elevated">
+              <Text
+                style={[styles.sectionTitle, { color: colors.textSecondary }]}
+              >
+                Education
+              </Text>
+              {profile.education.map((edu, index) => (
+                <View
+                  key={edu.id || index}
+                  style={[
+                    styles.eduItem,
+                    index > 0 && {
+                      borderTopWidth: 1,
+                      borderTopColor: colors.border,
+                      paddingTop: 12,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.eduDegree, { color: colors.text }]}>
+                    {edu.degree}
+                    {edu.major || edu.fieldOfStudy
+                      ? ` in ${edu.major || edu.fieldOfStudy}`
+                      : ""}
+                  </Text>
+                  <Text
+                    style={[styles.eduSchool, { color: colors.textSecondary }]}
+                  >
+                    {edu.school}
+                  </Text>
+                  <View style={styles.eduMeta}>
+                    {edu.gpa && (
+                      <Text
+                        style={[
+                          styles.eduMetaText,
+                          { color: colors.textSecondary },
+                        ]}
+                      >
+                        GPA: {edu.gpa}
+                      </Text>
+                    )}
+                    {edu.endDate && (
+                      <Text
+                        style={[
+                          styles.eduMetaText,
+                          { color: colors.textTertiary },
+                        ]}
+                      >
+                        {edu.startDate ? `${edu.startDate} - ` : ""}
+                        {edu.endDate}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              ))}
+            </Card>
+          )}
 
           {/* Resumes Section */}
           <View style={styles.sectionHeader}>
@@ -418,18 +479,11 @@ export default function ProfileDetailsScreen() {
           limit={upgradePromptData.limit}
         />
       )}
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  statusBarBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
   container: {
     flex: 1,
   },
@@ -552,5 +606,24 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     padding: 8,
+  },
+  eduItem: {
+    marginBottom: 12,
+  },
+  eduDegree: {
+    fontSize: typography.fontSize.base,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  eduSchool: {
+    fontSize: typography.fontSize.sm,
+    marginBottom: 4,
+  },
+  eduMeta: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  eduMetaText: {
+    fontSize: typography.fontSize.xs,
   },
 });

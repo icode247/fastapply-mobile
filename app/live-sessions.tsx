@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { MonitorPlay } from "lucide-react-native";
+import { Maximize2, Minimize2, MonitorPlay } from "lucide-react-native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -8,6 +8,7 @@ import {
   Pressable,
   RefreshControl,
   ScrollView,
+  StatusBar,
   StyleSheet,
   View,
 } from "react-native";
@@ -32,6 +33,7 @@ export default function LiveSessionsScreen() {
     null,
   );
   const [playerLoading, setPlayerLoading] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -69,6 +71,7 @@ export default function LiveSessionsScreen() {
         const updated = data.find((s) => s.id === selectedSession.id);
         if (updated && updated.status === "disconnected") {
           setSelectedSession(null);
+          setIsFullscreen(false);
         }
       }
     }, 10000);
@@ -87,8 +90,12 @@ export default function LiveSessionsScreen() {
   }, []);
 
   const handleBack = useCallback(() => {
+    if (isFullscreen) {
+      setIsFullscreen(false);
+      return;
+    }
     router.back();
-  }, [router]);
+  }, [router, isFullscreen]);
 
   // Build the live view URL with navbar hidden
   const getLiveViewUrl = (session: LiveSession) => {
@@ -110,6 +117,83 @@ export default function LiveSessionsScreen() {
 
   const activeSessions = sessions.filter((s) => s.status === "active");
   const pastSessions = sessions.filter((s) => s.status !== "active");
+
+  // Fullscreen mode - WebView takes over the entire screen
+  if (isFullscreen && selectedSession) {
+    return (
+      <View style={[styles.container, { backgroundColor: "#000" }]}>
+        <StatusBar hidden />
+        <WebView
+          ref={webViewRef}
+          source={{ uri: getLiveViewUrl(selectedSession) }}
+          style={styles.fullscreenWebView}
+          javaScriptEnabled
+          domStorageEnabled
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          onLoadStart={() => setPlayerLoading(true)}
+          onLoadEnd={() => setPlayerLoading(false)}
+          onMessage={(event) => {
+            if (event.nativeEvent.data === "browserbase-disconnected") {
+              setSelectedSession(null);
+              setIsFullscreen(false);
+            }
+          }}
+          injectedJavaScript={`
+            window.addEventListener("message", function(event) {
+              if (event.data === "browserbase-disconnected") {
+                window.ReactNativeWebView.postMessage("browserbase-disconnected");
+              }
+            });
+            true;
+          `}
+        />
+
+        {playerLoading && (
+          <View style={styles.playerLoadingOverlay}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text
+              style={[styles.playerLoadingText, { color: "#FFFFFF" }]}
+            >
+              Connecting to session...
+            </Text>
+          </View>
+        )}
+
+        {/* Floating top bar */}
+        <View
+          style={[
+            styles.fullscreenTopBar,
+            { paddingTop: insets.top + 4 },
+          ]}
+        >
+          <Pressable
+            style={styles.fullscreenButton}
+            onPress={() => setIsFullscreen(false)}
+          >
+            <Minimize2 size={20} color="#FFFFFF" strokeWidth={2} />
+          </Pressable>
+
+          <View style={styles.fullscreenInfo}>
+            <View style={[styles.nowPlayingDot, { backgroundColor: "#10B981" }]} />
+            <Text style={styles.fullscreenTitle} numberOfLines={1}>
+              {selectedSession.jobTitle || "Applying..."}
+            </Text>
+            <Text style={styles.fullscreenSubtitle} numberOfLines={1}>
+              {selectedSession.companyName || "Unknown"}
+            </Text>
+          </View>
+
+          <Pressable
+            style={styles.fullscreenButton}
+            onPress={handleBack}
+          >
+            <Ionicons name="close" size={22} color="#FFFFFF" />
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -209,6 +293,13 @@ export default function LiveSessionsScreen() {
                     : ""}
                 </Text>
               </View>
+              <Pressable
+                style={styles.fullscreenToggle}
+                onPress={() => setIsFullscreen(true)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Maximize2 size={18} color={colors.textSecondary} strokeWidth={2} />
+              </Pressable>
             </View>
           </>
         ) : (
@@ -489,6 +580,12 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.xs,
     marginTop: 1,
   },
+  fullscreenToggle: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   emptyPlayer: {
     flex: 1,
     justifyContent: "center",
@@ -497,6 +594,46 @@ const styles = StyleSheet.create({
   },
   emptyPlayerText: {
     fontSize: typography.fontSize.sm,
+  },
+
+  // Fullscreen
+  fullscreenWebView: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  fullscreenTopBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: spacing[3],
+    paddingBottom: spacing[2],
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  fullscreenButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullscreenInfo: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing[2],
+  },
+  fullscreenTitle: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    flexShrink: 1,
+  },
+  fullscreenSubtitle: {
+    fontSize: typography.fontSize.xs,
+    color: "rgba(255,255,255,0.7)",
+    flexShrink: 1,
   },
 
   // List

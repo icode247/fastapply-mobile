@@ -1,7 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Modal,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -15,6 +13,7 @@ import {
   JobPreferencesFormValues,
 } from "./JobPreferencesForm";
 import { LocationItem } from "./LocationsPickerModal";
+import { BottomSheet } from "../ui/BottomSheet";
 
 interface JobFiltersModalProps {
   visible: boolean;
@@ -36,6 +35,13 @@ export const JobFiltersModal: React.FC<JobFiltersModalProps> = ({
   const { colors } = useTheme();
   const [filters, setFilters] = useState<JobFilters>(initialFilters);
 
+  // Sync local state when modal opens with latest stored preferences
+  useEffect(() => {
+    if (visible) {
+      setFilters(initialFilters);
+    }
+  }, [visible, initialFilters]);
+
   const handleApply = () => {
     onApply(filters);
     onClose();
@@ -46,77 +52,54 @@ export const JobFiltersModal: React.FC<JobFiltersModalProps> = ({
   };
 
   return (
-    <Modal
+    <BottomSheet
       visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
+      onClose={onClose}
+      maxHeight="90%"
+      title="Edit Job Preferences"
     >
-      <View style={[styles.container, { backgroundColor: colors.background }]}>
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: colors.border }]}>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={28} color={colors.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: colors.text }]}>
-            Edit Job Preferences
-          </Text>
-          <TouchableOpacity onPress={handleReset}>
-            <Text style={[styles.resetText, { color: colors.textSecondary }]}>
-              Clear
-            </Text>
-          </TouchableOpacity>
-        </View>
+      {/* Clear link */}
+      <TouchableOpacity onPress={handleReset} style={styles.clearButton}>
+        <Text style={[styles.clearText, { color: colors.textSecondary }]}>
+          Clear All
+        </Text>
+      </TouchableOpacity>
 
-        {/* Content - Reusable Form */}
-        <View style={styles.formContainer}>
-          <JobPreferencesForm
-            values={filters}
-            onChange={setFilters}
-          />
-        </View>
-
-        {/* Apply Button */}
-        <View style={[styles.footer, { borderTopColor: colors.border }]}>
-          <TouchableOpacity
-            style={[styles.applyButton, { backgroundColor: colors.primary }]}
-            onPress={handleApply}
-          >
-            <Text style={styles.applyButtonText}>Apply Filters</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Content - Reusable Form */}
+      <View style={styles.formContainer}>
+        <JobPreferencesForm
+          values={filters}
+          onChange={setFilters}
+        />
       </View>
-    </Modal>
+
+      {/* Apply Button */}
+      <View style={[styles.footer, { borderTopColor: colors.border }]}>
+        <TouchableOpacity
+          style={[styles.applyButton, { backgroundColor: colors.primary }]}
+          onPress={handleApply}
+        >
+          <Text style={styles.applyButtonText}>Apply Filters</Text>
+        </TouchableOpacity>
+      </View>
+    </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  clearButton: {
+    alignSelf: "flex-end",
+    marginBottom: spacing[2],
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
-    borderBottomWidth: 1,
-  },
-  headerTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: "700",
-  },
-  resetText: {
+  clearText: {
     fontSize: typography.fontSize.base,
     fontWeight: "600",
   },
   formContainer: {
     flex: 1,
-    paddingHorizontal: spacing[5],
   },
   footer: {
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[4],
+    paddingTop: spacing[4],
     borderTopWidth: 1,
   },
   applyButton: {

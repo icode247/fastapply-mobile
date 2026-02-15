@@ -292,8 +292,7 @@ export const JobPreferencesForm: React.FC<JobPreferencesFormProps> = ({
           </TouchableOpacity>
         </View>
 
-        {/* Salary Range Slider */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
             Salary Range
           </Text>
@@ -350,7 +349,7 @@ export const JobPreferencesForm: React.FC<JobPreferencesFormProps> = ({
               thumbTintColor={colors.primary}
             />
           </View>
-        </View>
+        </View> */}
 
         {renderChipGroup("Job Type", JOB_TYPES, values.jobTypes, "jobTypes")}
         {renderChipGroup(
@@ -509,7 +508,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: spacing[3],
   },
   sectionHeaderRight: {
     flexDirection: "row",
@@ -519,6 +517,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: typography.fontSize.lg,
     fontWeight: "600",
+    marginBottom: spacing[3],
   },
   countBadge: {
     fontSize: typography.fontSize.base,

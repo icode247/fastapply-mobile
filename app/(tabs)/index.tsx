@@ -2,7 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import * as NavigationBar from "expo-navigation-bar";
 import { useRouter } from "expo-router";
-import { ChartNoAxesCombined, Gift, MonitorPlay, SlidersHorizontal } from "lucide-react-native";
+import { Gift, MonitorPlay, SlidersHorizontal, Zap } from "lucide-react-native";
 import React, {
   useCallback,
   useEffect,
@@ -41,6 +41,8 @@ import {
   ProfileSelection,
   ResumeSettings,
 } from "../../src/components/feed/ProfileSelectorModal";
+import { RewardsModal } from "../../src/components/feed/RewardsModal";
+import { StatsModal } from "../../src/components/feed/StatsModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
 import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { LoadingScreen } from "../../src/components/shared/LoadingScreen";
@@ -53,7 +55,10 @@ import { notificationService } from "../../src/services/notification.service";
 import { subscriptionService } from "../../src/services/subscription.service";
 import { storage } from "../../src/utils/storage";
 import { jobService, JobPreferences } from "../../src/services/job.service";
+import { ensureCacheLoaded, getAllCachedJobs } from "../../src/services/swipedJobsCache.service";
 import { profileService } from "../../src/services/profile.service";
+import { usePreferencesStore } from "../../src/stores/preferences.store";
+import { useScoutStore } from "../../src/stores/scout.store";
 import {
   EmploymentType,
   NormalizedJob,
@@ -120,16 +125,24 @@ function toLegacyJob(job: NormalizedJob): LegacyJob {
   };
 }
 
-// Map profile job type strings to API employment types
+// Map UI job type strings to API employment types
 const JOB_TYPE_MAP: Record<string, EmploymentType> = {
-  "Full-time": "full_time",
-  "Part-time": "part_time",
-  "Contract": "contract",
-  "Freelance": "freelance",
-  "Internship": "internship",
+  "full-time": "full_time",
+  "part-time": "part_time",
+  "contract": "contract",
+  "freelance": "freelance",
+  "internship": "internship",
 };
 
-// Map profile experience level strings to API experience levels
+// Map UI work mode strings to API workplace types
+const WORK_MODE_MAP: Record<string, WorkplaceType> = {
+  "remote": "remote",
+  "hybrid": "hybrid",
+  "on-site": "onsite",
+  "onsite": "onsite",
+};
+
+// Map UI experience level strings to API experience levels
 const EXPERIENCE_MAP: Record<string, "entry" | "mid" | "senior" | "lead" | "executive"> = {
   "Entry Level": "entry",
   "Junior": "entry",
@@ -140,51 +153,50 @@ const EXPERIENCE_MAP: Record<string, "entry" | "mid" | "senior" | "lead" | "exec
   "Executive": "executive",
 };
 
-// Build job preferences from user's profile
-function buildJobPreferencesFromProfile(profile?: JobProfile): JobPreferences | undefined {
-  if (!profile?.preferences) {
-    // No preferences set - return undefined to use service defaults
-    return undefined;
-  }
-
-  const prefs = profile.preferences;
+// Convert stored JobPreferencesFormValues to API JobPreferences format
+function buildApiPreferences(
+  stored: import("../../src/components/feed/JobPreferencesForm").JobPreferencesFormValues,
+  profile?: JobProfile,
+): JobPreferences | undefined {
   const jobPrefs: JobPreferences = {};
 
-  // Use positions as keywords (job titles user is looking for)
-  if (prefs.positions && prefs.positions.length > 0) {
-    jobPrefs.keywords = prefs.positions;
+  // Keywords from stored job titles, fallback to profile headline/experience
+  if (stored.jobTitles.length > 0) {
+    jobPrefs.keywords = stored.jobTitles;
+  } else if (profile?.headline) {
+    jobPrefs.keywords = [profile.headline];
+  } else if (profile?.experience && profile.experience.length > 0) {
+    jobPrefs.keywords = [profile.experience[0].title];
   }
 
-  // Map job types
-  if (prefs.jobType && prefs.jobType.length > 0) {
-    jobPrefs.jobTypes = prefs.jobType
-      .map((t) => JOB_TYPE_MAP[t])
+  // Locations
+  if (stored.locations.length > 0) {
+    jobPrefs.locations = stored.locations.map((l) => l.name);
+  }
+
+  // Job types
+  if (stored.jobTypes.length > 0) {
+    jobPrefs.jobTypes = stored.jobTypes
+      .map((t) => JOB_TYPE_MAP[t.toLowerCase()])
       .filter((t): t is EmploymentType => t !== undefined);
   }
 
-  // Map experience levels
-  if (prefs.experience && prefs.experience.length > 0) {
-    jobPrefs.experienceLevels = prefs.experience
+  // Work modes
+  if (stored.remoteOnly) {
+    jobPrefs.workModes = ["remote"];
+  } else if (stored.workModes.length > 0) {
+    jobPrefs.workModes = stored.workModes
+      .map((m) => WORK_MODE_MAP[m.toLowerCase()])
+      .filter((m): m is WorkplaceType => m !== undefined);
+  }
+
+  // Experience levels
+  if (stored.experienceLevels.length > 0) {
+    jobPrefs.experienceLevels = stored.experienceLevels
       .map((e) => EXPERIENCE_MAP[e])
       .filter((e): e is "entry" | "mid" | "senior" | "lead" | "executive" => e !== undefined);
   }
 
-  // Remote only -> work mode
-  if (prefs.remoteOnly) {
-    jobPrefs.workModes = ["remote"];
-  }
-
-  // Locations
-  if (prefs.locations && prefs.locations.length > 0) {
-    jobPrefs.locations = prefs.locations;
-  }
-
-  // Company blacklist
-  if (prefs.companyBlacklist && prefs.companyBlacklist.length > 0) {
-    jobPrefs.companyBlacklist = prefs.companyBlacklist;
-  }
-
-  // Only return if we have at least some preferences
   const hasPrefs = Object.keys(jobPrefs).length > 0;
   return hasPrefs ? jobPrefs : undefined;
 }
@@ -195,8 +207,24 @@ export default function FeedScreen() {
   const router = useRouter();
   const swipeDeckRef = useRef<SwipeDeckRef>(null);
 
+  // Persistent job preferences (shared between onboarding and filter modal)
+  const {
+    preferences: storedPreferences,
+    isLoaded: prefsLoaded,
+    initialize: initPreferences,
+    setPreferences: savePreferences,
+  } = usePreferencesStore();
+
+  // Scout voice assistant - consume pending actions
+  const { pendingAction, clearPendingAction } = useScoutStore();
+
+  // Initialize preferences store on mount
+  useEffect(() => {
+    initPreferences();
+  }, []);
+
   // Actions container bottom offset
-  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 23 : 100;
+  const actionsBottomOffset = Platform.OS === "ios" ? insets.bottom - 23 : 12;
 
   // Load jobs from service
   const [jobs, setJobs] = useState<NormalizedJob[]>([]);
@@ -254,7 +282,8 @@ export default function FeedScreen() {
   const [showProfileSelector, setShowProfileSelector] = useState(false);
   const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
-  const [filters, setFilters] = useState<JobFilters | null>(null);
+  const [showRewards, setShowRewards] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   // Real profiles from backend
   const [profiles, setProfiles] = useState<JobProfile[]>([]);
@@ -372,16 +401,24 @@ export default function FeedScreen() {
     };
   }, []);
 
-  // Load jobs from API once profile is available (to use preferences)
+  // Load swiped jobs cache on mount so liked jobs are filtered from results
   useEffect(() => {
-    // Wait for profiles to finish loading
-    if (profilesLoading) return;
+    const loadSwipedCache = async () => {
+      await ensureCacheLoaded();
+      const cached = await getAllCachedJobs();
+      jobService.setSwipedUrls(new Set(Object.keys(cached)));
+    };
+    loadSwipedCache();
+  }, []);
+
+  // Load jobs from API once preferences and profiles are ready
+  useEffect(() => {
+    if (!prefsLoaded || profilesLoading) return;
 
     const loadJobs = async () => {
       setIsLoadingJobs(true);
       try {
-        // Build preferences from selected profile
-        const preferences = buildJobPreferencesFromProfile(selectedProfile);
+        const preferences = buildApiPreferences(storedPreferences, selectedProfile);
         console.log("Loading jobs with preferences:", preferences);
 
         const fetchedJobs = await jobService.fetchInitialJobs(preferences);
@@ -395,7 +432,7 @@ export default function FeedScreen() {
     };
 
     loadJobs();
-  }, [profilesLoading, selectedProfile]);
+  }, [prefsLoaded, profilesLoading, selectedProfile]);
 
   // Trigger prefetch when approaching the end of jobs
   // The service handles all the logic - we just need to tell it the current index
@@ -431,6 +468,67 @@ export default function FeedScreen() {
 
     checkNotificationPermission();
   }, []);
+
+  // Scout: consume pending actions from voice assistant
+  useEffect(() => {
+    if (!pendingAction) return;
+
+    const { type, params, navigation } = pendingAction;
+    clearPendingAction();
+
+    // Navigate if needed
+    if (type === "navigate" && navigation) {
+      router.push(navigation as any);
+      return;
+    }
+
+    // Build search filters from Scout params
+    if (type === "search" || type === "filter") {
+      const voiceLocations: Array<{ id: string; name: string }> = [];
+      if (params.city) {
+        voiceLocations.push({ id: params.city.toLowerCase().replace(/\s/g, "-"), name: params.city });
+      } else if (params.location) {
+        voiceLocations.push({ id: params.location.toLowerCase().replace(/\s/g, "-"), name: params.location });
+      }
+
+      const queryParts: string[] = [];
+      if (params.jobTitle) queryParts.push(params.jobTitle);
+      if (params.skills) queryParts.push(...params.skills);
+
+      const searchFilters = {
+        query: queryParts.length > 0 ? queryParts.join(" ") : undefined,
+        jobTitles: params.jobTitle ? [params.jobTitle] : undefined,
+        remoteOnly: params.remote,
+        salaryMin: params.salaryMin,
+        salaryMax: params.salaryMax,
+        locations: voiceLocations.length > 0 ? voiceLocations.map((l) => l.name) : undefined,
+        countries: params.country ? [params.country] : undefined,
+        skills: params.skills,
+      };
+
+      const result = jobService.searchJobs(searchFilters);
+      setJobs(result.jobs);
+      setCurrentJobIndex(0);
+    }
+
+    // Apply to current job
+    if (type === "apply") {
+      swipeDeckRef.current?.swipeRight();
+    }
+
+    // Skip current job
+    if (type === "skip") {
+      swipeDeckRef.current?.swipeLeft();
+    }
+
+    // Undo
+    if (type === "undo") {
+      const didUndo = swipeDeckRef.current?.undo();
+      if (didUndo) {
+        setCurrentJobIndex((prev) => Math.max(0, prev - 1));
+      }
+    }
+  }, [pendingAction]);
 
   // Handle enabling notifications
   const handleEnableNotifications = async () => {
@@ -475,8 +573,10 @@ export default function FeedScreen() {
   };
 
   const handleUndo = () => {
-    swipeDeckRef.current?.undo();
-    setCurrentJobIndex((prev) => Math.max(0, prev - 1));
+    const didUndo = swipeDeckRef.current?.undo();
+    if (didUndo) {
+      setCurrentJobIndex((prev) => Math.max(0, prev - 1));
+    }
   };
 
   const handleReject = () => {
@@ -601,7 +701,7 @@ export default function FeedScreen() {
           console.log("Voice filter - found jobs:", result.total);
           setJobs(result.jobs);
           setCurrentJobIndex(0);
-          setFilters(newFilters);
+          savePreferences(newFilters);
 
           // If intent is apply, auto-apply to ALL filtered jobs
           if (intent === "apply" && result.jobs.length > 0) {
@@ -687,88 +787,22 @@ export default function FeedScreen() {
   }, []);
 
   const handleApplyFilters = async (newFilters: JobFilters) => {
-    setFilters(newFilters);
-    console.log("Filters applied:", newFilters);
+    // Persist preferences so they survive app restarts
+    await savePreferences(newFilters);
+    console.log("Filters applied and saved:", newFilters);
 
-    // Check if we need to re-fetch from API (job titles or locations changed)
-    const hasJobTitles = newFilters.jobTitles.length > 0;
-    const hasLocations = newFilters.locations.length > 0;
-
-    // Map UI job types to API format
-    const jobTypesMap: Record<string, EmploymentType> = {
-      "full-time": "full_time",
-      "part-time": "part_time",
-      contract: "contract",
-      internship: "internship",
-      freelance: "freelance",
-    };
-
-    // Map UI work modes to API format
-    const workModesMap: Record<string, WorkplaceType> = {
-      remote: "remote",
-      hybrid: "hybrid",
-      "on-site": "onsite",
-      onsite: "onsite",
-    };
-
-    if (hasJobTitles || hasLocations) {
-      // Fetch from API with new preferences (resets the job list)
-      setIsLoadingJobs(true);
-      try {
-        const preferences = {
-          keywords: newFilters.jobTitles,
-          locations: newFilters.locations.map((loc) => loc.name),
-          workModes: newFilters.remoteOnly
-            ? (["remote"] as WorkplaceType[])
-            : newFilters.workModes.length > 0
-              ? (newFilters.workModes
-                  .map((m) => workModesMap[m.toLowerCase()] || null)
-                  .filter(Boolean) as WorkplaceType[])
-              : undefined,
-          jobTypes:
-            newFilters.jobTypes.length > 0
-              ? (newFilters.jobTypes
-                  .map((t) => jobTypesMap[t.toLowerCase()] || null)
-                  .filter(Boolean) as EmploymentType[])
-              : undefined,
-        };
-
-        const fetchedJobs = await jobService.fetchInitialJobs(preferences);
-        console.log("Fetched jobs from API with filters:", fetchedJobs.length);
-        setJobs(fetchedJobs);
-        setCurrentJobIndex(0);
-      } catch (error) {
-        console.error("Failed to fetch jobs with filters:", error);
-      } finally {
-        setIsLoadingJobs(false);
-      }
-    } else {
-      // Apply filters locally
-      const searchFilters = {
-        remoteOnly: newFilters.remoteOnly,
-        jobTypes:
-          newFilters.jobTypes.length > 0
-            ? (newFilters.jobTypes
-                .map((t) => jobTypesMap[t.toLowerCase()] || null)
-                .filter(Boolean) as EmploymentType[])
-            : undefined,
-        workModes:
-          newFilters.workModes.length > 0
-            ? (newFilters.workModes
-                .map((m) => workModesMap[m.toLowerCase()] || null)
-                .filter(Boolean) as WorkplaceType[])
-            : undefined,
-      };
-
-      const result = jobService.searchJobs(searchFilters);
-      console.log(
-        "Filtered jobs locally:",
-        result.total,
-        "of",
-        jobService.getAllJobs().length,
-      );
-      setJobs(result.jobs);
+    // Always re-fetch from API with the new preferences
+    setIsLoadingJobs(true);
+    try {
+      const preferences = buildApiPreferences(newFilters, selectedProfile);
+      const fetchedJobs = await jobService.fetchInitialJobs(preferences);
+      console.log("Fetched jobs from API with filters:", fetchedJobs.length);
+      setJobs(fetchedJobs);
       setCurrentJobIndex(0);
+    } catch (error) {
+      console.error("Failed to fetch jobs with filters:", error);
+    } finally {
+      setIsLoadingJobs(false);
     }
   };
 
@@ -796,7 +830,7 @@ export default function FeedScreen() {
               <Animated.View style={isAutomationLive ? livePulseStyle : undefined}>
                 <MonitorPlay
                   size={Math.round(26 * uiScale)}
-                  color={isAutomationLive ? "#10B981" : colors.textTertiary}
+                  color={isAutomationLive ? "#10B981" : "#009688"}
                   strokeWidth={1.8}
                 />
               </Animated.View>
@@ -812,9 +846,9 @@ export default function FeedScreen() {
               style={[
                 styles.headerIconButton,
                               ]}
-              onPress={() => router.push("/settings/subscription" as any)}
+              onPress={() => setShowStats(true)}
             >
-              <ChartNoAxesCombined
+              <Zap
                 size={Math.round(26 * uiScale)}
                 color={colors.textTertiary}
                 strokeWidth={1.8}
@@ -839,11 +873,11 @@ export default function FeedScreen() {
               style={[
                 styles.headerIconButton,
                               ]}
-              onPress={() => router.push("/settings/subscription" as any)}
+              onPress={() => setShowRewards(true)}
             >
               <Gift
                 size={Math.round(26 * uiScale)}
-                color={colors.textTertiary}
+                color="#9C27B0"
                 strokeWidth={1.8}
               />
             </Pressable>
@@ -860,7 +894,7 @@ export default function FeedScreen() {
                 color={colors.textTertiary}
                 strokeWidth={1.8}
               />
-              {filters && (
+              {(storedPreferences.jobTitles.length > 0 || storedPreferences.locations.length > 0) && (
                 <View
                   style={[
                     styles.filterBadge,
@@ -953,7 +987,7 @@ export default function FeedScreen() {
       <View
         style={[
           styles.deckContainer,
-          Platform.OS === "android" && { marginBottom: -10 },
+          Platform.OS === "android" && { marginBottom: 0 },
         ]}
       >
         <SwipeDeck
@@ -1076,7 +1110,7 @@ export default function FeedScreen() {
         visible={showFilters}
         onClose={() => setShowFilters(false)}
         onApply={handleApplyFilters}
-        initialFilters={filters || undefined}
+        initialFilters={storedPreferences}
       />
 
       <ProfileSelectorModal
@@ -1094,12 +1128,25 @@ export default function FeedScreen() {
         initialResumeSettings={resumeSettings}
       />
 
+      {/* Rewards & Referral Modal */}
+      <RewardsModal
+        visible={showRewards}
+        onClose={() => setShowRewards(false)}
+      />
+
+      {/* Stats Modal */}
+      <StatsModal
+        visible={showStats}
+        onClose={() => setShowStats(false)}
+      />
+
       {/* Notification Permission Modal */}
       <NotificationPermissionModal
         visible={showNotificationModal}
         onEnable={handleEnableNotifications}
         onSkip={handleSkipNotifications}
       />
+
     </SafeAreaView>
   );
 }

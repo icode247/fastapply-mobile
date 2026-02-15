@@ -170,11 +170,18 @@ export default function CreateProfileScreen() {
         .map((s) => s.trim())
         .filter(Boolean);
 
-      const payload: CreateJobProfileDto = {
+      const payload = {
         ...formData,
         skills: currentSkills,
-        // NOTE: preferences and demographics are not yet supported by the backend API
-        // They are stored in frontend state for future use
+        // Flatten preferences (backend stores as top-level fields)
+        noticePeriod: preferences.noticePeriod ?? null,
+        securityClearance: preferences.securityClearance ?? null,
+        // Flatten demographics (backend stores as top-level fields)
+        gender: demographics.gender ?? null,
+        dateOfBirth: demographics.dateOfBirth ?? null,
+        race: demographics.race ?? null,
+        disabilityStatus: demographics.disabilityStatus ?? null,
+        veteranStatus: demographics.veteranStatus ?? null,
       };
 
       const newProfile = await profileService.createProfile(payload);

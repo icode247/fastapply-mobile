@@ -7,7 +7,6 @@ export default function OnboardingLayout() {
       <Stack.Screen name="personal-info" />
       <Stack.Screen name="experience" />
       <Stack.Screen name="preferences" />
-      <Stack.Screen name="complete" />
     </Stack>
   );
 }

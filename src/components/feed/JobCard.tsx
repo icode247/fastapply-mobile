@@ -203,10 +203,8 @@ export const JobCard = memo(JobCardComponent, (prevProps, nextProps) => {
 
 const styles = StyleSheet.create({
   card: {
-    // width: "100%",
     height: "100%",
     padding: spacing[6],
-    margin: spacing[2],
     shadowOffset: {
       width: 0,
       height: 4,

@@ -648,27 +648,27 @@ export default function DashboardScreen() {
               {getUserDisplayName()} 👋
             </Text>
           </View>
-          <TouchableOpacity style={styles.notificationBtn}>
+          <TouchableOpacity style={styles.notificationBtn} onPress={() => router.push("/notifications")}>
             {Platform.OS === "ios" ? (
               <BlurView
                 intensity={20}
                 tint={isDark ? "dark" : "light"}
-                style={[styles.notificationBtnBlur, { borderColor: colors.border }]}
+                style={styles.notificationBtnBlur}
               >
                 <Ionicons
                   name="notifications-outline"
-                  size={Math.round(22 * uiScale)}
+                  size={Math.round(26 * uiScale)}
                   color={colors.text}
                 />
                 <View style={[styles.notificationDot, { borderColor: colors.background }]} />
               </BlurView>
             ) : (
               <View
-                style={[styles.notificationBtnBlur, { borderColor: colors.border, backgroundColor: colors.surfaceSecondary }]}
+                style={[styles.notificationBtnBlur, { backgroundColor: colors.surfaceSecondary }]}
               >
                 <Ionicons
                   name="notifications-outline"
-                  size={Math.round(22 * uiScale)}
+                  size={Math.round(26 * uiScale)}
                   color={colors.text}
                 />
                 <View style={[styles.notificationDot, { borderColor: colors.background }]} />
@@ -849,7 +849,6 @@ const styles = StyleSheet.create({
     borderRadius: Math.round(16 * uiScale),
     justifyContent: "center",
     alignItems: "center",
-    borderWidth: 1,
   },
   notificationDot: {
     position: "absolute",

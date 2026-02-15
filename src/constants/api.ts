@@ -78,6 +78,7 @@ export const ENDPOINTS = {
   SUBSCRIPTIONS: {
     CURRENT: "/api/v1/subscriptions/current",
     USAGE: "/api/v1/subscriptions/usage",
+    CREDIT_HISTORY: "/api/v1/subscriptions/credit-history",
     UPGRADE: "/api/v1/subscriptions/upgrade",
     CANCEL: "/api/v1/subscriptions/cancel",
   },

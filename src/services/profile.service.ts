@@ -8,6 +8,12 @@ import {
 } from "../types";
 import { FileData, api, uploadFile } from "./api";
 
+// Backend returns isDefault; frontend uses isPrimary
+const mapProfile = (p: JobProfile): JobProfile => ({
+  ...p,
+  isPrimary: p.isPrimary ?? (p as any).isDefault,
+});
+
 export const profileService = {
   /**
    * Get all job profiles for the current user
@@ -25,11 +31,7 @@ export const profileService = {
       profiles = data.profiles || data.data || data.items || [];
     }
 
-    // Map isDefault to isPrimary if isPrimary is missing
-    return profiles.map((p) => ({
-      ...p,
-      isPrimary: p.isPrimary ?? (p as any).isDefault,
-    }));
+    return profiles.map(mapProfile);
   },
 
   /**
@@ -38,7 +40,7 @@ export const profileService = {
   async getPrimaryProfile(): Promise<JobProfile | null> {
     try {
       const response = await api.get<JobProfile>(ENDPOINTS.PROFILES.PRIMARY);
-      return response.data;
+      return mapProfile(response.data);
     } catch (error) {
       // If no primary profile exists
       return null;
@@ -50,7 +52,7 @@ export const profileService = {
    */
   async getProfile(id: string): Promise<JobProfile> {
     const response = await api.get<JobProfile>(ENDPOINTS.PROFILES.BY_ID(id));
-    return response.data;
+    return mapProfile(response.data);
   },
 
   /**
@@ -89,7 +91,7 @@ export const profileService = {
     const response = await api.post<JobProfile>(
       ENDPOINTS.PROFILES.SET_DEFAULT(id)
     );
-    return response.data;
+    return mapProfile(response.data);
   },
 
   /**

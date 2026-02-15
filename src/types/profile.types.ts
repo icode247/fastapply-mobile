@@ -17,6 +17,7 @@ export interface EducationItem {
   degree: string;
   fieldOfStudy?: string;
   major?: string;
+  gpa?: string;
   startDate?: string;
   endDate?: string;
   location?: string;
@@ -83,6 +84,7 @@ export interface JobProfile {
   state?: string;
   country?: string;
   zipcode?: string;
+  timezone?: string;
 
   // Professional Info
   yearsOfExperience?: number;
@@ -133,6 +135,7 @@ export interface CreateJobProfileDto {
   state?: string;
   country?: string;
   zipcode?: string;
+  timezone?: string;
   yearsOfExperience?: number;
   skills?: string[];
   languages?: string[];
@@ -167,6 +170,7 @@ export interface ParsedResume {
   state?: string;
   country?: string;
   zipcode?: string;
+  timezone?: string;
   yearsOfExperience?: number;
   desiredSalary?: string;
   githubURL?: string;

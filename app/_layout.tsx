@@ -21,6 +21,9 @@ import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { LoadingScreen } from "../src/components";
+import { ScoutFloatingButton } from "../src/components/scout/ScoutFloatingButton";
+import { ScoutOverlay } from "../src/components/scout/ScoutOverlay";
+import { useScout } from "../src/hooks/useScout";
 import { useTheme } from "../src/hooks";
 import { notificationService } from "../src/services";
 import { useAuthStore, useThemeStore } from "../src/stores";
@@ -56,6 +59,7 @@ function RootLayoutNav() {
     useAuthStore();
   const { initialize: initTheme, activeTheme } = useThemeStore();
   const { colors } = useTheme();
+  const { activate: activateScout, wakeWordActive } = useScout();
 
   const notificationListener = useRef<Notifications.Subscription | undefined>(
     undefined,
@@ -201,6 +205,10 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
+            name="notifications"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name="live-sessions"
             options={{
               headerShown: false,
@@ -208,6 +216,17 @@ function RootLayoutNav() {
             }}
           />
         </Stack>
+
+        {/* Scout Voice Assistant - only show when authenticated + onboarded */}
+        {isAuthenticated && hasCompletedOnboarding && (
+          <>
+            <ScoutFloatingButton
+              onPress={activateScout}
+              wakeWordActive={wakeWordActive}
+            />
+            <ScoutOverlay />
+          </>
+        )}
       </ThemeProvider>
     </>
   );

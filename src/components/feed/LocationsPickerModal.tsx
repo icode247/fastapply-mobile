@@ -2,10 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -13,10 +9,10 @@ import {
   View,
 } from "react-native";
 import { Text } from "../ui/Text";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { borderRadius, spacing, typography } from "../../constants/theme";
 import { filterCities } from "../../constants/cities";
 import { useTheme } from "../../hooks";
+import { BottomSheet } from "../ui/BottomSheet";
 
 export interface LocationItem {
   id: string;
@@ -39,7 +35,6 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
   maxLocations = 5,
 }) => {
   const { colors } = useTheme();
-  const insets = useSafeAreaInsets();
   const [inputValue, setInputValue] = useState("");
 
   const selectedIds = useMemo(
@@ -75,209 +70,126 @@ export const LocationsPickerModal: React.FC<LocationsPickerModalProps> = ({
   const hasSuggestions = suggestions.length > 0;
 
   return (
-    <Modal
+    <BottomSheet
       visible={visible}
-      animationType="slide"
-      transparent
-      onRequestClose={onClose}
+      onClose={onClose}
+      maxHeight={hasSuggestions ? "75%" : "60%"}
+      showCloseButton={false}
+      title="Locations"
     >
-      <Pressable style={styles.overlay} onPress={onClose}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={styles.keyboardView}
+      {/* Search Input */}
+      <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputWrapper,
+            { backgroundColor: colors.surfaceSecondary },
+          ]}
         >
-          <Pressable
-            style={[
-              styles.container,
-              {
-                backgroundColor: colors.background,
-                paddingBottom: insets.bottom + spacing[4],
-                maxHeight: hasSuggestions ? "75%" : "60%",
-              },
-            ]}
-            onPress={(e) => e.stopPropagation()}
+          <Ionicons
+            name="search"
+            size={20}
+            color={colors.textTertiary}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={[styles.input, { color: colors.text }]}
+            placeholder="Search locations"
+            placeholderTextColor={colors.textTertiary}
+            value={inputValue}
+            onChangeText={setInputValue}
+            onSubmitEditing={() => addLocation()}
+            returnKeyType="done"
+          />
+          <TouchableOpacity
+            onPress={() => addLocation()}
+            style={[styles.addButton, { backgroundColor: colors.primary }]}
+            disabled={!inputValue.trim()}
           >
-            {/* Handle */}
-            <View style={styles.handleContainer}>
-              <View
-                style={[styles.handle, { backgroundColor: colors.textTertiary }]}
-              />
-            </View>
+            <Ionicons name="add" size={20} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-            {/* Header */}
-            <View style={styles.header}>
-              <TouchableOpacity onPress={onClose} style={styles.headerButton}>
-                <Text style={[styles.doneButton, { color: colors.success }]}>
-                  Done
-                </Text>
-              </TouchableOpacity>
-              <Text style={[styles.title, { color: colors.text }]}>
-                Locations
-              </Text>
-              <View style={styles.headerButton} />
-            </View>
-
-            {/* Search Input */}
-            <View style={styles.inputContainer}>
-              <View
-                style={[
-                  styles.inputWrapper,
-                  { backgroundColor: colors.surfaceSecondary },
-                ]}
-              >
-                <Ionicons
-                  name="search"
-                  size={20}
-                  color={colors.textTertiary}
-                  style={styles.searchIcon}
-                />
-                <TextInput
-                  style={[styles.input, { color: colors.text }]}
-                  placeholder="Search locations"
-                  placeholderTextColor={colors.textTertiary}
-                  value={inputValue}
-                  onChangeText={setInputValue}
-                  onSubmitEditing={() => addLocation()}
-                  returnKeyType="done"
-                />
-                <TouchableOpacity
-                  onPress={() => addLocation()}
-                  style={[styles.addButton, { backgroundColor: colors.success }]}
-                  disabled={!inputValue.trim()}
-                >
-                  <Ionicons name="add" size={20} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Autocomplete Suggestions */}
-            {hasSuggestions && (
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item, index) => `${index}-${item}`}
-                keyboardShouldPersistTaps="handled"
-                style={styles.suggestionsContainer}
-                contentContainerStyle={styles.suggestionsContent}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[
-                      styles.suggestionItem,
-                      { borderBottomColor: colors.border },
-                    ]}
-                    onPress={() => addLocation(item)}
-                  >
-                    <Ionicons
-                      name="location-outline"
-                      size={18}
-                      color={colors.textSecondary}
-                      style={styles.suggestionIcon}
-                    />
-                    <Text
-                      style={[
-                        styles.suggestionText,
-                        { color: colors.text },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {item}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-            )}
-
-            {/* Counter */}
-            <View style={styles.counterContainer}>
-              <Text style={[styles.counterText, { color: colors.textSecondary }]}>
-                {selectedLocations.length}/{maxLocations} locations
-              </Text>
-            </View>
-
-            {/* Divider */}
-            <View style={[styles.divider, { backgroundColor: colors.border }]} />
-
-            {/* Selected Items */}
-            <ScrollView
-              style={styles.listContainer}
-              contentContainerStyle={styles.listContent}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
+      {/* Autocomplete Suggestions */}
+      {hasSuggestions && (
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item, index) => `${index}-${item}`}
+          keyboardShouldPersistTaps="handled"
+          style={styles.suggestionsContainer}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.suggestionItem,
+                { borderBottomColor: colors.border },
+              ]}
+              onPress={() => addLocation(item)}
             >
-              {selectedLocations.map((item) => (
-                <View
-                  key={item.id}
-                  style={[
-                    styles.listItem,
-                    { backgroundColor: colors.surfaceSecondary },
-                  ]}
-                >
-                  <View style={styles.listItemContent}>
-                    <Text style={[styles.listItemTitle, { color: colors.text }]}>
-                      {item.name}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => removeLocation(item.id)}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                  >
-                    <Ionicons name="trash-outline" size={20} color={colors.error} />
-                  </TouchableOpacity>
-                </View>
-              ))}
-            </ScrollView>
-          </Pressable>
-        </KeyboardAvoidingView>
-      </Pressable>
-    </Modal>
+              <Ionicons
+                name="location-outline"
+                size={18}
+                color={colors.textSecondary}
+                style={styles.suggestionIcon}
+              />
+              <Text
+                style={[
+                  styles.suggestionText,
+                  { color: colors.text },
+                ]}
+                numberOfLines={1}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {/* Counter */}
+      <View style={styles.counterContainer}>
+        <Text style={[styles.counterText, { color: colors.textSecondary }]}>
+          {selectedLocations.length}/{maxLocations} locations
+        </Text>
+      </View>
+
+      {/* Divider */}
+      <View style={[styles.divider, { backgroundColor: colors.border }]} />
+
+      {/* Selected Items */}
+      <ScrollView
+        style={styles.listContainer}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {selectedLocations.map((item) => (
+          <View
+            key={item.id}
+            style={[
+              styles.listItem,
+              { backgroundColor: colors.surfaceSecondary },
+            ]}
+          >
+            <View style={styles.listItemContent}>
+              <Text style={[styles.listItemTitle, { color: colors.text }]}>
+                {item.name}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => removeLocation(item.id)}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="trash-outline" size={20} color={colors.error} />
+            </TouchableOpacity>
+          </View>
+        ))}
+      </ScrollView>
+    </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    justifyContent: "flex-end",
-  },
-  keyboardView: {
-    justifyContent: "flex-end",
-  },
-  container: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    minHeight: 350,
-  },
-  handleContainer: {
-    alignItems: "center",
-    paddingTop: spacing[3],
-    paddingBottom: spacing[1],
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing[5],
-    paddingVertical: spacing[3],
-  },
-  headerButton: {
-    width: 50,
-  },
-  title: {
-    fontSize: typography.fontSize.lg,
-    fontWeight: "600",
-    textAlign: "center",
-    flex: 1,
-  },
-  doneButton: {
-    fontSize: typography.fontSize.base,
-    fontWeight: "600",
-  },
   inputContainer: {
-    paddingHorizontal: spacing[5],
     paddingBottom: spacing[3],
   },
   inputWrapper: {
@@ -306,9 +218,6 @@ const styles = StyleSheet.create({
   suggestionsContainer: {
     maxHeight: 200,
   },
-  suggestionsContent: {
-    paddingHorizontal: spacing[5],
-  },
   suggestionItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -323,7 +232,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   counterContainer: {
-    paddingHorizontal: spacing[5],
     paddingBottom: spacing[2],
     paddingTop: spacing[2],
   },
@@ -332,14 +240,12 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    marginHorizontal: spacing[5],
     marginBottom: spacing[3],
   },
   listContainer: {
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: spacing[5],
     gap: spacing[2],
     paddingBottom: spacing[4],
   },

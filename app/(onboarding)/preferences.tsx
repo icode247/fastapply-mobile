@@ -1,30 +1,74 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Text } from "../../src/components/ui/Text";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../../src/components";
 import { JobPreferencesForm } from "../../src/components/feed/JobPreferencesForm";
 import { borderRadius, spacing, typography } from "../../src/constants/theme";
-import { useTheme } from "../../src/hooks";
-import { useOnboardingStore } from "../../src/stores";
+import { useAuth, useTheme } from "../../src/hooks";
+import { profileService } from "../../src/services";
+import { getApiErrorMessage } from "../../src/services/api";
+import { useOnboardingStore, usePreferencesStore } from "../../src/stores";
 
 export default function PreferencesScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { completeOnboarding } = useAuth();
   const {
     currentStep,
     totalSteps,
     jobPreferences,
     updateJobPreferences,
     resetJobPreferences,
-    nextStep,
+    getProfileData,
+    resumeFile,
+    reset,
     prevStep,
   } = useOnboardingStore();
+  const { setPreferences } = usePreferencesStore();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleContinue = () => {
-    nextStep();
-    router.push("/(onboarding)/complete");
+  const handleContinue = async () => {
+    setIsLoading(true);
+    try {
+      const profileData = getProfileData();
+
+      // Create job profile
+      const profile = await profileService.createProfile({
+        name: "Primary Profile",
+        ...profileData,
+      });
+
+      // Upload resume if we have one
+      if (resumeFile) {
+        try {
+          await profileService.uploadResume(profile.id, resumeFile);
+        } catch (uploadError) {
+          console.warn("Resume upload failed:", uploadError);
+        }
+      }
+
+      // Set as primary profile
+      await profileService.setPrimaryProfile(profile.id);
+
+      // Save job preferences before resetting onboarding store
+      await setPreferences(jobPreferences);
+
+      // Mark onboarding as complete
+      completeOnboarding();
+
+      // Reset onboarding store
+      reset();
+
+      // Navigate to main app
+      router.replace("/(tabs)");
+    } catch (error) {
+      Alert.alert("Error", getApiErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -99,7 +143,7 @@ export default function PreferencesScreen() {
       <View
         style={[styles.actions, { backgroundColor: colors.background }]}
       >
-        <Button title="Continue" onPress={handleContinue} fullWidth size="lg" />
+        <Button title="Get Started" onPress={handleContinue} loading={isLoading} fullWidth size="lg" />
       </View>
     </SafeAreaView>
   );

@@ -795,12 +795,26 @@ class AutomationService {
    */
   async getLiveSessions(): Promise<LiveSession[]> {
     try {
-      const response = await api.get<{ success: boolean; data: LiveSession[] }>(
+      const response = await api.get<{ success: boolean; data: any[] }>(
         ENDPOINTS.AUTOMATIONS.USER_LIVE_SESSIONS
       );
-      return response.data.data || [];
+      const raw = response.data.data || [];
+      // Map backend fields to frontend LiveSession shape
+      return raw.map((s: any) => ({
+        id: s.id || s.sessionId,
+        automationId: s.automationId,
+        runId: s.runId || s.sessionId,
+        liveViewUrl: s.liveViewUrl || s.debugUrl || s.sessionUrl,
+        jobTitle: s.jobTitle,
+        companyName: s.companyName,
+        platform: s.platform,
+        status: s.status || "active",
+        startedAt: s.startedAt,
+        currentUrl: s.currentUrl || s.jobUrl,
+      }));
     } catch (error) {
-      logger.error("Failed to get live sessions:", getApiErrorMessage(error));
+      // Backend route not yet available — silently return empty
+      logger.debug("Live sessions not available:", getApiErrorMessage(error));
       return [];
     }
   }

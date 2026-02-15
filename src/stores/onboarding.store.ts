@@ -32,6 +32,7 @@ interface OnboardingState {
   currentCity: string;
   state: string;
   country: string;
+  timezone: string;
   linkedinURL: string;
   githubURL: string;
   website: string;
@@ -77,7 +78,7 @@ interface OnboardingState {
 
 const initialState = {
   currentStep: 0,
-  totalSteps: 5,
+  totalSteps: 4,
 
   resumeFile: null,
   parsedResume: null,
@@ -94,6 +95,7 @@ const initialState = {
   currentCity: "",
   state: "",
   country: "",
+  timezone: "",
   linkedinURL: "",
   githubURL: "",
   website: "",
@@ -156,6 +158,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       currentCity: data.currentCity || "",
       state: data.state || "",
       country: data.country || "",
+      timezone: data.timezone || "",
       linkedinURL: data.linkedinURL || "",
       githubURL: data.githubURL || "",
       website: data.website || "",
@@ -183,6 +186,7 @@ export const useOnboardingStore = create<OnboardingState>((set, get) => ({
       currentCity: state.currentCity,
       state: state.state,
       country: state.country,
+      timezone: state.timezone,
       linkedinURL: state.linkedinURL,
       githubURL: state.githubURL,
       website: state.website,

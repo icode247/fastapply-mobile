@@ -262,6 +262,14 @@ export const isNotFoundError = (error: unknown): boolean => {
   return isApiError(error) && error.response?.status === 404;
 };
 
+// Get HTTP status code from API error (returns undefined for non-API errors)
+export const getApiErrorStatus = (error: unknown): number | undefined => {
+  if (isApiError(error)) {
+    return error.response?.status;
+  }
+  return undefined;
+};
+
 // Get error message from API error
 export const getApiErrorMessage = (error: unknown): string => {
   if (isApiError(error)) {

@@ -2,6 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   TextInput,
@@ -77,9 +79,14 @@ export default function ExperienceScreen() {
         </Text>
       </View>
 
+      <KeyboardAvoidingView
+        style={styles.flex1}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         {/* Header */}
         <View style={styles.header}>
@@ -262,6 +269,16 @@ export default function ExperienceScreen() {
                 >
                   {edu.school}
                 </Text>
+                {edu.gpa && (
+                  <Text
+                    style={[
+                      styles.experienceDate,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    GPA: {edu.gpa}
+                  </Text>
+                )}
                 {edu.endDate && (
                   <Text
                     style={[
@@ -332,6 +349,7 @@ export default function ExperienceScreen() {
           )}
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       {/* Actions */}
       <View style={styles.actions}>
@@ -343,6 +361,9 @@ export default function ExperienceScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  flex1: {
     flex: 1,
   },
   progressContainer: {

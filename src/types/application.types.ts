@@ -102,3 +102,15 @@ export interface ApplicationFilters {
   endDate?: string;
   search?: string;
 }
+
+export interface CanApplyResponse {
+  canApply: boolean;
+  reason?: string;
+  quota?: {
+    used: number;
+    limit: number;
+    remaining: number;
+  };
+  alreadyApplied?: boolean;
+  projectId?: string;
+}

@@ -5,6 +5,26 @@ import { spacing, typography } from "../../constants/theme";
 import { useTheme } from "../../hooks";
 import { CreateJobProfileDto } from "../../types";
 import { Input } from "../ui/Input";
+import { Select } from "../ui/Select";
+
+const TIMEZONE_OPTIONS = [
+  { label: "EST (Eastern Standard Time)", value: "EST" },
+  { label: "CST (Central Standard Time)", value: "CST" },
+  { label: "MST (Mountain Standard Time)", value: "MST" },
+  { label: "PST (Pacific Standard Time)", value: "PST" },
+  { label: "AKST (Alaska Standard Time)", value: "AKST" },
+  { label: "HST (Hawaii Standard Time)", value: "HST" },
+  { label: "GMT (Greenwich Mean Time)", value: "GMT" },
+  { label: "CET (Central European Time)", value: "CET" },
+  { label: "EET (Eastern European Time)", value: "EET" },
+  { label: "GST (Gulf Standard Time)", value: "GST" },
+  { label: "IST (India Standard Time)", value: "IST" },
+  { label: "SGT (Singapore Time)", value: "SGT" },
+  { label: "JST (Japan Standard Time)", value: "JST" },
+  { label: "AEST (Australian Eastern Time)", value: "AEST" },
+  { label: "NZST (New Zealand Standard Time)", value: "NZST" },
+  { label: "None of the time zones listed", value: "other" },
+];
 
 interface PersonalSectionProps {
   formData: Partial<CreateJobProfileDto>;
@@ -119,6 +139,14 @@ export const PersonalSection: React.FC<PersonalSectionProps> = ({
           />
         </View>
       </View>
+
+      <Select
+        label="Timezone"
+        value={formData.timezone}
+        options={TIMEZONE_OPTIONS}
+        onSelect={(val) => onChange("timezone", val)}
+        placeholder="Select your timezone"
+      />
     </View>
   );
 };

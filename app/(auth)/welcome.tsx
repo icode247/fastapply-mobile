@@ -10,10 +10,7 @@ import {
   Dimensions,
   Easing,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
   Platform,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -169,7 +166,7 @@ const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({
       {/* Subtitle - positioned at top: 194px */}
       <View style={styles.slide1SubtitleSection}>
         <Text style={styles.slide1Subtitle}>
-          Just tell Scout what you're looking for. Our AI voice assistant finds,
+          Just tell FastApply what you're looking for. Our AI voice assistant finds,
           matches, and applies to 50+ jobs daily-hands-free.
         </Text>
       </View>
@@ -366,16 +363,12 @@ const Slide2: React.FC<{ cardAnimation: Animated.Value }> = ({
   return (
     <View style={styles.slideContainer}>
       {/* Title Section */}
-      <View style={styles.titleSection}>
-        {/* Main Title with gradient text effect */}
-        <View style={styles.titleContainer}>
-          <Text style={styles.mainTitle}>
-            Swipe to Your{"\n"}Next Interview
-          </Text>
-        </View>
+      <View style={styles.slide1TitleSection}>
+        <GradientText>{`Swipe to Your\nNext Interview`}</GradientText>
+      </View>
 
-        {/* Subtitle */}
-        <Text style={styles.subtitle}>
+      <View style={styles.slide1SubtitleSection}>
+        <Text style={styles.slide1Subtitle}>
           Quickly browse and swipe to apply to jobs tailored just for you.
           Matches appear everyday.
         </Text>
@@ -417,7 +410,6 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [currentPage, setCurrentPage] = useState(0);
-  const scrollViewRef = useRef<ScrollView>(null);
 
   // Animations
   const headerOpacity = useRef(new Animated.Value(0)).current;
@@ -426,6 +418,9 @@ export default function WelcomeScreen() {
   const cardAnimation = useRef(new Animated.Value(0)).current;
   const buttonsOpacity = useRef(new Animated.Value(0)).current;
   const buttonsTranslateY = useRef(new Animated.Value(30)).current;
+
+  // Crossfade animation: 0 = slide 1 visible, 1 = slide 2 visible
+  const crossfade = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Header entrance
@@ -479,59 +474,50 @@ export default function WelcomeScreen() {
     ]).start();
   }, []);
 
-  // Auto-scroll slides - always sliding left (infinite carousel)
-  const slideIndexRef = useRef(0);
+  // Auto-crossfade between slides
+  const currentSlideRef = useRef(0);
 
   useEffect(() => {
-    const totalRealPages = 2;
-    const slideWidth = SCREEN_WIDTH - 44;
-
     const interval = setInterval(() => {
-      slideIndexRef.current += 1;
+      const nextSlide = currentSlideRef.current === 0 ? 1 : 0;
+      currentSlideRef.current = nextSlide;
+      setCurrentPage(nextSlide);
 
-      // Scroll to next slide
-      scrollViewRef.current?.scrollTo({
-        x: slideIndexRef.current * slideWidth,
-        animated: true,
-      });
-
-      // Update indicator (always shows 0 or 1)
-      setCurrentPage(slideIndexRef.current % totalRealPages);
-
-      // After scrolling to the clone (index 2), instantly reset to real slide 1 (index 0)
-      if (slideIndexRef.current >= totalRealPages) {
-        setTimeout(() => {
-          slideIndexRef.current = 0;
-          scrollViewRef.current?.scrollTo({
-            x: 0,
-            animated: false,
-          });
-        }, 500); // Wait for animation to complete
-      }
-    }, 4000); // Change slide every 4 seconds
+      Animated.timing(crossfade, {
+        toValue: nextSlide,
+        duration: 600,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver: true,
+      }).start();
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);
 
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / (SCREEN_WIDTH - 44));
-    // Only show indicator for real pages (0 or 1)
-    setCurrentPage(page % 2);
-  };
+  // Slide 1: visible when crossfade=0, hidden when crossfade=1
+  const slide1Opacity = crossfade.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+
+  // Slide 2: hidden when crossfade=0, visible when crossfade=1
+  const slide2Opacity = crossfade.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 1],
+  });
 
   return (
     <View style={styles.container}>
-      {/* Gradient background matching Figma: 173deg gradient */}
+      {/* Gradient background */}
       <LinearGradient
-        colors={["#1263B2", "#0D4982", "#082A4C"]}
+        colors={["#126ba3", "#0E5680", "#0A3F5E"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.3, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
 
       {/* Main Content */}
-      <View style={[styles.content, { paddingTop: insets.top + 12,  }]}>
+      <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
         {/* Header with Logo and Page Indicator */}
         <Animated.View
           style={[
@@ -542,40 +528,23 @@ export default function WelcomeScreen() {
             },
           ]}
         >
-          {/* <Image
-            source={require("../../assets/icons/scout-icon.png")}
-            style={styles.logoIcon}
-            resizeMode="contain"
-          /> */}
           <PageIndicator currentPage={currentPage} totalPages={2} />
         </Animated.View>
 
-        {/* Swipeable Slides */}
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewContent}
-        >
-          {/* Slide 1 */}
-          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+        {/* Crossfade Slides */}
+        <View style={styles.slidesContainer}>
+          <Animated.View
+            style={[StyleSheet.absoluteFill, { opacity: slide1Opacity }]}
+          >
             <Slide1 cardsAnimation={cardsAnimation} />
-          </View>
-
-          {/* Slide 2 */}
-          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
+          </Animated.View>
+          <Animated.View
+            style={[StyleSheet.absoluteFill, { opacity: slide2Opacity }]}
+            pointerEvents={currentPage === 1 ? "auto" : "none"}
+          >
             <Slide2 cardAnimation={cardAnimation} />
-          </View>
-
-          {/* Clone of Slide 1 for infinite loop */}
-          <View style={[styles.slide, { width: SCREEN_WIDTH - 44 }]}>
-            <Slide1 cardsAnimation={cardsAnimation} />
-          </View>
-        </ScrollView>
+          </Animated.View>
+        </View>
 
         {/* Bottom Buttons */}
         <Animated.View
@@ -648,14 +617,8 @@ const styles = StyleSheet.create({
     width: 8,
     backgroundColor: "rgba(217,217,217,0.3)",
   },
-  // ScrollView styles
-  scrollView: {
-    flex: 1,
-  },
-  scrollViewContent: {
-    flexGrow: 1,
-  },
-  slide: {
+  // Slides container
+  slidesContainer: {
     flex: 1,
   },
   slideContainer: {
@@ -670,14 +633,14 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#FFFFFF",
     textAlign: "center",
-    lineHeight: Math.round(42 * uiScale),
+    lineHeight: Math.round(44 * uiScale),
     width: Math.round(350 * uiScale),
     // Note: React Native doesn't support gradient text natively
     // The gradient effect (132deg, white to #B4DBE8) would need expo-linear-gradient with MaskedView
   },
   slide1SubtitleSection: {
     alignItems: "center",
-    marginTop: 16,
+    marginTop: 10,
     paddingHorizontal: 12,
   },
   slide1Subtitle: {

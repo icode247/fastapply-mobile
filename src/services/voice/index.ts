@@ -6,6 +6,11 @@ export { voiceCommandParserService } from "./voiceCommandParser.service";
 export { jobMatcherService } from "./jobMatcher.service";
 export { voiceCommandService } from "./voiceCommand.service";
 
+// Scout Voice Assistant
+export { scoutTTSService } from "./scoutTTS.service";
+export { scoutAIService } from "./scoutAI.service";
+export { wakeWordService } from "./wakeWord.service";
+
 // Re-export types
 export type {
   RecordingConfig,

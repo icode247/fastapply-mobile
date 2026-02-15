@@ -11,7 +11,7 @@
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#6366F1"
+      "backgroundColor": "#126ba3"
     },
     "ios": {
       "supportsTablet": true,
@@ -25,14 +25,15 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#6366F1"
+        "backgroundColor": "#126ba3"
       },
       "package": "com.fastapply.app",
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -57,8 +58,10 @@
     },
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
-      }
-    }
+        "projectId": "81b5d3fa-d3b1-48c9-8df8-471fb277de6a"
+      },
+      "router": {}
+    },
+    "owner": "codev206"
   }
 }

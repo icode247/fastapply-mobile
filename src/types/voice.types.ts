@@ -92,3 +92,27 @@ export interface GPTIntentResponse {
   confidence: number;
   suggestion?: string;
 }
+
+// Scout Voice Assistant Types
+
+export type ScoutPhase = "idle" | "listening" | "thinking" | "speaking" | "done";
+
+export interface ScoutAction {
+  type:
+    | "search"
+    | "filter"
+    | "apply"
+    | "skip"
+    | "navigate"
+    | "details"
+    | "undo"
+    | "none";
+  params: VoiceCommandParams;
+  navigation?: string; // route to navigate to, e.g. "/(tabs)/dashboard"
+}
+
+export interface ScoutResponse {
+  response: string; // what Scout says back
+  action: ScoutAction;
+  emotion: "neutral" | "excited" | "thinking" | "sorry";
+}

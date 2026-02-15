@@ -3,6 +3,7 @@ import {
   Application,
   ApplicationFilters,
   ApplicationStats,
+  CanApplyResponse,
   CreateApplicationDto,
   PaginatedResponse,
   UpdateApplicationDto,
@@ -114,10 +115,8 @@ export const applicationService = {
   /**
    * Check if user can apply to a specific job
    */
-  async canApply(
-    jobId: string
-  ): Promise<{ canApply: boolean; reason?: string }> {
-    const response = await api.get<{ canApply: boolean; reason?: string }>(
+  async canApply(jobId: string): Promise<CanApplyResponse> {
+    const response = await api.get<CanApplyResponse>(
       `${ENDPOINTS.APPLICATIONS.CAN_APPLY}?jobId=${jobId}`
     );
     return response.data;

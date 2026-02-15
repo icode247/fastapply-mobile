@@ -26,6 +26,7 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
         school: "",
         degree: "",
         fieldOfStudy: "",
+        gpa: "",
         startDate: "",
         endDate: "",
         location: "",
@@ -100,6 +101,14 @@ export const EducationSection: React.FC<EducationSectionProps> = ({
               />
             </View>
           </View>
+
+          <Input
+            label="GPA"
+            value={item.gpa}
+            onChangeText={(t) => updateEducation(index, "gpa", t)}
+            placeholder="e.g. 3.8"
+            keyboardType="decimal-pad"
+          />
 
           <View style={styles.row}>
             <View style={styles.halfInput}>
