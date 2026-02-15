@@ -1,5 +1,5 @@
 // useScout - Global orchestration hook for Scout voice assistant
-// Wires together: recording -> STT -> AI -> TTS -> action dispatch
+// Flow: listen → think → speak → (action? dismiss : listen again) → ...
 
 import * as Haptics from "expo-haptics";
 import { useCallback, useEffect, useRef } from "react";
@@ -13,23 +13,36 @@ import {
 import { useScoutStore } from "../stores/scout.store";
 import { logger } from "../utils/logger";
 
+// How long to wait for the user to start speaking before closing
+const NO_SPEECH_TIMEOUT_MS = 7000;
+
 export function useScout() {
   const store = useScoutStore();
   const abortRef = useRef<AbortController | null>(null);
   const isProcessingRef = useRef(false);
+  const hasSpokenRef = useRef(false);
+  const noSpeechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Warm up TTS cache on mount
   useEffect(() => {
     scoutTTSService.warmupCache();
   }, []);
 
+  const activateRef = useRef<() => void>(() => {});
+
   // Set up wake word listener
   useEffect(() => {
     if (wakeWordService.isEnabled()) {
       wakeWordService.onWakeWordDetected(() => {
-        activate();
+        activateRef.current();
       });
-      wakeWordService.start();
+      wakeWordService.start().then((started) => {
+        if (!started) {
+          logger.warn(
+            "Wake word: could not start. Requires a development build. Use the button instead.",
+          );
+        }
+      });
     }
 
     return () => {
@@ -38,108 +51,158 @@ export function useScout() {
   }, []);
 
   /**
-   * Activate Scout: show overlay, play acknowledgment, start recording
+   * Clear the no-speech timeout
    */
-  const activate = useCallback(async () => {
-    if (store.isOverlayVisible || isProcessingRef.current) return;
+  const clearNoSpeechTimer = useCallback(() => {
+    if (noSpeechTimerRef.current) {
+      clearTimeout(noSpeechTimerRef.current);
+      noSpeechTimerRef.current = null;
+    }
+  }, []);
 
-    // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  /**
+   * Start a recording session. Returns true if recording started.
+   * Starts a no-speech timer — if the user doesn't speak within the window, dismiss.
+   */
+  const startListening = useCallback(async (): Promise<boolean> => {
+    hasSpokenRef.current = false;
+    useScoutStore.getState().setPhase("listening");
 
-    // Show overlay + set phase
-    store.activate();
+    // Start a timer: if user doesn't speak within the window, close
+    clearNoSpeechTimer();
+    noSpeechTimerRef.current = setTimeout(async () => {
+      if (!hasSpokenRef.current && !isProcessingRef.current) {
+        logger.debug("Scout: no speech detected, closing");
+        await voiceRecordingService.cancelRecording();
+        useScoutStore.getState().setPhase("done");
+      }
+    }, NO_SPEECH_TIMEOUT_MS);
 
-    // Start recording FIRST — TTS playback conflicts with iOS audio mode
-    // (allowsRecordingIOS must be true during recording, but TTS sets it to false)
     const started = await voiceRecordingService.startRecording({
-      maxDuration: 15000,
-      silenceThresholdMs: 2000,
+      maxDuration: 20000,
+      silenceThresholdMs: 3000,
       onSilenceDetected: () => {
-        handleSilenceDetected();
+        if (hasSpokenRef.current) {
+          clearNoSpeechTimer();
+          handleSilenceDetected();
+        }
       },
       onMeteringUpdate: (level) => {
-        store.setAudioLevel(level);
+        useScoutStore.getState().setAudioLevel(level);
+        if (level > 0.25) {
+          hasSpokenRef.current = true;
+          // User started speaking — cancel the no-speech timer
+          clearNoSpeechTimer();
+        }
       },
     });
 
-    if (!started) {
-      store.setError("Microphone permission required");
-      store.deactivate();
-    }
-  }, [store.isOverlayVisible]);
+    return started;
+  }, []);
 
   /**
-   * Handle silence detected: stop recording and process
+   * Activate Scout: show overlay, start recording
+   */
+  const activate = useCallback(async () => {
+    if (useScoutStore.getState().isOverlayVisible || isProcessingRef.current)
+      return;
+
+    if (wakeWordService.isEnabled()) {
+      await wakeWordService.stop();
+    }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    useScoutStore.getState().activate();
+
+    const started = await startListening();
+
+    if (!started) {
+      useScoutStore.getState().setError("Microphone permission required");
+      useScoutStore.getState().deactivate();
+      restartWakeWord();
+    }
+  }, []);
+
+  activateRef.current = activate;
+
+  const restartWakeWord = useCallback(() => {
+    if (wakeWordService.isEnabled()) {
+      setTimeout(() => {
+        wakeWordService.start();
+      }, 500);
+    }
+  }, []);
+
+  /**
+   * Handle silence after speech: process the recording.
+   * After Scout speaks back:
+   *   - action dispatched → phase "done" → overlay auto-dismisses
+   *   - no action (follow-up) → start listening again
    */
   const handleSilenceDetected = useCallback(async () => {
     if (isProcessingRef.current) return;
     isProcessingRef.current = true;
 
     try {
-      // Stop recording
       const result = await voiceRecordingService.stopRecording();
 
-      // If silent/empty, just close
       if (result.isSilent || !result.success || !result.uri) {
-        store.deactivate();
+        useScoutStore.getState().setPhase("done");
         isProcessingRef.current = false;
         return;
       }
 
-      // Move to thinking phase
-      store.setPhase("thinking");
-      store.setAudioLevel(0);
+      // Thinking
+      useScoutStore.getState().setPhase("thinking");
+      useScoutStore.getState().setAudioLevel(0);
 
-      // Transcribe
       const transcription = await speechToTextService.transcribeJobCommand(
         result.uri,
       );
-
-      // Clean up recording file
       voiceRecordingService.deleteRecording(result.uri);
 
       if (!transcription.text) {
-        store.setResponseText("I didn't catch that.");
-        store.setPhase("speaking");
+        useScoutStore.getState().setPhase("speaking");
         await scoutTTSService.speakCached("no_understand");
-        store.setPhase("done");
+        // Listen again after "didn't catch that"
         isProcessingRef.current = false;
+        await startListening();
         return;
       }
 
-      store.setTranscript(transcription.text);
+      useScoutStore.getState().setTranscript(transcription.text);
 
-      // Process through AI
+      // AI processing
       abortRef.current = new AbortController();
       const aiResponse = await scoutAIService.process(
         transcription.text,
-        undefined, // context can be passed here
+        undefined,
         abortRef.current.signal,
       );
 
-      // Set response text and speak it
-      store.setResponseText(aiResponse.response);
-      store.setPhase("speaking");
-
-      // Dispatch action immediately (don't wait for speech)
-      if (aiResponse.action.type !== "none") {
-        store.setPendingAction(aiResponse.action);
-      }
-
       // Speak the response
+      useScoutStore.getState().setPhase("speaking");
       await scoutTTSService.speak(aiResponse.response);
 
-      // Done
-      store.setPhase("done");
+      if (aiResponse.action.type !== "none") {
+        // Action dispatched → done → overlay will auto-dismiss
+        useScoutStore.getState().setPendingAction(aiResponse.action);
+        useScoutStore.getState().setPhase("done");
+      } else {
+        // Follow-up question — listen again for user's reply
+        isProcessingRef.current = false;
+        await startListening();
+        return;
+      }
     } catch (error) {
       if ((error as Error).name === "AbortError") {
         logger.debug("Scout: processing aborted");
       } else {
         logger.error("Scout: processing error:", error);
-        store.setResponseText("Sorry, something went wrong.");
-        store.setPhase("speaking");
+        useScoutStore.getState().setPhase("speaking");
         await scoutTTSService.speakCached("sorry");
-        store.setPhase("done");
+        useScoutStore.getState().setPhase("done");
       }
     } finally {
       isProcessingRef.current = false;
@@ -153,11 +216,14 @@ export function useScout() {
     abortRef.current?.abort();
     abortRef.current = null;
     isProcessingRef.current = false;
+    hasSpokenRef.current = false;
+    clearNoSpeechTimer();
 
     await voiceRecordingService.cancelRecording();
     await scoutTTSService.stop();
 
-    store.deactivate();
+    useScoutStore.getState().deactivate();
+    restartWakeWord();
   }, []);
 
   return {

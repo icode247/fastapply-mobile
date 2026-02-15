@@ -5,6 +5,7 @@
 //
 // EXPO_PUBLIC_WAKE_WORD_ENABLED must be "true" to activate either provider.
 
+import { NativeModules } from "react-native";
 import { logger } from "../../utils/logger";
 
 const WAKE_WORD_ENABLED = process.env.EXPO_PUBLIC_WAKE_WORD_ENABLED === "true";
@@ -34,13 +35,16 @@ class NativeWakeWordProvider implements WakeWordProvider {
     this.callback = callback;
 
     try {
-      const Voice = await import("@react-native-voice/voice").catch(() => null);
-      if (!Voice?.default) {
-        logger.warn("Wake word native: @react-native-voice/voice not installed");
+      // Check if the native Voice module is registered BEFORE requiring the
+      // JS wrapper. The wrapper's top-level code creates a NativeEventEmitter
+      // which throws an Invariant Violation if the native module doesn't exist
+      // (e.g. in Expo Go). Neither try-catch nor dynamic import can catch that.
+      if (!NativeModules.Voice) {
+        logger.warn("Wake word native: Voice native module not available (requires dev build)");
         return false;
       }
 
-      this.voiceModule = Voice.default;
+      this.voiceModule = require("@react-native-voice/voice").default;
 
       // Wire up speech events
       this.voiceModule.onSpeechResults = (event: any) => {

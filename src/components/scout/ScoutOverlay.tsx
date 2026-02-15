@@ -11,9 +11,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
-  FadeIn,
   FadeInDown,
-  FadeOut,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
@@ -30,10 +28,10 @@ export const ScoutOverlay: React.FC = () => {
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const { isOverlayVisible, phase, responseText, audioLevel, deactivate } =
+  const { isOverlayVisible, phase, audioLevel, deactivate } =
     useScoutStore();
 
-  // Auto-dismiss after speaking finishes
+  // Auto-dismiss when phase reaches "done"
   const dismissTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -129,13 +127,8 @@ export const ScoutOverlay: React.FC = () => {
 
       case "speaking":
       case "done":
-        return responseText ? (
-          <Animated.View entering={FadeInDown.duration(400)}>
-            <Text style={[styles.responseText, { color: colors.text }]}>
-              {responseText}
-            </Text>
-          </Animated.View>
-        ) : null;
+        // No text — Scout just speaks, orb animates
+        return null;
 
       default:
         return null;
@@ -228,12 +221,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "500",
     letterSpacing: 0.5,
-  },
-  responseText: {
-    fontSize: 20,
-    fontWeight: "600",
-    textAlign: "center",
-    lineHeight: 28,
   },
   dotsRow: {
     flexDirection: "row",
