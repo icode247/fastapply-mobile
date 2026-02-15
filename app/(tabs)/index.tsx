@@ -44,7 +44,7 @@ import {
 import { RewardsModal } from "../../src/components/feed/RewardsModal";
 import { StatsModal } from "../../src/components/feed/StatsModal";
 import { SwipeDeck, SwipeDeckRef } from "../../src/components/feed/SwipeDeck";
-import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
+// import { VoiceAutoPilotOverlay } from "../../src/components/feed/VoiceAutoPilotOverlay";
 import { LoadingScreen } from "../../src/components/shared/LoadingScreen";
 import { spacing, typography, uiScale } from "../../src/constants/theme";
 import { useTheme } from "../../src/hooks";
@@ -58,6 +58,7 @@ import { jobService, JobPreferences } from "../../src/services/job.service";
 import { ensureCacheLoaded, getAllCachedJobs } from "../../src/services/swipedJobsCache.service";
 import { profileService } from "../../src/services/profile.service";
 import { usePreferencesStore } from "../../src/stores/preferences.store";
+import { useScout } from "../../src/hooks/useScout";
 import { useScoutStore } from "../../src/stores/scout.store";
 import {
   EmploymentType,
@@ -280,7 +281,7 @@ export default function FeedScreen() {
   // Modal states
   const [showFilters, setShowFilters] = useState(false);
   const [showProfileSelector, setShowProfileSelector] = useState(false);
-  const [showVoiceOverlay, setShowVoiceOverlay] = useState(false);
+  // const [showVoiceOverlay, setShowVoiceOverlay] = useState(false); // replaced by Scout
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showRewards, setShowRewards] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -610,9 +611,12 @@ export default function FeedScreen() {
     setShowProfileSelector(true);
   };
 
-  // Voice auto-pilot handler
+  // Scout voice assistant
+  const { activate: activateScout } = useScout();
+
+  // Voice auto-pilot handler — now activates Scout
   const handleVoiceCommand = () => {
-    setShowVoiceOverlay(true);
+    activateScout();
   };
 
   // Handle parsed voice command
@@ -1098,12 +1102,12 @@ export default function FeedScreen() {
         </View>
       )}
 
-      {/* Voice Auto-Pilot Overlay */}
-      <VoiceAutoPilotOverlay
+      {/* Voice Auto-Pilot Overlay — replaced by Scout (global in _layout.tsx) */}
+      {/* <VoiceAutoPilotOverlay
         visible={showVoiceOverlay}
         onClose={() => setShowVoiceOverlay(false)}
         onCommandParsed={handleVoiceCommandParsed}
-      />
+      /> */}
 
       {/* Modals */}
       <JobFiltersModal

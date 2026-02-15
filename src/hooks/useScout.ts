@@ -49,10 +49,8 @@ export function useScout() {
     // Show overlay + set phase
     store.activate();
 
-    // Play "Hmmm..." immediately (pre-cached)
-    scoutTTSService.speakCached("hmm").catch(() => {});
-
-    // Start recording with silence detection
+    // Start recording FIRST — TTS playback conflicts with iOS audio mode
+    // (allowsRecordingIOS must be true during recording, but TTS sets it to false)
     const started = await voiceRecordingService.startRecording({
       maxDuration: 15000,
       silenceThresholdMs: 2000,

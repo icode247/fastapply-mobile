@@ -220,10 +220,13 @@ function RootLayoutNav() {
         {/* Scout Voice Assistant - only show when authenticated + onboarded */}
         {isAuthenticated && hasCompletedOnboarding && (
           <>
-            <ScoutFloatingButton
-              onPress={activateScout}
-              wakeWordActive={wakeWordActive}
-            />
+            {/* Hide floating button on jobs feed — that screen has its own waveform button */}
+            {!(segments[0] === "(tabs)" && !segments[1]) && (
+              <ScoutFloatingButton
+                onPress={activateScout}
+                wakeWordActive={wakeWordActive}
+              />
+            )}
             <ScoutOverlay />
           </>
         )}
