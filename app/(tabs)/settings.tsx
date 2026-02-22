@@ -129,7 +129,7 @@ const SettingItem: React.FC<{
           <Text
             style={[
               styles.settingLabel,
-              { color: isDestructive ? "#EF4444" : colors.text },
+              { color: isDestructive ? colors.error : colors.text },
             ]}
           >
             {label}
@@ -151,7 +151,7 @@ const SettingItem: React.FC<{
               true: colors.primary,
             }}
             thumbColor="#FFFFFF"
-            ios_backgroundColor={isDark ? "#333" : "#E5E5E5"}
+            ios_backgroundColor={isDark ? colors.level2 : colors.borderLight}
           />
         ) : (
           <Ionicons
@@ -315,7 +315,7 @@ export default function SettingsScreen() {
   const handleContactSupport = async () => {
     // Replace with your actual WhatsApp Business number (digits only, with country code)
     const whatsappNumber = "14XXXXXXXXX"; // TODO: Replace with actual number
-    const message = "Hi, I need help with FastApply.";
+    const message = "Hi, I need help with Scout.";
     const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     const canOpen = await Linking.canOpenURL(url);
     if (canOpen) {
@@ -460,8 +460,8 @@ export default function SettingsScreen() {
                 <LinearGradient
                   colors={
                     subscription?.tier === "free"
-                      ? ["#636B74", "#32383E"]
-                      : ["#F59E0B", "#EF4444"]
+                      ? [colors.secondary, colors.secondaryDark]
+                      : [colors.warning, colors.error]
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
@@ -470,7 +470,7 @@ export default function SettingsScreen() {
                   <Ionicons
                     name={subscription?.tier === "free" ? "person" : "sparkles"}
                     size={Math.round(12 * uiScale)}
-                    color="#FFF"
+                    color={colors.textInverse}
                   />
                   <Text style={styles.planBadgeText}>{getPlanName()}</Text>
                 </LinearGradient>
@@ -499,7 +499,7 @@ export default function SettingsScreen() {
               >
                 <View style={styles.subscriptionContent}>
                   <View style={styles.subscriptionIcon}>
-                    <Ionicons name="sparkles" size={Math.round(28 * uiScale)} color="#FFF" />
+                    <Ionicons name="sparkles" size={Math.round(28 * uiScale)} color={colors.textInverse} />
                   </View>
                   <View style={styles.subscriptionInfo}>
                     <Text style={styles.subscriptionTitle}>
@@ -510,7 +510,7 @@ export default function SettingsScreen() {
                     </Text>
                   </View>
                   <View style={styles.subscriptionArrow}>
-                    <Ionicons name="arrow-forward" size={Math.round(20 * uiScale)} color="#FFF" />
+                    <Ionicons name="arrow-forward" size={Math.round(20 * uiScale)} color={colors.textInverse} />
                   </View>
                 </View>
               </LinearGradient>
@@ -522,7 +522,7 @@ export default function SettingsScreen() {
         <SettingsSection title="ACCOUNT" delay={100} colors={colors}>
           <SettingItem
             icon="card-outline"
-            iconColor="#10B981"
+            iconColor={colors.success}
             label="Subscription"
             value={getPlanName()}
             delay={150}
@@ -536,7 +536,7 @@ export default function SettingsScreen() {
         <SettingsSection title="PREFERENCES" delay={300} colors={colors}>
           <SettingItem
             icon="notifications-outline"
-            iconColor="#0284c7"
+            iconColor={colors.primary}
             label="Push Notifications"
             delay={350}
             colors={colors}
@@ -558,7 +558,7 @@ export default function SettingsScreen() {
           /> */}
           <SettingItem
             icon={isDark ? "moon-outline" : "sunny-outline"}
-            iconColor={isDark ? "#F59E0B" : "#0ea5e9"}
+            iconColor={isDark ? colors.warning : colors.primary}
             label="Dark Mode"
             delay={400}
             colors={colors}
@@ -573,7 +573,7 @@ export default function SettingsScreen() {
         <SettingsSection title="SUPPORT" delay={550} colors={colors}>
           <SettingItem
             icon="help-circle-outline"
-            iconColor="#0ea5e9"
+            iconColor={colors.primary}
             label="Help Center"
             delay={600}
             colors={colors}
@@ -591,7 +591,7 @@ export default function SettingsScreen() {
           />
           <SettingItem
             icon="star-outline"
-            iconColor="#F59E0B"
+            iconColor={colors.warning}
             label="Rate the App"
             delay={700}
             colors={colors}
@@ -600,7 +600,7 @@ export default function SettingsScreen() {
           />
           <SettingItem
             icon="document-text-outline"
-            iconColor="#0284c7"
+            iconColor={colors.primary}
             label="Privacy Policy"
             delay={750}
             colors={colors}
@@ -613,7 +613,7 @@ export default function SettingsScreen() {
         <SettingsSection title="DANGER ZONE" delay={800} colors={colors}>
           <SettingItem
             icon="log-out-outline"
-            iconColor="#EF4444"
+            iconColor={colors.error}
             label="Sign Out"
             delay={850}
             colors={colors}
@@ -623,7 +623,7 @@ export default function SettingsScreen() {
           />
           <SettingItem
             icon="trash-outline"
-            iconColor="#EF4444"
+            iconColor={colors.error}
             label="Delete Account"
             delay={900}
             colors={colors}
@@ -635,11 +635,14 @@ export default function SettingsScreen() {
 
         {/* App Version */}
         <View style={[styles.footer, { paddingBottom: insets.bottom + 100 }]}>
-          <Text style={[styles.versionText, { color: colors.textTertiary }]}>
-            FastApply v1.0.0
+          <Text style={[styles.footerBrand, { color: colors.text }]}>
+            Scout
+          </Text>
+          <Text style={[styles.footerPoweredBy, { color: colors.textTertiary }]}>
+            powered by FastApply
           </Text>
           <Text style={[styles.copyrightText, { color: colors.textTertiary }]}>
-            © 2025 FastApply. All rights reserved.
+            v1.0.0
           </Text>
         </View>
       </ScrollView>
@@ -849,12 +852,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: spacing[8],
   },
-  versionText: {
-    fontSize: Math.round(14 * uiScale),
+  footerBrand: {
+    fontSize: Math.round(18 * uiScale),
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+  footerPoweredBy: {
+    fontSize: Math.round(11 * uiScale),
     fontWeight: "500",
+    marginTop: 2,
   },
   copyrightText: {
-    fontSize: Math.round(12 * uiScale),
-    marginTop: spacing[1],
+    fontSize: Math.round(11 * uiScale),
+    marginTop: spacing[2],
   },
 });

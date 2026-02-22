@@ -73,7 +73,7 @@ const initialNotifications: Notification[] = [
   {
     id: "5",
     type: "system",
-    title: "Welcome to FastApply",
+    title: "Welcome to Scout",
     description: "Complete your profile to start applying",
     timestamp: "3d ago",
     read: true,

@@ -1,0 +1,1263 @@
+[{
+  "id": "1988488390",
+  "date_posted": "2026-02-06T02:25:11",
+  "date_created": "2026-02-06T02:49:09.508946",
+  "title": "PhD Software Engineer - Database Technologies",
+  "organization": "Oracle",
+  "organization_url": "https://eeho.fa.us2.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "United States",
+        "addressRegion": "",
+        "addressCountry": "US",
+        "postalCode": "",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": null,
+  "url": "https://eeho.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_45001/job/325815",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "eeho.fa.us2.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": null,
+  "regions_derived": null,
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": null,
+  "locations_derived": [
+    "United States"
+  ],
+  "timezones_derived": [
+    "America/Chicago"
+  ],
+  "lats_derived": [
+    39.7837304
+  ],
+  "lngs_derived": [
+    -100.445882
+  ],
+  "remote_derived": false,
+  "domain_derived": "oracle.com",
+  "description_text": "New College Grad Role intended for students graduating with their PhD by August 2026, or have graduated within 12 months of cohort start date in June/July 2026. \nTarget Start Date: June or July 2026 \nWork Location: San Francisco Bay Area (Redwood Shores, CA) & Nashua, NH\nThe Program:\nOur future success depends on hiring world-class, early in career talent who are looking to power next-generation services and solutions. We are hiring students with a diverse set of skills and experiences to work in and across teams. Our program is intended to enhance your overall learning experience, help build your network, and accelerate your opportunity to make an impact. \nThe Team: \nThe Oracle Database Technologies organizations creates data management technologies that power the modern economy. This includes the Oracle Database, the most widely used mission-critical database in all major industries around the world. We use this foundation to develop Database Services in Public and Private Clouds, and the Oracle Autonomous Database, the world’s first self-driving, self-securing, self-repairing mission-critical cloud database service. The organization also engineers hardware systems specialized for database that are used by over 75% of the largest businesses in the world. In this team, the code that you write will power highly critical systems used by billions of people including travel reservations, telecommunications, hospitals, payroll, insurance, banking, pharmaceuticals, manufacturing, e-commerce, utilities, and government services. The goal of our products is to increase the possibilities and productivity of businesses and people worldwide. Over 30% of the largest businesses in the world are already using our database cloud technologies.\nThe Company:\nOracle is the world’s leading provider of business software. With a presence in over 175 countries, we are one of the biggest technology companies on the planet. We're using innovative emerging technologies to tackle real-world problems today. From advancing energy efficiency to reimagining online commerce, the work we do is not only transforming the world of business it's helping advance governments, power nonprofits, and giving billions of people the tools they need to outpace change. For more information about Oracle (NYSE:ORCL), visit us at oracle.com. \nWhat You’ll Bring (Objective Minimum Qualifications):\nTo be considered for a Software Engineer position in the Database Technologies organizations, you must possess the Objective Minimum Qualifications (OMQs) below. \nPlease ensure that your application clearly indicates that you meet these OMQs, by listing relevant academic/professional/personal projects on your resume.\nPlease ensure that your application clearly indicates that you meet these OMQs, by listing relevant academic/professional/personal projects on your resume.\nCompleted a PhD in Computer Science, Computer Engineering, or an equivalent science/engineering field between by August 2026.\nAre strongly proficient (i.e., able to complete coding projects with no assistance) in the following programming languages: C, C++ and Java \nHave the ability to implement sophisticated algorithms and data structures in very complex systems with the highest quality.\nHave completed coursework, projects, internships, and or research three or more of the following Systems Programming related areas: \nComputer Architecture / Software Architecture\nDistributed Systems\nDatabase Systems / Database Internals (Storage Engine) \nMultithreaded/Multicore programming/Concurrent programming\nParallel Programming\nOperating Systems Concepts\nAI\nML\nHave completed at least one internship, research assistantship, teaching assistantship, or equivalent practical experience working with the relevant technical areas noted above.\nReside in the United States and/or attend a university in the US. \nAble to obtain work authorization in the US in 2026\nAbout You (Preferred Qualifications):\nMinimum 3.0 GPA\nCareer Level - IC3\n\nAs a world leader in cloud solutions, Oracle uses tomorrow’s technology to tackle today’s challenges. We’ve partnered with industry-leaders in almost every sector—and continue to thrive after 40+ years of change by operating with integrity. \nWe know that true innovation starts when everyone is empowered to contribute. That’s why we’re committed to growing an inclusive workforce that promotes opportunities for all.\nOracle careers open the door to global opportunities where work-life balance flourishes. We offer competitive benefits based on parity and consistency and support our people with flexible medical, life insurance, and retirement options. We also encourage employees to give back to their communities through our volunteer programs.\nWe’re committed to including people with disabilities at all stages of the employment process. If you require accessibility assistance or accommodation for a disability at any point, let us know by emailing accommodation-request_mb@oracle.com or by calling +1 888 404 2494 in the United States. \nOracle is an Equal Employment Opportunity Employer. All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, national origin, sexual orientation, gender identity, disability and protected veterans’ status, or any other characteristic protected by law. Oracle will consider for employment qualified applicants with arrest and conviction records pursuant to applicable law.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Health Insurance",
+    "Life Insurance",
+    "Retirement Options",
+    "Volunteer Programs"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "C",
+    "C++",
+    "Java",
+    "Computer Architecture",
+    "Software Architecture",
+    "Distributed Systems",
+    "Database Systems",
+    "Multithreaded Programming",
+    "Concurrent Programming",
+    "Parallel Programming",
+    "Operating Systems",
+    "AI",
+    "ML"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The role involves developing and enhancing database technologies that support critical systems used globally. The code written will impact various industries, including telecommunications, banking, and healthcare.",
+  "ai_requirements_summary": "Candidates must have completed a PhD in a relevant field by August 2026 and be proficient in C, C++, and Java. Practical experience through internships or research in systems programming areas is also required.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Database Technologies",
+    "Oracle Database",
+    "Cloud Services",
+    "Data Management",
+    "Software Engineering",
+    "Computer Science",
+    "Computer Engineering",
+    "Distributed Systems",
+    "Database Internals",
+    "Multithreading",
+    "Concurrent Programming",
+    "Parallel Programming",
+    "Operating Systems",
+    "Artificial Intelligence",
+    "Machine Learning",
+    "Internship",
+    "Research Assistantship"
+  ],
+  "ai_taxonomies_a": [
+    "Technology",
+    "Engineering",
+    "Data & Analytics",
+    "Software",
+    "Science & Research"
+  ],
+  "ai_education_requirements": [
+    "postgraduate degree"
+  ]
+},
+{
+  "id": "1988302970",
+  "date_posted": "2026-02-06T00:29:48",
+  "date_created": "2026-02-06T01:08:24.77702",
+  "title": "Float Pharmacist",
+  "organization": "Albertsons Companies",
+  "organization_url": "https://eofd.fa.us6.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": "2026-02-13T00:29:48",
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "PLANO",
+        "addressRegion": "TX",
+        "addressCountry": "US",
+        "postalCode": "75075",
+        "streetAddress": "3100 INDEPENDENCE PKWY"
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://eofd.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/677021",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "eofd.fa.us6.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Plano"
+  ],
+  "regions_derived": [
+    "Texas"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Collin County"
+  ],
+  "locations_derived": [
+    "Plano, Texas, United States"
+  ],
+  "timezones_derived": [
+    "America/Chicago"
+  ],
+  "lats_derived": [
+    33.040001
+  ],
+  "lngs_derived": [
+    -96.7509498
+  ],
+  "remote_derived": false,
+  "domain_derived": "albertsonscompanies.com",
+  "description_text": "Are you the Pharmacist who knows your patients by name? Do they ask for you because you build meaningful relationships \nwith them? Do you want to practice in a progressive setting where you can make an impact on patient care and be a part of your community? Are you a pharmacist who creates a culture that promotes diversity, equity, inclusion and belonging, and embraces associate well-being, growth and development?\nThen Tom Thumb is the place for you! \nAs a Pharmacist with our company, you will be part of a team that is committed to providing direct patient care and wellness services. You will play a valuable role in disease state management, optimizing medication therapy, delivering outstanding patient-centered care and assisting in managing acute and chronic conditions. \nOur Pharmacists:\nActively delivers patient care services\nSupervises pharmacy technicians, clerks and pharmacy interns\nUpholds operational standards including performance metrics, safety and compliance\nImplements company initiatives to increase profitability\nRequirements:\nBachelor’s Degree in Pharmacy or Pharm.D or equivalent FPGEC (NABP)\nMust have an active pharmacy license in state(s) of practice with all held licenses in good standing\nCertified Immunizer Preferred\nAbility to work a variety of schedules including, dayshift, evenings, holidays, and weekends\nWe also provide a variety of benefits including:\nCompetitive Wages\nFlexible work schedules\nAssociate discounts\nLeaders invested in your training, career growth & development\nHealth and welfare benefits for eligible employees (Medical, Dental, 401k and more!)\nVacation / Paid Time Off\nOPT, H-1B (H1B) & TN sponsorship or H1B visa transfers may be available\nAbout Us:\nAlbertsons Companies is at the forefront of the revolution in retail. We have a new vision: forging a retail winner that is admired for national strength with deep local roots, that offers an easy, fun, friendly, and inspiring experience, no matter how a customer chooses to shop with us. We want talented individuals to be a part of this journey! We are a company that strives to reflect the rich diversity of the communities we serve. A workplace where everyone will be celebrated, have equal access to opportunities and resources, and be fully able to contribute to their and our company’s success.\nLocally great and nationally strong, Albertsons Companies (NYSE: ACI) is one of the largest food and drug retailers in the United States. Albertsons Companies is committed to helping people across the country live better lives by making a meaningful difference, neighborhood by neighborhood. The organization includes 2,273 retail and drug stores with 1720 pharmacies, 402 associated fuel centers, 22 distribution facilities, and 19 manufacturing plants with over 300,000 employees across 34 states and the District of Columbia. The company is publicly owned with supermarkets across the country that includes Albertsons, Safeway, Vons, Jewel-Osco, ACME, Shaw’s, Tom Thumb, United Supermarkets, United Express, Randalls, Albertson’s Market, Pavilions, Star Markets, Market Street, Carrs, Haggen, Lucky, Amigos, Andronico’s Community Markets, King’s, Balducci’s, and Albertson’s Market Street. \nDISCLAIMER\nThe above statements are intended to describe the general nature of work performed by the employees assigned to this job and are not the official job description for the position. All employees must comply with Company, Division, and Store policies and applicable laws. The responsibilities, duties, and skills of personnel may vary within store and/or from store to store and the official job description will be provided during the application process.\nALBERTSONS SAFEWAY IS AN EQUAL OPPORTUNITY EMPLOYER\nThis Company is an Equal Opportunity Employer, and does not discriminate on the basis of race, gender, ethnicity, religion, national origin, age, disability, veteran status, or on any other basis prohibited by law. We endeavor to make this site accessible to any and all users. If you would like to contact us regarding the accessibility of our website or need assistance completing the application process, please contact us at 1-888-255-2269. #LI-EF1\n\nAlbertsons Companies is at the forefront of the revolution in retail. Committed to innovation and fostering a culture of belonging, our team is united with a unique purpose: to bring people together around the joys of food and to inspire well-being. We want talented individuals to be part of this journey!\nLocally great and nationally strong, Albertsons Companies (NYSE: ACI) is a leading food and drug retailer in the U.S. We operate over 2,200 stores, 1,732 pharmacies, 405 fuel centers, 22 distribution facilities, and 19 manufacturing plants across 34 states and the District of Columbia. Our well-known banners include Albertsons, Safeway, Vons, Jewel-Osco, ACME, Shaw’s, Tom Thumb, United Supermarkets, United Express, Randalls, Albertson’s Market, Pavilions, Star Markets, Market Street, Carrs, Haggen, Lucky, Amigos, Andronico’s Community Markets, King’s, Balducci’s, and Albertson’s Market Street.\nOur vision is to be a retail leader admired for national strength with deep local roots, offering an easy, fun, friendly, and inspiring experience, no matter how customers choose to shop with us. We celebrate the rich diversity of the communities we serve, and strive to create a workplace where everyone has equal access to opportunities and resources, and can fully contribute to their and our company’s success.\nBring your flavor\nBuilding the future of food and well-being starts with you. Join our team and bring your best self to the table.\nDisclaimer\nThe above statements are intended to describe the general nature of work performed by the employees assigned to this job and are not the official job description for the position. All employees must comply with Company, Division, and Store policies and applicable laws. The responsibilities, duties, and skills of personnel may vary within store and/or from store to store and the official job description will be provided during the application process.\nAlbertsons is an Equal Opportunity Employer\nThis Company is an Equal Opportunity Employer, and does not discriminate on the basis of race, gender, ethnicity, religion, national origin, age, disability, veteran status, gender identity/expression, sexual orientation, or on any other basis prohibited by law. Consistent with applicable state and local law, the Company will consider for employment qualified applicants with arrest and conviction records. \nWe endeavor to make this site accessible to any and all users. If you would like to contact us regarding the accessibility of our website or need assistance completing the application process, please contact us at 1-888-255-2269(option #4).\n\nPay Transparency:\n\nStarting rates will be no less than the local minimum wage and may vary based on things like location, experience, qualifications, and the terms of any applicable collective bargaining agreement. Candidates with unique qualifications may be considered for compensation above this range. Dependent on length of service, hours worked, any applicable collective bargaining agreement and/or Company policy, benefits may include medical, dental, vision, disability and life insurance, sick pay*, PTO/Vacation pay*, paid holidays*, bereavement pay and retirement benefits (pension and/or 401(k) eligibility). Associates in this position may be eligible for a quarterly bonus, subject to Company bonus plans. Applications are accepted on an on-going basis.\n*For roles in Washington State: Sick pay and PTO/Vacation pay are accrued based on hours worked and paid holidays are issued at 7-9 days annually.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Competitive Wages",
+    "Flexible Work Schedules",
+    "Associate Discounts",
+    "Health and Welfare Benefits",
+    "Vacation / Paid Time Off"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Patient Care",
+    "Disease State Management",
+    "Medication Therapy Optimization",
+    "Pharmacy Supervision",
+    "Operational Standards",
+    "Safety Compliance",
+    "Immunization Certification"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "As a Float Pharmacist, you will deliver patient care services, supervise pharmacy staff, and uphold operational standards. You will also play a key role in managing acute and chronic conditions.",
+  "ai_requirements_summary": "Candidates must have a Bachelor’s Degree in Pharmacy or Pharm.D and an active pharmacy license in the state of practice. Certification as an immunizer is preferred, and the ability to work various schedules is required.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Pharmacist",
+    "Patient Care",
+    "Medication Therapy",
+    "Disease Management",
+    "Pharmacy Technicians",
+    "Operational Standards",
+    "Immunization",
+    "Healthcare",
+    "Community",
+    "Diversity",
+    "Equity",
+    "Inclusion",
+    "Wellness Services",
+    "Pharmacy Interns",
+    "Safety Compliance",
+    "Performance Metrics",
+    "Acute Conditions",
+    "Chronic Conditions"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare",
+    "Retail"
+  ],
+  "ai_education_requirements": [
+    "bachelor degree"
+  ]
+},
+{
+  "id": "1988302971",
+  "date_posted": "2026-02-06T00:17:24",
+  "date_created": "2026-02-06T01:08:24.778141",
+  "title": "Float Pharmacist",
+  "organization": "Albertsons Companies",
+  "organization_url": "https://eofd.fa.us6.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": "2026-02-13T00:17:24",
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "IRVING",
+        "addressRegion": "TX",
+        "addressCountry": "US",
+        "postalCode": "75038",
+        "streetAddress": "4010 N MACARTHUR BLVD"
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://eofd.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1001/job/677019",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "eofd.fa.us6.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Irving"
+  ],
+  "regions_derived": [
+    "Texas"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Dallas County"
+  ],
+  "locations_derived": [
+    "Irving, Texas, United States"
+  ],
+  "timezones_derived": [
+    "America/Chicago"
+  ],
+  "lats_derived": [
+    32.86060832819481
+  ],
+  "lngs_derived": [
+    -96.95957221289754
+  ],
+  "remote_derived": false,
+  "domain_derived": "albertsonscompanies.com",
+  "description_text": "Are you the Pharmacist who knows your patients by name? Do they ask for you because you build meaningful relationships \nwith them? Do you want to practice in a progressive setting where you can make an impact on patient care and be a part of your community? Are you a pharmacist who creates a culture that promotes diversity, equity, inclusion and belonging, and embraces associate well-being, growth and development?\nThen Tom Thumb is the place for you! \nAs a Pharmacist with our company, you will be part of a team that is committed to providing direct patient care and wellness services. You will play a valuable role in disease state management, optimizing medication therapy, delivering outstanding patient-centered care and assisting in managing acute and chronic conditions. \nOur Pharmacists:\nActively delivers patient care services\nSupervises pharmacy technicians, clerks and pharmacy interns\nUpholds operational standards including performance metrics, safety and compliance\nImplements company initiatives to increase profitability\nRequirements:\nBachelor’s Degree in Pharmacy or Pharm.D or equivalent FPGEC (NABP)\nMust have an active pharmacy license in state(s) of practice with all held licenses in good standing\nCertified Immunizer Preferred\nAbility to work a variety of schedules including, dayshift, evenings, holidays, and weekends\nWe also provide a variety of benefits including:\nCompetitive Wages\nFlexible work schedules\nAssociate discounts\nLeaders invested in your training, career growth & development\nHealth and welfare benefits for eligible employees (Medical, Dental, 401k and more!)\nVacation / Paid Time Off\nOPT, H-1B (H1B) & TN sponsorship or H1B visa transfers may be available\nAbout Us:\nAlbertsons Companies is at the forefront of the revolution in retail. We have a new vision: forging a retail winner that is admired for national strength with deep local roots, that offers an easy, fun, friendly, and inspiring experience, no matter how a customer chooses to shop with us. We want talented individuals to be a part of this journey! We are a company that strives to reflect the rich diversity of the communities we serve. A workplace where everyone will be celebrated, have equal access to opportunities and resources, and be fully able to contribute to their and our company’s success.\nLocally great and nationally strong, Albertsons Companies (NYSE: ACI) is one of the largest food and drug retailers in the United States. Albertsons Companies is committed to helping people across the country live better lives by making a meaningful difference, neighborhood by neighborhood. The organization includes 2,273 retail and drug stores with 1720 pharmacies, 402 associated fuel centers, 22 distribution facilities, and 19 manufacturing plants with over 300,000 employees across 34 states and the District of Columbia. The company is publicly owned with supermarkets across the country that includes Albertsons, Safeway, Vons, Jewel-Osco, ACME, Shaw’s, Tom Thumb, United Supermarkets, United Express, Randalls, Albertson’s Market, Pavilions, Star Markets, Market Street, Carrs, Haggen, Lucky, Amigos, Andronico’s Community Markets, King’s, Balducci’s, and Albertson’s Market Street. \nDISCLAIMER\nThe above statements are intended to describe the general nature of work performed by the employees assigned to this job and are not the official job description for the position. All employees must comply with Company, Division, and Store policies and applicable laws. The responsibilities, duties, and skills of personnel may vary within store and/or from store to store and the official job description will be provided during the application process.\nALBERTSONS SAFEWAY IS AN EQUAL OPPORTUNITY EMPLOYER\nThis Company is an Equal Opportunity Employer, and does not discriminate on the basis of race, gender, ethnicity, religion, national origin, age, disability, veteran status, or on any other basis prohibited by law. We endeavor to make this site accessible to any and all users. If you would like to contact us regarding the accessibility of our website or need assistance completing the application process, please contact us at 1-888-255-2269. #LI-EF1\n\nAlbertsons Companies is at the forefront of the revolution in retail. Committed to innovation and fostering a culture of belonging, our team is united with a unique purpose: to bring people together around the joys of food and to inspire well-being. We want talented individuals to be part of this journey!\nLocally great and nationally strong, Albertsons Companies (NYSE: ACI) is a leading food and drug retailer in the U.S. We operate over 2,200 stores, 1,732 pharmacies, 405 fuel centers, 22 distribution facilities, and 19 manufacturing plants across 34 states and the District of Columbia. Our well-known banners include Albertsons, Safeway, Vons, Jewel-Osco, ACME, Shaw’s, Tom Thumb, United Supermarkets, United Express, Randalls, Albertson’s Market, Pavilions, Star Markets, Market Street, Carrs, Haggen, Lucky, Amigos, Andronico’s Community Markets, King’s, Balducci’s, and Albertson’s Market Street.\nOur vision is to be a retail leader admired for national strength with deep local roots, offering an easy, fun, friendly, and inspiring experience, no matter how customers choose to shop with us. We celebrate the rich diversity of the communities we serve, and strive to create a workplace where everyone has equal access to opportunities and resources, and can fully contribute to their and our company’s success.\nBring your flavor\nBuilding the future of food and well-being starts with you. Join our team and bring your best self to the table.\nDisclaimer\nThe above statements are intended to describe the general nature of work performed by the employees assigned to this job and are not the official job description for the position. All employees must comply with Company, Division, and Store policies and applicable laws. The responsibilities, duties, and skills of personnel may vary within store and/or from store to store and the official job description will be provided during the application process.\nAlbertsons is an Equal Opportunity Employer\nThis Company is an Equal Opportunity Employer, and does not discriminate on the basis of race, gender, ethnicity, religion, national origin, age, disability, veteran status, gender identity/expression, sexual orientation, or on any other basis prohibited by law. Consistent with applicable state and local law, the Company will consider for employment qualified applicants with arrest and conviction records. \nWe endeavor to make this site accessible to any and all users. If you would like to contact us regarding the accessibility of our website or need assistance completing the application process, please contact us at 1-888-255-2269(option #4).\n\nPay Transparency:\n\nStarting rates will be no less than the local minimum wage and may vary based on things like location, experience, qualifications, and the terms of any applicable collective bargaining agreement. Candidates with unique qualifications may be considered for compensation above this range. Dependent on length of service, hours worked, any applicable collective bargaining agreement and/or Company policy, benefits may include medical, dental, vision, disability and life insurance, sick pay*, PTO/Vacation pay*, paid holidays*, bereavement pay and retirement benefits (pension and/or 401(k) eligibility). Associates in this position may be eligible for a quarterly bonus, subject to Company bonus plans. Applications are accepted on an on-going basis.\n*For roles in Washington State: Sick pay and PTO/Vacation pay are accrued based on hours worked and paid holidays are issued at 7-9 days annually.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Competitive Wages",
+    "Flexible Work Schedules",
+    "Associate Discounts",
+    "Health And Welfare Benefits",
+    "Vacation / Paid Time Off"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Patient Care",
+    "Medication Therapy Management",
+    "Disease State Management",
+    "Supervision",
+    "Operational Standards",
+    "Safety Compliance",
+    "Diversity",
+    "Equity",
+    "Inclusion",
+    "Wellness Services",
+    "Community Engagement",
+    "Immunization Certification",
+    "Team Collaboration",
+    "Customer Service",
+    "Pharmacy Operations",
+    "Training And Development"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "As a Float Pharmacist, you will deliver patient care services, supervise pharmacy staff, and uphold operational standards. You will also play a key role in managing medication therapy and providing wellness services.",
+  "ai_requirements_summary": "Candidates must have a Bachelor’s Degree in Pharmacy or Pharm.D and an active pharmacy license in the state of practice. Certification as an immunizer is preferred, and the ability to work various schedules is required.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Pharmacist",
+    "Patient Care",
+    "Medication Therapy",
+    "Disease Management",
+    "Pharmacy Technician",
+    "Operational Standards",
+    "Immunization",
+    "Diversity",
+    "Equity",
+    "Inclusion",
+    "Wellness Services",
+    "Community",
+    "Healthcare",
+    "Pharmacy Operations",
+    "Customer Service",
+    "Training",
+    "Development"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare",
+    "Retail"
+  ],
+  "ai_education_requirements": [
+    "bachelor degree"
+  ]
+},
+{
+  "id": "1988022795",
+  "date_posted": "2026-02-05T22:17:15",
+  "date_created": "2026-02-05T22:31:16.113657",
+  "title": "Float Pharmacist",
+  "organization": "Albertsons Companies",
+  "organization_url": "https://eofd.fa.us6.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "CLACKAMAS",
+        "addressRegion": "OR",
+        "addressCountry": "US",
+        "postalCode": "97015",
+        "streetAddress": "16300 SE EVELYN ST"
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://eofd.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX/job/676998",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "eofd.fa.us6.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Clackamas"
+  ],
+  "regions_derived": [
+    "Oregon"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Clackamas County"
+  ],
+  "locations_derived": [
+    "Clackamas, Oregon, United States"
+  ],
+  "timezones_derived": [
+    "America/Los_Angeles"
+  ],
+  "lats_derived": [
+    45.40362
+  ],
+  "lngs_derived": [
+    -122.5621833
+  ],
+  "remote_derived": false,
+  "domain_derived": "albertsonscompanies.com",
+  "description_text": "Why choose us?\nAre you ready to take the next step in your career? Join us for an exciting opportunity at Albertsons Companies, where innovation and customer service go hand-in-hand!\nAt Albertsons Companies, we are looking for someone who’s not just seeking a job, but someone who wants to make an impact. In this role, you’ll have the opportunity to lead, innovate, and contribute to the growth of a company that values great service and lasting customer relationships. This position offers the chance to work in a fast-paced, dynamic environment that’s constantly evolving.\nBring your flavor\nAre you the pharmacist who knows your patients by name? Do they ask for you because you build meaningful relationships with them? Do you want to practice in a progressive setting where you can make an impact on patient care and be a part of your community? If so, this is the opportunity for you!\nAs a pharmacist with our company, you will be part of a team that is committed to providing direct patient care and wellness services. You will play a valuable role in disease state management, optimizing medication therapy, delivering outstanding patient-centered care and assisting in managing acute and chronic conditions. \nBuilding the future of food and well-being starts with you. Join our team and bring your best self to the table. Applications are accepted on an on-going basis.\nMain Responsibilities:\nActively delivers patient care services\nSupervises pharmacy technicians, clerks and pharmacy interns\nEmbrace and champion operational excellence, ensuring a safe and compliant environment.\nContribute actively to the company’s cultural initiatives that enhance overall success and sustainability\nWe are looking for candidates who possess the following:\nBachelor’s degree in pharmacy or Pharm.D or equivalent FPGEC (NABP)\nMust have an active pharmacy license in state(s) of practice with all held licenses in good standing\nCertified Immunizer Required\nAbility to work a variety of schedules \nWe also provide a variety of benefits including:\nCompetitive Wages\nFlexible work schedules\nAssociate discounts\nLeaders invested in your training, career growth & development\nHealth and welfare benefits for eligible employees (Medical, Dental, 401k and more!)\nVacation / Paid Time Off\nOPT, H-1B (H1B) & TN sponsorship or H1B visa transfers may be available\nAn inclusive work environment with talented colleagues who reflect the communities we serve\nOur Values – Click below to view video:\nACI Values\nA copy of the full job description can be made available to you. #LI-RM1\n\nPay Transparency:\n\nStarting rates will be no less than the local minimum wage and may vary based on things like location, experience, qualifications, and the terms of any applicable collective bargaining agreement. Candidates with unique qualifications may be considered for compensation above this range. Dependent on length of service, hours worked, any applicable collective bargaining agreement and/or Company policy, benefits may include medical, dental, vision, disability and life insurance, sick pay*, PTO/Vacation pay*, paid holidays*, bereavement pay and retirement benefits (pension and/or 401(k) eligibility). Associates in this position may be eligible for a quarterly bonus, subject to Company bonus plans. Applications are accepted on an on-going basis.\n*For roles in Washington State: Sick pay and PTO/Vacation pay are accrued based on hours worked and paid holidays are issued at 7-9 days annually.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Competitive Wages",
+    "Flexible Work Schedules",
+    "Associate Discounts",
+    "Health and Welfare Benefits",
+    "Vacation / Paid Time Off"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Patient Care",
+    "Medication Therapy",
+    "Disease State Management",
+    "Operational Excellence",
+    "Customer Service",
+    "Team Leadership",
+    "Community Engagement",
+    "Immunization"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The Float Pharmacist will actively deliver patient care services and supervise pharmacy technicians and interns. They will also contribute to operational excellence and the company's cultural initiatives.",
+  "ai_requirements_summary": "Candidates must possess a Bachelor’s degree in pharmacy or Pharm.D, an active pharmacy license, and be a certified immunizer. The ability to work a variety of schedules is also required.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Pharmacist",
+    "Patient Care",
+    "Medication Therapy",
+    "Disease Management",
+    "Immunization",
+    "Pharmacy Technicians",
+    "Operational Excellence",
+    "Customer Relationships",
+    "Healthcare",
+    "Wellness Services",
+    "Community Engagement",
+    "Pharmacy Interns",
+    "Acute Conditions",
+    "Chronic Conditions",
+    "Team Leadership",
+    "Cultural Initiatives",
+    "Health Benefits"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare",
+    "Customer Service & Support",
+    "Retail"
+  ],
+  "ai_education_requirements": [
+    "bachelor degree"
+  ]
+},
+{
+  "id": "1988022794",
+  "date_posted": "2026-02-05T22:04:35",
+  "date_created": "2026-02-05T22:31:16.112707",
+  "title": "Pharmacy Manager (Pharmacist)",
+  "organization": "Albertsons Companies",
+  "organization_url": "https://eofd.fa.us6.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "LAKE OSWEGO",
+        "addressRegion": "OR",
+        "addressCountry": "US",
+        "postalCode": "97034",
+        "streetAddress": "401 A AVE"
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://eofd.fa.us6.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX/job/676994",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "eofd.fa.us6.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Lake Oswego"
+  ],
+  "regions_derived": [
+    "Oregon"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Clackamas County"
+  ],
+  "locations_derived": [
+    "Lake Oswego, Oregon, United States"
+  ],
+  "timezones_derived": [
+    "America/Los_Angeles"
+  ],
+  "lats_derived": [
+    45.420534
+  ],
+  "lngs_derived": [
+    -122.668447
+  ],
+  "remote_derived": false,
+  "domain_derived": "albertsonscompanies.com",
+  "description_text": "Why choose us?\nAre you ready to take the next step in your career? Join us for an exciting opportunity at Albertsons Companies, where innovation and customer service go hand-in-hand!\nAt Albertsons Companies, we are looking for someone who’s not just seeking a job, but someone who wants to make an impact. In this role, you’ll have the opportunity to lead, innovate, and contribute to the growth of a company that values great service and lasting customer relationships. This position offers the chance to work in a fast-paced, dynamic environment that’s constantly evolving.\nBring your flavor\nAre you the pharmacist who knows your patients by name? Do they ask for you because you build meaningful relationships with them? Are you ready to lead in a progressive pharmacy setting where you can make a real impact on patient care and strengthen your community ties? If so, this is the opportunity for you!\nAs a Pharmacy Manager for our company, you will be part of a team that is committed to providing direct patient care and wellness services. You will play a valuable role in disease state management, optimizing medication therapy, delivering outstanding patient-centered care and assisting in managing acute and chronic conditions.\nMain Responsibilities:\nUnder the direction of the Division Pharmacy Manager, the Pharmacy Manager is responsible for the financial performance of the pharmacy and acts as pharmacist in charge.\nActively delivers patient care services\nUpholds operational standards including performance metrics, safety and compliance\nRecruits, trains and supervises pharmacy team\nPartners with management in developing and implementing initiatives to increase profitability\nWe are looking for candidates who possess the following:\nBachelor's Degree in Pharmacy or Pharm.D or equivalent FPGEC (NABP)\nActive pharmacy license in state(s) of practice with all held licenses in good standing\nCertified Immunizer Required\n1 year of supervisory experience in a pharmacy setting preferred\nAbility to work a variety of schedules\nWe also provide a variety of benefits including:\nCompetitive Wages\nFlexible work schedules\nAssociate discounts\nLeaders invested in your training, career growth & development\nHealth and welfare benefits for eligible employees (Medical, Dental, 401k and more!)\nVacation / Paid Time Off\nOPT, H-1B (H1B) & TN sponsorship or H1B visa transfers may be available\nAn inclusive work environment with talented colleagues who reflect the communities we serve\nOur Values – Click below to view video:\nACI Values\nA copy of the full job description can be made available to you. #LI-RM1\n\nAlbertsons Companies is at the forefront of the revolution in retail. Committed to innovation and fostering a culture of belonging, our team is united with a unique purpose: to bring people together around the joys of food and to inspire well-being. We want talented individuals to be part of this journey!\nLocally great and nationally strong, Albertsons Companies (NYSE: ACI) is a leading food and drug retailer in the U.S. We operate over 2,200 stores, 1,732 pharmacies, 405 fuel centers, 22 distribution facilities, and 19 manufacturing plants across 34 states and the District of Columbia. Our well-known banners include Albertsons, Safeway, Vons, Jewel-Osco, ACME, Shaw’s, Tom Thumb, United Supermarkets, United Express, Randalls, Albertson’s Market, Pavilions, Star Markets, Market Street, Carrs, Haggen, Lucky, Amigos, Andronico’s Community Markets, King’s, Balducci’s, and Albertson’s Market Street.\nOur vision is to be a retail leader admired for national strength with deep local roots, offering an easy, fun, friendly, and inspiring experience, no matter how customers choose to shop with us. We celebrate the rich diversity of the communities we serve, and strive to create a workplace where everyone has equal access to opportunities and resources, and can fully contribute to their and our company’s success.\nBring your flavor\nBuilding the future of food and well-being starts with you. Join our team and bring your best self to the table.\nDisclaimer\nThe above statements are intended to describe the general nature of work performed by the employees assigned to this job and are not the official job description for the position. All employees must comply with Company, Division, and Store policies and applicable laws. The responsibilities, duties, and skills of personnel may vary within store and/or from store to store and the official job description will be provided during the application process.\nAlbertsons is an Equal Opportunity Employer\nThis Company is an Equal Opportunity Employer, and does not discriminate on the basis of race, gender, ethnicity, religion, national origin, age, disability, veteran status, gender identity/expression, sexual orientation, or on any other basis prohibited by law. Consistent with applicable state and local law, the Company will consider for employment qualified applicants with arrest and conviction records. \nWe endeavor to make this site accessible to any and all users. If you would like to contact us regarding the accessibility of our website or need assistance completing the application process, please contact us at 1-888-255-2269(option #4).\n\nPay Transparency:\n\nStarting rates will be no less than the local minimum wage and may vary based on things like location, experience, qualifications, and the terms of any applicable collective bargaining agreement. Candidates with unique qualifications may be considered for compensation above this range. Dependent on length of service, hours worked, any applicable collective bargaining agreement and/or Company policy, benefits may include medical, dental, vision, disability and life insurance, sick pay*, PTO/Vacation pay*, paid holidays*, bereavement pay and retirement benefits (pension and/or 401(k) eligibility). Associates in this position may be eligible for a quarterly bonus, subject to Company bonus plans. Applications are accepted on an on-going basis.\n*For roles in Washington State: Sick pay and PTO/Vacation pay are accrued based on hours worked and paid holidays are issued at 7-9 days annually.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Competitive Wages",
+    "Flexible Work Schedules",
+    "Associate Discounts",
+    "Health And Welfare Benefits",
+    "Vacation / Paid Time Off"
+  ],
+  "ai_experience_level": "2-5",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Patient Care",
+    "Medication Therapy",
+    "Disease State Management",
+    "Supervision",
+    "Compliance",
+    "Training",
+    "Customer Service",
+    "Leadership",
+    "Pharmacy Operations",
+    "Community Engagement",
+    "Innovative Thinking",
+    "Relationship Building",
+    "Profitability Initiatives",
+    "Safety Standards",
+    "Wellness Services",
+    "Acute And Chronic Condition Management"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The Pharmacy Manager is responsible for the financial performance of the pharmacy and acts as pharmacist in charge. They will actively deliver patient care services and uphold operational standards.",
+  "ai_requirements_summary": "Candidates must possess a Bachelor's Degree in Pharmacy or Pharm.D, an active pharmacy license, and be a certified immunizer. Supervisory experience in a pharmacy setting is preferred.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Pharmacy",
+    "Patient Care",
+    "Medication Therapy",
+    "Disease Management",
+    "Pharmacist",
+    "Healthcare",
+    "Customer Service",
+    "Leadership",
+    "Compliance",
+    "Training",
+    "Wellness Services",
+    "Immunization",
+    "Pharmacy Operations",
+    "Profitability",
+    "Community Engagement",
+    "Acute Conditions",
+    "Chronic Conditions",
+    "Operational Standards",
+    "Performance Metrics",
+    "Team Supervision",
+    "Innovation",
+    "Retail",
+    "Healthcare Services",
+    "Pharmacy Management",
+    "Financial Performance",
+    "Safety Standards",
+    "Relationship Building",
+    "Dynamic Environment",
+    "Career Growth",
+    "Diversity"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare",
+    "Management & Leadership",
+    "Customer Service & Support",
+    "Retail"
+  ],
+  "ai_education_requirements": [
+    "bachelor degree"
+  ]
+},
+{
+  "id": "1988008226",
+  "date_posted": "2026-02-05T21:55:30",
+  "date_created": "2026-02-05T22:13:33.919794",
+  "title": "Registered Nurse - Neurosciences, PRN - RN",
+  "organization": "Mayo Clinic",
+  "organization_url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jacksonville",
+        "addressRegion": "FL",
+        "addressCountry": "United States",
+        "postalCode": "32224",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Part time"
+  ],
+  "url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/375684",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Jacksonville"
+  ],
+  "regions_derived": [
+    "Florida"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Duval County"
+  ],
+  "locations_derived": [
+    "Jacksonville, Florida, United States"
+  ],
+  "timezones_derived": [
+    "America/New_York"
+  ],
+  "lats_derived": [
+    30.28195073738405
+  ],
+  "lngs_derived": [
+    -81.46320544212406
+  ],
+  "remote_derived": false,
+  "domain_derived": "mayoclinic.org",
+  "description_text": "The registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Clinic Nursing Professional Practice Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. A subset of employees may be required to drive their personal vehicle as a part of the responsibility of their role. \n\nThis role is eligible for TN sponsorship. Successful sponsorship will require state licensure and completion of the VisaScreen or equivalent certification.\n\nWhy Mayo Clinic \n\nMayo Clinic is top-ranked in more specialties than any other care provider according to U.S. News & World Report. As we work together to put the needs of the patient first, we are also dedicated to our employees, investing in competitive compensation and comprehensive benefit plans – to take care of you and your family, now and in the future. And with continuing education and advancement opportunities at every turn, you can build a long, successful career with Mayo Clinic. \n\nJust as our reputation has spread beyond our Minnesota roots, so have our locations. Today, our employees are located at our three major campuses in Phoenix/Scottsdale, Arizona, Jacksonville, Florida, Rochester, Minnesota, and at Mayo Clinic Health System campuses throughout Midwestern communities, and at our international locations. Each Mayo Clinic location is a special place where our employees thrive in both their work and personal lives. Learn more about what each unique Mayo Clinic campus has to offer, and where your best fit is. \n\nEqual Opportunity \n\nAll qualified applicants will receive consideration for employment without regard to race, color, religion, sex, gender identity, sexual orientation, national origin, protected veteran status or disability status. Learn more about the \"EOE is the Law\". Mayo Clinic participates in E-Verify and may provide the Social Security Administration and, if necessary, the Department of Homeland Security with information from each new employee's Form I-9 to confirm work authorization.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Health Insurance",
+    "Competitive Compensation",
+    "Comprehensive Benefit Plans",
+    "Continuing Education",
+    "Advancement Opportunities"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Nursing Care",
+    "Patient Care",
+    "Patient Education",
+    "Communication Skills",
+    "Leadership",
+    "Mentoring",
+    "Quality Improvement",
+    "Delegation",
+    "Team Collaboration"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The RN is accountable for coordinating nursing care, including direct patient care and patient/family education. They will plan, implement, evaluate, and communicate all phases of nursing care for assigned patients.",
+  "ai_requirements_summary": "The RN must possess excellent communication skills and may participate in leadership roles and quality improvement efforts. A subset of employees may need to drive their personal vehicle as part of their responsibilities.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "PART_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Registered Nurse",
+    "Neurosciences",
+    "Patient Care",
+    "Patient Education",
+    "Nursing Practice",
+    "Leadership",
+    "Quality Improvement",
+    "Delegation",
+    "Communication Skills",
+    "Mayo Clinic",
+    "Healthcare",
+    "Professional Practice Model",
+    "Transitions of Care",
+    "Mentoring",
+    "Committees",
+    "Projects"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare"
+  ],
+  "ai_education_requirements": null
+},
+{
+  "id": "1988008220",
+  "date_posted": "2026-02-05T21:55:30",
+  "date_created": "2026-02-05T22:13:33.787881",
+  "title": "Registered Nurse - Neurosciences, PRN - RN",
+  "organization": "Mayo Clinic",
+  "organization_url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jacksonville",
+        "addressRegion": "FL",
+        "addressCountry": "United States",
+        "postalCode": "",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Part time"
+  ],
+  "url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Mayo-US/job/375684",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Jacksonville"
+  ],
+  "regions_derived": [
+    "Florida"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Duval County"
+  ],
+  "locations_derived": [
+    "Jacksonville, Florida, United States"
+  ],
+  "timezones_derived": [
+    "America/New_York"
+  ],
+  "lats_derived": [
+    30.3321838
+  ],
+  "lngs_derived": [
+    -81.655651
+  ],
+  "remote_derived": false,
+  "domain_derived": "mayoclinic.org",
+  "description_text": "The registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Clinic Nursing Professional Practice Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. A subset of employees may be required to drive their personal vehicle as a part of the responsibility of their role. \n\nThis role is eligible for TN sponsorship. Successful sponsorship will require state licensure and completion of the VisaScreen or equivalent certification.\n\nWhy Mayo Clinic \n\nMayo Clinic is top-ranked in more specialties than any other care provider according to U.S. News & World Report. As we work together to put the needs of the patient first, we are also dedicated to our employees, investing in competitive compensation and comprehensive benefit plans – to take care of you and your family, now and in the future. And with continuing education and advancement opportunities at every turn, you can build a long, successful career with Mayo Clinic. \n\nJust as our reputation has spread beyond our Minnesota roots, so have our locations. Today, our employees are located at our three major campuses in Phoenix/Scottsdale, Arizona, Jacksonville, Florida, Rochester, Minnesota, and at Mayo Clinic Health System campuses throughout Midwestern communities, and at our international locations. Each Mayo Clinic location is a special place where our employees thrive in both their work and personal lives. Learn more about what each unique Mayo Clinic campus has to offer, and where your best fit is. \n\nEqual Opportunity \n\nAll qualified applicants will receive consideration for employment without regard to race, color, religion, sex, gender identity, sexual orientation, national origin, protected veteran status or disability status. Learn more about the \"EOE is the Law\". Mayo Clinic participates in E-Verify and may provide the Social Security Administration and, if necessary, the Department of Homeland Security with information from each new employee's Form I-9 to confirm work authorization.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Health Insurance",
+    "Competitive Compensation",
+    "Comprehensive Benefit Plans",
+    "Continuing Education",
+    "Advancement Opportunities"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Nursing Care",
+    "Patient Care",
+    "Patient Education",
+    "Communication Skills",
+    "Mentoring",
+    "Leadership",
+    "Quality Improvement",
+    "Delegation",
+    "Teamwork"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The RN is accountable for coordinating nursing care, including direct patient care and patient/family education. They will plan, implement, evaluate, and communicate all phases of nursing care for assigned patients.",
+  "ai_requirements_summary": "The RN must possess excellent communication skills and may participate in leadership roles and quality improvement efforts. A subset of employees may be required to drive their personal vehicle as part of their responsibilities.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "PART_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Registered Nurse",
+    "Neurosciences",
+    "Patient Care",
+    "Patient Education",
+    "Nursing Practice",
+    "Leadership",
+    "Quality Improvement",
+    "Delegation",
+    "Communication Skills",
+    "Mentoring",
+    "Mayo Clinic",
+    "Healthcare",
+    "Professional Practice Model",
+    "Transitions of Care",
+    "VisaScreen",
+    "State Licensure"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare"
+  ],
+  "ai_education_requirements": null
+},
+{
+  "id": "1988008231",
+  "date_posted": "2026-02-05T21:46:45",
+  "date_created": "2026-02-05T22:13:33.977239",
+  "title": "Registered Nurse - Short Stay Unit - RN",
+  "organization": "Mayo Clinic",
+  "organization_url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jacksonville",
+        "addressRegion": "FL",
+        "addressCountry": "United States",
+        "postalCode": "32224",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/375824",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Jacksonville"
+  ],
+  "regions_derived": [
+    "Florida"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Duval County"
+  ],
+  "locations_derived": [
+    "Jacksonville, Florida, United States"
+  ],
+  "timezones_derived": [
+    "America/New_York"
+  ],
+  "lats_derived": [
+    30.28195073738405
+  ],
+  "lngs_derived": [
+    -81.46320544212406
+  ],
+  "remote_derived": false,
+  "domain_derived": "mayoclinic.org",
+  "description_text": "The registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Clinic Nursing Professional Practice Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. A subset of employees may be required to drive their personal vehicle as a part of the responsibility of their role. \n\nThis role is eligible for TN sponsorship. Successful sponsorship will require state licensure and completion of the VisaScreen or equivalent certification.\n\nWhy Mayo Clinic \n\nMayo Clinic is top-ranked in more specialties than any other care provider according to U.S. News & World Report. As we work together to put the needs of the patient first, we are also dedicated to our employees, investing in competitive compensation and comprehensive benefit plans – to take care of you and your family, now and in the future. And with continuing education and advancement opportunities at every turn, you can build a long, successful career with Mayo Clinic. \n\nBenefits Highlights \nMedical: Multiple plan options.\nDental: Delta Dental or reimbursement account for flexible coverage.\nVision: Affordable plan with national network.\nPre-Tax Savings: HSA and FSAs for eligible expenses.\nRetirement: Competitive retirement package to secure your future.\n\nJust as our reputation has spread beyond our Minnesota roots, so have our locations. Today, our employees are located at our three major campuses in Phoenix/Scottsdale, Arizona, Jacksonville, Florida, Rochester, Minnesota, and at Mayo Clinic Health System campuses throughout Midwestern communities, and at our international locations. Each Mayo Clinic location is a special place where our employees thrive in both their work and personal lives. Learn more about what each unique Mayo Clinic campus has to offer, and where your best fit is. \n\nEqual Opportunity \n\nAll qualified applicants will receive consideration for employment without regard to race, color, religion, sex, gender identity, sexual orientation, national origin, protected veteran status or disability status. Learn more about the \"EOE is the Law\". Mayo Clinic participates in E-Verify and may provide the Social Security Administration and, if necessary, the Department of Homeland Security with information from each new employee's Form I-9 to confirm work authorization.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Medical",
+    "Dental",
+    "Vision",
+    "Pre-Tax Savings",
+    "Retirement"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Nursing Care",
+    "Patient Care",
+    "Patient Education",
+    "Communication Skills",
+    "Leadership",
+    "Mentoring",
+    "Quality Improvement",
+    "Delegation"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The RN is accountable for coordinating nursing care, including direct patient care and transitions of care. They support professional nursing practice and are responsible for planning, implementing, evaluating, and communicating all phases of nursing care for assigned patients.",
+  "ai_requirements_summary": "The RN must possess excellent communication skills and be skilled in mentoring and teaching. They may also participate in committees or projects and are required to have state licensure and complete the VisaScreen or equivalent certification for TN sponsorship.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Registered Nurse",
+    "Nursing",
+    "Patient Care",
+    "Patient Education",
+    "Transitions of Care",
+    "Professional Practice",
+    "Quality Improvement",
+    "Leadership",
+    "Mentoring",
+    "Delegation",
+    "Communication Skills",
+    "Mayo Clinic",
+    "Healthcare",
+    "Licensure",
+    "VisaScreen",
+    "TN Sponsorship"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare"
+  ],
+  "ai_education_requirements": null
+},
+{
+  "id": "1988008218",
+  "date_posted": "2026-02-05T21:46:45",
+  "date_created": "2026-02-05T22:13:33.785838",
+  "title": "Registered Nurse - Short Stay Unit - RN",
+  "organization": "Mayo Clinic",
+  "organization_url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jacksonville",
+        "addressRegion": "FL",
+        "addressCountry": "United States",
+        "postalCode": "",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/Mayo-US/job/375824",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Jacksonville"
+  ],
+  "regions_derived": [
+    "Florida"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Duval County"
+  ],
+  "locations_derived": [
+    "Jacksonville, Florida, United States"
+  ],
+  "timezones_derived": [
+    "America/New_York"
+  ],
+  "lats_derived": [
+    30.3321838
+  ],
+  "lngs_derived": [
+    -81.655651
+  ],
+  "remote_derived": false,
+  "domain_derived": "mayoclinic.org",
+  "description_text": "The registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Clinic Nursing Professional Practice Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. A subset of employees may be required to drive their personal vehicle as a part of the responsibility of their role. \n\nThis role is eligible for TN sponsorship. Successful sponsorship will require state licensure and completion of the VisaScreen or equivalent certification.\n\nWhy Mayo Clinic \n\nMayo Clinic is top-ranked in more specialties than any other care provider according to U.S. News & World Report. As we work together to put the needs of the patient first, we are also dedicated to our employees, investing in competitive compensation and comprehensive benefit plans – to take care of you and your family, now and in the future. And with continuing education and advancement opportunities at every turn, you can build a long, successful career with Mayo Clinic. \n\nBenefits Highlights \nMedical: Multiple plan options.\nDental: Delta Dental or reimbursement account for flexible coverage.\nVision: Affordable plan with national network.\nPre-Tax Savings: HSA and FSAs for eligible expenses.\nRetirement: Competitive retirement package to secure your future.\n\nJust as our reputation has spread beyond our Minnesota roots, so have our locations. Today, our employees are located at our three major campuses in Phoenix/Scottsdale, Arizona, Jacksonville, Florida, Rochester, Minnesota, and at Mayo Clinic Health System campuses throughout Midwestern communities, and at our international locations. Each Mayo Clinic location is a special place where our employees thrive in both their work and personal lives. Learn more about what each unique Mayo Clinic campus has to offer, and where your best fit is. \n\nEqual Opportunity \n\nAll qualified applicants will receive consideration for employment without regard to race, color, religion, sex, gender identity, sexual orientation, national origin, protected veteran status or disability status. Learn more about the \"EOE is the Law\". Mayo Clinic participates in E-Verify and may provide the Social Security Administration and, if necessary, the Department of Homeland Security with information from each new employee's Form I-9 to confirm work authorization.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Medical",
+    "Dental",
+    "Vision",
+    "Pre-Tax Savings",
+    "Retirement"
+  ],
+  "ai_experience_level": "0-2",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Nursing Care",
+    "Patient Care",
+    "Patient Education",
+    "Communication Skills",
+    "Mentoring",
+    "Leadership",
+    "Quality Improvement",
+    "Delegation"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The RN is accountable for coordinating nursing care, including direct patient care and education. They will also support professional nursing practice and lead quality improvement efforts.",
+  "ai_requirements_summary": "The RN must possess excellent communication skills and may need to drive their personal vehicle for job responsibilities. Successful candidates will require state licensure and completion of VisaScreen or equivalent certification.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Registered Nurse",
+    "Nursing",
+    "Patient Care",
+    "Patient Education",
+    "Transitions of Care",
+    "Mayo Clinic",
+    "Professional Practice Model",
+    "ANA Nursing Standards",
+    "Leadership",
+    "Quality Improvement",
+    "Delegation",
+    "Communication Skills",
+    "Mentoring",
+    "Driving",
+    "Licensure",
+    "VisaScreen",
+    "Healthcare"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare"
+  ],
+  "ai_education_requirements": null
+},
+{
+  "id": "1987852132",
+  "date_posted": "2026-02-05T21:01:52",
+  "date_created": "2026-02-05T21:15:31.826944",
+  "title": "Registered Nurse - Pre-Op/PACU - RN",
+  "organization": "Mayo Clinic",
+  "organization_url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com:443/hcmUI/CandidateExperience/",
+  "date_validthrough": null,
+  "locations_raw": [
+    {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jacksonville",
+        "addressRegion": "FL",
+        "addressCountry": "United States",
+        "postalCode": "32224",
+        "streetAddress": ""
+      }
+    }
+  ],
+  "locations_alt_raw": null,
+  "location_type": "",
+  "location_requirements_raw": null,
+  "salary_raw": null,
+  "employment_type": [
+    "Full time"
+  ],
+  "url": "https://fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/375061",
+  "source_type": "ats",
+  "source": "oraclecloud",
+  "source_domain": "fa-euwp-saasfaprod1.fa.ocs.oraclecloud.com",
+  "organization_logo": null,
+  "cities_derived": [
+    "Jacksonville"
+  ],
+  "regions_derived": [
+    "Florida"
+  ],
+  "countries_derived": [
+    "United States"
+  ],
+  "counties_derived": [
+    "Duval County"
+  ],
+  "locations_derived": [
+    "Jacksonville, Florida, United States"
+  ],
+  "timezones_derived": [
+    "America/New_York"
+  ],
+  "lats_derived": [
+    30.28195073738405
+  ],
+  "lngs_derived": [
+    -81.46320544212406
+  ],
+  "remote_derived": false,
+  "domain_derived": "mayoclinic.org",
+  "description_text": "The registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Nursing Care Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. \n\nThe registered nurse (RN) is accountable for the coordination of nursing care, including direct patient care, patient/family education and transitions of care. The RN supports professional nursing practice across practice settings and across the continuum of care to meet the needs of the patient and family. The RN will function within the Mayo Nursing Care Model, which includes accountability for planning, implementing, evaluating and communicating all phases of nursing care for assigned patients. The ANA Nursing: Scope and Standards of Practice provide a basis for the practice of the RN. The RN provides leadership through activities such as preceptor role, informal and formal leadership roles, and quality improvement efforts. The RN delegates patient care according to skill level, experience, patient acuity, fiscal accountability and availability of resources. The RN possesses excellent communication skills; is skillful in mentoring and teaching; and may participate on committees or projects. \n\nWhat do Pre-Op/PACU Nurses do at Mayo Clinic?\n• Focuses on the phases of patient care before and immediately following a surgical procedure, however they do not perform the actual surgery. This includes Pre-Op, Phase 1 PACU and Phase 2 PACU.\n• Assess, quickly identify and resolve pre-operative issues.\n• Starting and monitoring IVs, administering pre-operative medications and performing pre-operative instruction and explanation of patient's rights and procedures.\n• In the PACU (Post Anesthesia Care Unit), the nurse will provide care for post-op patients recovering from general, regional, and local anesthesia.\n• Traditional Onboarding – 12- week clinical orientation designed for nurses with Preop/PACU or higher acuity level experience.\n• Fast paced, Critical Care Nursing Concepts\n• On Call: Weekday (Mon-Fri) approximately 1 per 4-week schedule, 2130-0730\n• On Call: Weekend Saturday and Sunday, 12-hour shift approximately every 13th-14th weekend.\nPre-Op/PACU Department Snapshot\n• 72 Pre-Op/PACU Beds\n• 105 Nurses\n• 10 Patient Care Techs and 5 Clinical Assistants\n• Pre-Op ratio-1 RN : 3 patients\n• Phase 1 PACU ratio-1 RN : 2 patients\n• Phase 2 PACU ratio-1 RN : 3 patients\n• Fast-paced unit utilizing critical care nursing concepts\n\nThis role is eligible for TN sponsorship. Successful sponsorship will require state licensure and completion of the VisaScreen or equivalent certification.\n\nWhy Mayo Clinic \n\nMayo Clinic is top-ranked in more specialties than any other care provider according to U.S. News & World Report. As we work together to put the needs of the patient first, we are also dedicated to our employees, investing in competitive compensation and comprehensive benefit plans – to take care of you and your family, now and in the future. And with continuing education and advancement opportunities at every turn, you can build a long, successful career with Mayo Clinic. \n\nBenefits Highlights \nMedical: Multiple plan options.\nDental: Delta Dental or reimbursement account for flexible coverage.\nVision: Affordable plan with national network.\nPre-Tax Savings: HSA and FSAs for eligible expenses.\nRetirement: Competitive retirement package to secure your future.\n\nJust as our reputation has spread beyond our Minnesota roots, so have our locations. Today, our employees are located at our three major campuses in Phoenix/Scottsdale, Arizona, Jacksonville, Florida, Rochester, Minnesota, and at Mayo Clinic Health System campuses throughout Midwestern communities, and at our international locations. Each Mayo Clinic location is a special place where our employees thrive in both their work and personal lives. Learn more about what each unique Mayo Clinic campus has to offer, and where your best fit is. \n\nEqual Opportunity \n\nAll qualified applicants will receive consideration for employment without regard to race, color, religion, sex, gender identity, sexual orientation, national origin, protected veteran status or disability status. Learn more about the \"EOE is the Law\". Mayo Clinic participates in E-Verify and may provide the Social Security Administration and, if necessary, the Department of Homeland Security with information from each new employee's Form I-9 to confirm work authorization.",
+  "ai_salary_currency": null,
+  "ai_salary_value": null,
+  "ai_salary_minvalue": null,
+  "ai_salary_maxvalue": null,
+  "ai_salary_unittext": null,
+  "ai_benefits": [
+    "Medical",
+    "Dental",
+    "Vision",
+    "Pre-Tax Savings",
+    "Retirement"
+  ],
+  "ai_experience_level": "2-5",
+  "ai_work_arrangement": "On-site",
+  "ai_work_arrangement_office_days": null,
+  "ai_remote_location": null,
+  "ai_remote_location_derived": null,
+  "ai_key_skills": [
+    "Patient Care",
+    "Patient Education",
+    "Communication Skills",
+    "Mentoring",
+    "Leadership",
+    "Quality Improvement",
+    "Critical Care Nursing",
+    "IV Administration",
+    "Pre-Operative Assessment",
+    "Post-Anesthesia Care",
+    "Delegation",
+    "Team Collaboration",
+    "Patient Rights",
+    "Surgical Procedures",
+    "Clinical Orientation",
+    "Nursing Care Model"
+  ],
+  "ai_hiring_manager_name": null,
+  "ai_hiring_manager_email_address": null,
+  "ai_core_responsibilities": "The registered nurse is responsible for coordinating nursing care, including direct patient care and education. They will assess pre-operative issues and provide care in the PACU for patients recovering from anesthesia.",
+  "ai_requirements_summary": "The role requires excellent communication skills and the ability to mentor and lead. Experience in Pre-Op/PACU or higher acuity nursing is preferred.",
+  "ai_working_hours": 40,
+  "ai_employment_type": [
+    "FULL_TIME"
+  ],
+  "ai_job_language": "English",
+  "ai_visa_sponsorship": true,
+  "ai_keywords": [
+    "Registered Nurse",
+    "Pre-Op",
+    "PACU",
+    "Patient Care",
+    "Nursing Care Model",
+    "ANA Nursing Standards",
+    "IV Therapy",
+    "Anesthesia",
+    "Surgical Procedures",
+    "Patient Education",
+    "Quality Improvement",
+    "Clinical Orientation",
+    "Critical Care Nursing",
+    "Patient Rights",
+    "Delegation",
+    "Mentoring"
+  ],
+  "ai_taxonomies_a": [
+    "Healthcare",
+    "Management & Leadership"
+  ],
+  "ai_education_requirements": null
+}]

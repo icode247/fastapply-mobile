@@ -16,6 +16,10 @@ import {
 } from "../types/job.types";
 import { logger } from "../utils/logger";
 import api from "./api";
+import { getLocalJobsBatch, resetLocalJobs } from "./localJobs";
+
+// When false, use local sample data instead of hitting the API
+const USE_API_JOBS = process.env.EXPO_PUBLIC_USE_API_JOBS === "true";
 
 // Supported ATS platforms - must match backend allowed values
 const SUPPORTED_PLATFORMS: JobPlatform[] = ["rippling", "ashby", "workable"];
@@ -61,6 +65,7 @@ class JobService {
   private isFetching = false;
   private isPrefetching = false;
   private lastError: string | null = null;
+  private localOffset = 0;
 
   // Current search preferences (for consistent pagination)
   private currentPreferences: JobPreferences | null = null;
@@ -142,10 +147,16 @@ class JobService {
     this.fetchedJobIds.clear();
     this.hasMoreJobs = true;
     this.lastError = null;
+    this.localOffset = 0;
 
     // Store preferences for subsequent fetches
     if (preferences) {
       this.currentPreferences = preferences;
+    }
+
+    if (!USE_API_JOBS) {
+      resetLocalJobs();
+      return this.fetchLocalBatch();
     }
 
     return this.fetchJobsBatch();
@@ -160,7 +171,42 @@ class JobService {
       return [];
     }
 
+    if (!USE_API_JOBS) {
+      return this.fetchLocalBatch();
+    }
+
     return this.fetchJobsBatch();
+  }
+
+  /**
+   * Internal: Load a batch of jobs from local sample files
+   */
+  private fetchLocalBatch(): NormalizedJob[] {
+    const { jobs, hasMore } = getLocalJobsBatch(this.localOffset, BATCH_SIZE);
+
+    // Filter out duplicates and swiped jobs
+    const freshJobs =
+      this.swipedUrls.size > 0
+        ? jobs.filter(
+            (job) =>
+              !this.swipedUrls.has(job.applyUrl) &&
+              !this.swipedUrls.has(job.listingUrl)
+          )
+        : jobs;
+
+    freshJobs.forEach((job) => this.fetchedJobIds.add(job.id));
+    this.jobs = [...this.jobs, ...freshJobs];
+    this.localOffset += BATCH_SIZE;
+    this.hasMoreJobs = hasMore;
+
+    logger.debug("[JobService] Loaded local jobs:", {
+      batch: freshJobs.length,
+      total: this.jobs.length,
+      hasMore,
+    });
+
+    this.notifyListeners();
+    return freshJobs;
   }
 
   /**
@@ -269,6 +315,12 @@ class JobService {
 
     logger.debug("[JobService] Starting prefetch, remaining jobs:", remainingJobs);
     this.isPrefetching = true;
+
+    if (!USE_API_JOBS) {
+      this.fetchLocalBatch();
+      this.isPrefetching = false;
+      return;
+    }
 
     this.fetchJobsBatch()
       .then((newJobs) => {
@@ -431,6 +483,36 @@ class JobService {
       );
     }
 
+    // Salary filter — compare against job's numeric salary fields
+    if (filters.salaryMin != null) {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.salaryMax == null || job.salaryMax >= filters.salaryMin!
+      );
+    }
+    if (filters.salaryMax != null) {
+      filteredJobs = filteredJobs.filter(
+        (job) => job.salaryMin == null || job.salaryMin <= filters.salaryMax!
+      );
+    }
+
+    // Experience levels filter
+    if (filters.experienceLevels && filters.experienceLevels.length > 0) {
+      const expMap: Record<string, string[]> = {
+        entry: ["entry level", "junior", "entry"],
+        mid: ["mid level", "mid"],
+        senior: ["senior level", "senior"],
+        lead: ["lead"],
+        executive: ["executive", "director", "vp"],
+      };
+      const matchTerms = filters.experienceLevels
+        .filter((e): e is NonNullable<typeof e> => e != null)
+        .flatMap((e) => expMap[e] || [e]);
+      filteredJobs = filteredJobs.filter((job) => {
+        const exp = job.experience.toLowerCase();
+        return matchTerms.some((term) => exp.includes(term));
+      });
+    }
+
     return {
       jobs: filteredJobs,
       total: filteredJobs.length,
@@ -560,6 +642,7 @@ class JobService {
     this.isPrefetching = false;
     this.lastError = null;
     this.currentPreferences = null;
+    this.localOffset = 0;
     this.notifyListeners();
   }
 

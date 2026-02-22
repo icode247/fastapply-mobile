@@ -38,52 +38,52 @@ const getCleanFileName = (path: string) => {
   }
 };
 
-const STATUS_CONFIG: Record<
-  string,
-  { color: string; label: string; icon: string; bg: string }
-> = {
-  submitted: {
-    color: "#3B82F6",
-    label: "Applied",
-    icon: "checkmark-circle",
-    bg: "#EFF6FF",
-  },
-  pending: {
-    color: "#F59E0B",
-    label: "Pending",
-    icon: "time",
-    bg: "#FFFBEB",
-  },
-  processing: {
-    color: "#8B5CF6",
-    label: "Processing",
-    icon: "sync",
-    bg: "#F5F3FF",
-  },
-  completed: {
-    color: "#10B981",
-    label: "Completed",
-    icon: "checkmark-done-circle",
-    bg: "#ECFDF5",
-  },
-  failed: {
-    color: "#EF4444",
-    label: "Failed",
-    icon: "alert-circle",
-    bg: "#FEF2F2",
-  },
-  cancelled: {
-    color: "#6B7280",
-    label: "Cancelled",
-    icon: "close-circle",
-    bg: "#F9FAFB",
-  },
-};
-
 export default function ApplicationDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, isDark } = useTheme();
+
+  const STATUS_CONFIG: Record<
+    string,
+    { color: string; label: string; icon: string; bg: string }
+  > = {
+    submitted: {
+      color: colors.statusApplied,
+      label: "Applied",
+      icon: "checkmark-circle",
+      bg: isDark ? colors.statusApplied + "20" : "#EFF6FF",
+    },
+    pending: {
+      color: colors.statusPending,
+      label: "Pending",
+      icon: "time",
+      bg: isDark ? colors.statusPending + "20" : "#FFFBEB",
+    },
+    processing: {
+      color: colors.statusProcessing,
+      label: "Processing",
+      icon: "sync",
+      bg: isDark ? colors.statusProcessing + "20" : "#F5F3FF",
+    },
+    completed: {
+      color: colors.statusCompleted,
+      label: "Completed",
+      icon: "checkmark-done-circle",
+      bg: isDark ? colors.statusCompleted + "20" : "#ECFDF5",
+    },
+    failed: {
+      color: colors.statusFailed,
+      label: "Failed",
+      icon: "alert-circle",
+      bg: isDark ? colors.statusFailed + "20" : "#FEF2F2",
+    },
+    cancelled: {
+      color: colors.statusSkipped,
+      label: "Cancelled",
+      icon: "close-circle",
+      bg: isDark ? colors.statusSkipped + "20" : "#F9FAFB",
+    },
+  };
   const insets = useSafeAreaInsets();
 
   const [isLoading, setIsLoading] = useState(true);

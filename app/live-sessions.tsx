@@ -107,7 +107,7 @@ export default function LiveSessionsScreen() {
   const getStatusColor = (status: LiveSession["status"]) => {
     switch (status) {
       case "active":
-        return "#10B981";
+        return colors.success;
       case "completed":
         return colors.primary;
       case "disconnected":
@@ -175,7 +175,7 @@ export default function LiveSessionsScreen() {
           </Pressable>
 
           <View style={styles.fullscreenInfo}>
-            <View style={[styles.nowPlayingDot, { backgroundColor: "#10B981" }]} />
+            <View style={[styles.nowPlayingDot, { backgroundColor: colors.success }]} />
             <Text style={styles.fullscreenTitle} numberOfLines={1}>
               {selectedSession.jobTitle || "Applying..."}
             </Text>
@@ -271,7 +271,7 @@ export default function LiveSessionsScreen() {
               ]}
             >
               <View
-                style={[styles.nowPlayingDot, { backgroundColor: "#10B981" }]}
+                style={[styles.nowPlayingDot, { backgroundColor: colors.success }]}
               />
               <View style={styles.nowPlayingInfo}>
                 <Text

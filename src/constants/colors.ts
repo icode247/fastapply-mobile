@@ -1,7 +1,7 @@
-// Color Palette - FastApply Theme (matching fastapply.co)
+// Color Palette - Scout Theme
 export const colors = {
   light: {
-    // Primary brand colors (FastApply Blue)
+    // Primary brand colors
     primary: "#0B6BCB",
     primaryLight: "#185EA5",
     primaryDark: "#12467B",
@@ -21,24 +21,24 @@ export const colors = {
     secondaryLight: "#9FA6AD",
     secondaryDark: "#32383E",
 
-    // Status colors
-    success: "#1F7A1F",
-    successLight: "#2E7D32",
-    successDark: "#0A470A",
+    // Semantic colors
+    success: "#10B981",
+    successLight: "#D1FAE5",
+    successDark: "#059669",
 
-    warning: "#9A5B13",
-    warningLight: "#AB6E19",
-    warningDark: "#72430D",
+    warning: "#F59E0B",
+    warningLight: "#FEF3C7",
+    warningDark: "#D97706",
 
-    error: "#C41C1C",
-    errorLight: "#D32F2F",
-    errorDark: "#8C0F0F",
+    error: "#EF4444",
+    errorLight: "#FEE2E2",
+    errorDark: "#DC2626",
 
-    info: "#0B6BCB",
-    infoLight: "#185EA5",
-    infoDark: "#12467B",
+    info: "#3B82F6",
+    infoLight: "#DBEAFE",
+    infoDark: "#2563EB",
 
-    // Background colors (FastApply Light Mode)
+    // Background colors
     background: "#FFFFFF",
     backgroundSecondary: "#FBFCFE",
     surface: "#FBFCFE",
@@ -47,7 +47,7 @@ export const colors = {
     level2: "#DDE7EE",
     level3: "#CDD7E1",
 
-    // Text colors (FastApply Light Mode)
+    // Text colors
     text: "#171A1C",
     textSecondary: "#32383E",
     textTertiary: "#555E68",
@@ -58,18 +58,20 @@ export const colors = {
     borderLight: "#DDE7EE",
     borderDark: "#9FA6AD",
 
-    // Application status colors
-    statusApplied: "#0B6BCB",
-    statusProcessing: "#9A5B13",
-    statusCompleted: "#1F7A1F",
-    statusFailed: "#C41C1C",
+    // Application status colors (vivid, badge-ready)
+    statusApplied: "#3B82F6",
+    statusPending: "#F59E0B",
+    statusProcessing: "#8B5CF6",
+    statusCompleted: "#10B981",
+    statusFailed: "#EF4444",
+    statusSkipped: "#6B7280",
 
     // Misc
     overlay: "rgba(0, 0, 0, 0.5)",
     shadow: "rgba(0, 0, 0, 0.1)",
   },
   dark: {
-    // Primary brand colors (FastApply Blue - brighter in dark mode)
+    // Primary brand colors (brighter in dark mode)
     primary: "#0B6BCB",
     primaryLight: "#4393E4",
     primaryDark: "#185EA5",
@@ -89,24 +91,24 @@ export const colors = {
     secondaryLight: "#CDD7E1",
     secondaryDark: "#636B74",
 
-    // Status colors
-    success: "#51BC51",
-    successLight: "#77DD77",
-    successDark: "#1F7A1F",
+    // Semantic colors (brighter for dark mode contrast)
+    success: "#34D399",
+    successLight: "#064E3B",
+    successDark: "#10B981",
 
-    warning: "#F5C462",
-    warningLight: "#FFDA85",
-    warningDark: "#9A5B13",
+    warning: "#FBBF24",
+    warningLight: "#78350F",
+    warningDark: "#F59E0B",
 
-    error: "#F09898",
-    errorLight: "#FFCDD2",
-    errorDark: "#C41C1C",
+    error: "#F87171",
+    errorLight: "#7F1D1D",
+    errorDark: "#EF4444",
 
-    info: "#4393E4",
-    infoLight: "#97C3F0",
-    infoDark: "#0B6BCB",
+    info: "#60A5FA",
+    infoLight: "#1E3A5F",
+    infoDark: "#3B82F6",
 
-    // Background colors (FastApply Dark Mode - Pure Black Body)
+    // Background colors (Pure Black Body)
     background: "#000000",
     backgroundSecondary: "#0B0D0E",
     surface: "#0B0D0E",
@@ -115,7 +117,7 @@ export const colors = {
     level2: "#32383E",
     level3: "#555E68",
 
-    // Text colors (FastApply Dark Mode)
+    // Text colors
     text: "#F0F4F8",
     textSecondary: "#CDD7E1",
     textTertiary: "#9FA6AD",
@@ -126,11 +128,13 @@ export const colors = {
     borderLight: "#555E68",
     borderDark: "#171A1C",
 
-    // Application status colors
-    statusApplied: "#4393E4",
-    statusProcessing: "#F5C462",
-    statusCompleted: "#51BC51",
-    statusFailed: "#F09898",
+    // Application status colors (brighter for dark mode)
+    statusApplied: "#60A5FA",
+    statusPending: "#FBBF24",
+    statusProcessing: "#A78BFA",
+    statusCompleted: "#34D399",
+    statusFailed: "#F87171",
+    statusSkipped: "#9CA3AF",
 
     // Misc
     overlay: "rgba(0, 0, 0, 0.7)",

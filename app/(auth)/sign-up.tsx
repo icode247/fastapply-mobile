@@ -27,27 +27,37 @@ import { useAuth } from "../../src/hooks/useAuth";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 // Input Field Component matching Figma design
-const InputField: React.FC<{
+const InputField = React.forwardRef<TextInput, {
   label: string;
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
   error?: string;
   keyboardType?: "default" | "email-address";
+  inputMode?: "text" | "email" | "none";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
+  autoComplete?: "name" | "email" | "off";
   textContentType?: "emailAddress" | "name" | "none";
-}> = ({
+  returnKeyType?: "done" | "next";
+  onSubmitEditing?: () => void;
+  blurOnSubmit?: boolean;
+}>(({
   label,
   placeholder,
   value,
   onChangeText,
   error,
   keyboardType = "default",
+  inputMode = "text",
   autoCapitalize = "none",
   autoCorrect = false,
+  autoComplete = "off",
   textContentType = "none",
-}) => {
+  returnKeyType = "done",
+  onSubmitEditing,
+  blurOnSubmit = true,
+}, ref) => {
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -61,6 +71,7 @@ const InputField: React.FC<{
         ]}
       >
         <TextInput
+          ref={ref}
           style={styles.input}
           placeholder={placeholder}
           placeholderTextColor="rgba(255,255,255,0.4)"
@@ -69,13 +80,16 @@ const InputField: React.FC<{
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           keyboardType={keyboardType}
+          inputMode={inputMode}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
-          autoComplete={keyboardType === "email-address" ? "email" : "off"}
+          autoComplete={autoComplete}
           textContentType={textContentType}
           selectionColor="rgba(255,255,255,0.5)"
           cursorColor="#FFFFFF"
-          returnKeyType="done"
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
+          blurOnSubmit={blurOnSubmit}
           enablesReturnKeyAutomatically
         />
       </View>
@@ -87,7 +101,7 @@ const InputField: React.FC<{
       ) : null}
     </View>
   );
-};
+});
 
 // Gradient Text Component
 const GradientText: React.FC<{ children: string; style?: any }> = ({
@@ -114,6 +128,8 @@ export default function SignUpScreen() {
   const insets = useSafeAreaInsets();
 
   const { handleGoogleCallback } = useAuth();
+  const emailRef = useRef<TextInput>(null);
+  const referralRef = useRef<TextInput>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [referralCode, setReferralCode] = useState("");
@@ -294,25 +310,38 @@ export default function SignUpScreen() {
                 onChangeText={(text) => { setName(text); setNameError(""); }}
                 error={nameError}
                 autoCapitalize="words"
+                autoComplete="name"
                 textContentType="name"
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => emailRef.current?.focus()}
               />
 
               <InputField
+                ref={emailRef}
                 label="Email address"
                 placeholder="example@gmail.com"
                 value={email}
                 onChangeText={(text) => { setEmail(text); setEmailError(""); }}
                 error={emailError}
                 keyboardType="email-address"
+                inputMode="email"
                 autoCapitalize="none"
+                autoComplete="email"
                 textContentType="emailAddress"
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => referralRef.current?.focus()}
               />
 
               <InputField
+                ref={referralRef}
                 label="Referral code (optional)"
                 placeholder="e.g JCRxwe1"
                 value={referralCode}
                 onChangeText={setReferralCode}
+                returnKeyType="done"
+                onSubmitEditing={handleSignUp}
               />
             </View>
 

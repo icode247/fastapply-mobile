@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FastApply",
+    "name": "Scout",
     "slug": "fastapply",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -51,7 +51,13 @@
         }
       ],
       "expo-audio",
-      "@react-native-google-signin/google-signin"
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.759807876753-vrm3pb6rbbut1jn3oe4aqvhgfj4gbjei"
+        }
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true

@@ -89,12 +89,14 @@ class VoiceRecordingService {
   }
 
   /**
-   * Configure audio mode for recording
+   * Configure audio mode for recording — interrupts other audio (pauses music, etc.)
    */
   private async configureAudioMode(): Promise<void> {
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: true,
       playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: false,
     });
   }
 
@@ -141,11 +143,22 @@ class VoiceRecordingService {
       // Start VAD metering
       this.startMetering();
 
-      // Auto-stop after max duration
+      // Auto-stop after max duration — notify via silence callback so the caller can process
       this.timeoutId = setTimeout(() => {
         if (this.isRecording) {
           logger.debug("Max recording duration reached, auto-stopping");
-          this.stopRecording();
+          // Stop metering first to prevent double-triggers
+          if (this.meteringIntervalId) {
+            clearInterval(this.meteringIntervalId);
+            this.meteringIntervalId = null;
+          }
+          // Notify caller via the same callback used for silence detection
+          if (this.onSilenceDetected) {
+            this.onSilenceDetected();
+          } else {
+            // No callback — just stop the recording
+            this.stopRecording();
+          }
         }
       }, this.maxDuration);
 
@@ -196,10 +209,12 @@ class VoiceRecordingService {
       // Release the recording object to free up resources/mic
       this.recording = null;
 
-      // Reset audio mode
+      // Reset audio mode — release recording session
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
       });
 
       if (!uri) {
@@ -263,10 +278,12 @@ class VoiceRecordingService {
       }
       this.isRecording = false;
 
-      // Reset audio mode
+      // Reset audio mode — release recording session
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
       });
     } catch (error) {
       logger.error("Error canceling recording:", error);
@@ -306,12 +323,22 @@ class VoiceRecordingService {
         if (status.isRecording && status.metering !== undefined) {
           // Metering: -160dB (silence) to 0dB (loud).
           // Human voice: ~ -15dB to 0dB.
-          // Background noise: ~ -45dB to -30dB (based on user logs).
-          // New Threshold: If level < -25dB, consider it silence.
-          const isSilent = status.metering < -25;
+          // Background noise: ~ -45dB to -30dB.
+          //
+          // Adaptive silence detection:
+          //   - Before speech detected: use fixed threshold (-25dB)
+          //   - After speech detected: use relative threshold (peak - 15dB)
+          //   This adapts to the user's environment and mic sensitivity.
+          const FIXED_THRESHOLD = -25;
+          const DROP_FROM_PEAK = 15;
+          const silenceThreshold =
+            this.maxVolume > FIXED_THRESHOLD
+              ? this.maxVolume - DROP_FROM_PEAK
+              : FIXED_THRESHOLD;
+
+          const isSilent = status.metering < silenceThreshold;
 
           if (!isSilent) {
-            // Update max volume if we detect something louder
             this.maxVolume = Math.max(this.maxVolume, status.metering);
           }
 
@@ -322,17 +349,21 @@ class VoiceRecordingService {
             this.onMeteringUpdate(normalizedLevel);
           }
 
+          // Accumulate silence with gradual decay instead of hard reset.
+          // A single noise blip won't reset the counter entirely.
           if (isSilent) {
             this.silenceDuration += 100; // 100ms interval
           } else {
-            this.silenceDuration = 0;
+            this.silenceDuration = Math.max(0, this.silenceDuration - 200);
           }
 
           if (
             this.silenceDuration >= this.silenceThresholdMs &&
             this.onSilenceDetected
           ) {
-            logger.debug("Silence detected (VAD), auto-stopping");
+            logger.debug(
+              `Silence detected (VAD): peak=${this.maxVolume.toFixed(0)}dB, threshold=${silenceThreshold.toFixed(0)}dB, current=${status.metering.toFixed(0)}dB`,
+            );
             this.onSilenceDetected();
             // Clear interval to prevent multiple triggers
             if (this.meteringIntervalId) {

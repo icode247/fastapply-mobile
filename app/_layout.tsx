@@ -17,10 +17,10 @@ import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { LoadingScreen } from "../src/components";
+import { AnimatedSplashScreen } from "../src/components/shared/AnimatedSplashScreen";
 import { ScoutFloatingButton } from "../src/components/scout/ScoutFloatingButton";
 import { ScoutOverlay } from "../src/components/scout/ScoutOverlay";
 import { useScout } from "../src/hooks/useScout";
@@ -60,6 +60,7 @@ function RootLayoutNav() {
   const { initialize: initTheme, activeTheme } = useThemeStore();
   const { colors } = useTheme();
   const { activate: activateScout, wakeWordActive } = useScout();
+  const [splashComplete, setSplashComplete] = useState(false);
 
   const notificationListener = useRef<Notifications.Subscription | undefined>(
     undefined,
@@ -158,15 +159,9 @@ function RootLayoutNav() {
     };
   }, [isAuthenticated]);
 
-  // Don't show loader during init - let native splash screen handle it
-  // This prevents the loader from flashing on the welcome screen
-  if (!isInitialized) {
-    return null;
-  }
-
   return (
     <>
-      <StatusBar style={activeTheme === "dark" ? "light" : "dark"} />
+      <StatusBar style={splashComplete ? (activeTheme === "dark" ? "light" : "dark") : "light"} />
       <ThemeProvider value={activeTheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack
           screenOptions={{
@@ -231,6 +226,14 @@ function RootLayoutNav() {
           </>
         )}
       </ThemeProvider>
+
+      {/* Animated splash overlay — sits on top of everything */}
+      {!splashComplete && (
+        <AnimatedSplashScreen
+          isAppReady={isInitialized}
+          onComplete={() => setSplashComplete(true)}
+        />
+      )}
     </>
   );
 }
@@ -243,12 +246,6 @@ export default function RootLayout() {
     Roboto_600SemiBold,
     Roboto_700Bold,
   });
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return null;

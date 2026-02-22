@@ -1,5 +1,6 @@
 export * from "./profile";
 export { EmptyState } from "./shared/EmptyState";
+export { AnimatedSplashScreen } from "./shared/AnimatedSplashScreen";
 export { LoadingScreen } from "./shared/LoadingScreen";
 export { StatusBadge } from "./shared/StatusBadge";
 export { BottomSheet } from "./ui/BottomSheet";

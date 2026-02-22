@@ -166,7 +166,7 @@ const Slide1: React.FC<{ cardsAnimation: Animated.Value }> = ({
       {/* Subtitle - positioned at top: 194px */}
       <View style={styles.slide1SubtitleSection}>
         <Text style={styles.slide1Subtitle}>
-          Just tell FastApply what you're looking for. Our AI voice assistant finds,
+          Just tell Scout what you're looking for. Our AI voice assistant finds,
           matches, and applies to 50+ jobs daily-hands-free.
         </Text>
       </View>

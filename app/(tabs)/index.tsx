@@ -1,5 +1,7 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import MaskedView from "@react-native-masked-view/masked-view";
 import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import * as NavigationBar from "expo-navigation-bar";
 import { useRouter } from "expo-router";
 import { Gift, MonitorPlay, SlidersHorizontal, Zap } from "lucide-react-native";
@@ -12,7 +14,6 @@ import React, {
 } from "react";
 import {
   Alert,
-  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -483,43 +484,148 @@ export default function FeedScreen() {
       return;
     }
 
-    // Build search filters from Scout params
+    // Search/filter: build preferences → save → fetch from API
     if (type === "search" || type === "filter") {
+      // Build locations from voice params
       const voiceLocations: Array<{ id: string; name: string }> = [];
-      if (params.city) {
-        voiceLocations.push({ id: params.city.toLowerCase().replace(/\s/g, "-"), name: params.city });
-      } else if (params.location) {
-        voiceLocations.push({ id: params.location.toLowerCase().replace(/\s/g, "-"), name: params.location });
+      const locationName = params.city || params.location || params.state || params.country;
+      if (locationName) {
+        voiceLocations.push({
+          id: locationName.toLowerCase().replace(/\s/g, "-"),
+          name: locationName,
+        });
       }
 
-      const queryParts: string[] = [];
-      if (params.jobTitle) queryParts.push(params.jobTitle);
-      if (params.skills) queryParts.push(...params.skills);
-
-      const searchFilters = {
-        query: queryParts.length > 0 ? queryParts.join(" ") : undefined,
-        jobTitles: params.jobTitle ? [params.jobTitle] : undefined,
-        remoteOnly: params.remote,
-        salaryMin: params.salaryMin,
-        salaryMax: params.salaryMax,
-        locations: voiceLocations.length > 0 ? voiceLocations.map((l) => l.name) : undefined,
-        countries: params.country ? [params.country] : undefined,
-        skills: params.skills,
+      // Map voice jobType strings to UI display format
+      const voiceJobTypeMap: Record<string, string> = {
+        full_time: "Full-time",
+        "full-time": "Full-time",
+        fulltime: "Full-time",
+        part_time: "Part-time",
+        "part-time": "Part-time",
+        parttime: "Part-time",
+        contract: "Contract",
+        internship: "Internship",
+        freelance: "Freelance",
       };
 
-      const result = jobService.searchJobs(searchFilters);
-      setJobs(result.jobs);
-      setCurrentJobIndex(0);
+      // Map voice experience to UI display format
+      const voiceExpMap: Record<string, string> = {
+        entry: "Entry Level",
+        junior: "Entry Level",
+        mid: "Mid Level",
+        senior: "Senior",
+        lead: "Lead",
+        executive: "Executive",
+      };
+
+      // Build preferences matching JobPreferencesFormValues
+      const newPrefs: import("../../src/components/feed/JobPreferencesForm").JobPreferencesFormValues = {
+        ...storedPreferences,
+        // Only override fields that the voice command specified
+        jobTitles: params.jobTitle
+          ? [params.jobTitle]
+          : storedPreferences.jobTitles,
+        locations: voiceLocations.length > 0
+          ? voiceLocations
+          : storedPreferences.locations,
+        jobTypes: params.jobType
+          ? params.jobType
+              .map((t) => voiceJobTypeMap[t.toLowerCase()] || t)
+              .filter(Boolean)
+          : storedPreferences.jobTypes,
+        workModes: params.remote
+          ? ["Remote"]
+          : storedPreferences.workModes,
+        experienceLevels: params.experienceLevel
+          ? [voiceExpMap[params.experienceLevel.toLowerCase()] || params.experienceLevel]
+          : storedPreferences.experienceLevels,
+        salaryMin: params.salaryMin ?? storedPreferences.salaryMin,
+        salaryMax: params.salaryMax ?? storedPreferences.salaryMax,
+        remoteOnly: params.remote ?? storedPreferences.remoteOnly,
+        visaSponsorship: storedPreferences.visaSponsorship,
+      };
+
+      // Persist to preferences store
+      savePreferences(newPrefs);
+
+      // Fetch fresh jobs from API using the same path as handleApplyFilters
+      (async () => {
+        setIsLoadingJobs(true);
+        try {
+          const preferences = buildApiPreferences(newPrefs, selectedProfile);
+          const fetchedJobs = await jobService.fetchInitialJobs(preferences);
+          let finalJobs = fetchedJobs;
+
+          // Apply local filters for fields the API doesn't support (company, salary, skills)
+          if (params.company || params.skills?.length) {
+            const result = jobService.searchJobs({
+              companies: params.company ? [params.company] : undefined,
+              skills: params.skills,
+              salaryMin: params.salaryMin,
+              salaryMax: params.salaryMax,
+            });
+            finalJobs = result.jobs;
+          }
+
+          setJobs(finalJobs);
+          setCurrentJobIndex(0);
+
+          // If applyToAll was requested, auto-swipe right on all results
+          if (params.applyToAll && finalJobs.length > 0) {
+            const swipeCount = finalJobs.length;
+            setIsAutoPilotActive(true);
+            setAutoPilotProgress({ current: 0, total: swipeCount });
+            let swiped = 0;
+            autoPilotRef.current = setInterval(() => {
+              if (swiped >= swipeCount) {
+                if (autoPilotRef.current) clearInterval(autoPilotRef.current);
+                setIsAutoPilotActive(false);
+                return;
+              }
+              swipeDeckRef.current?.swipeRight();
+              swiped++;
+              setAutoPilotProgress({ current: swiped, total: swipeCount });
+            }, 800) as unknown as number;
+          }
+        } catch (error) {
+          console.error("Scout: failed to fetch jobs with voice filters:", error);
+        } finally {
+          setIsLoadingJobs(false);
+        }
+      })();
+      return;
     }
 
-    // Apply to current job
+    // Apply to current job (or apply to all remaining if applyToAll)
     if (type === "apply") {
-      swipeDeckRef.current?.swipeRight();
+      if (params.applyToAll) {
+        const remainingJobs = jobs.length - currentJobIndex;
+        if (remainingJobs > 0) {
+          setIsAutoPilotActive(true);
+          setAutoPilotProgress({ current: 0, total: remainingJobs });
+          let swiped = 0;
+          autoPilotRef.current = setInterval(() => {
+            if (swiped >= remainingJobs) {
+              if (autoPilotRef.current) clearInterval(autoPilotRef.current);
+              setIsAutoPilotActive(false);
+              return;
+            }
+            swipeDeckRef.current?.swipeRight();
+            swiped++;
+            setAutoPilotProgress({ current: swiped, total: remainingJobs });
+          }, 800) as unknown as number;
+        }
+      } else {
+        swipeDeckRef.current?.swipeRight();
+      }
+      return;
     }
 
     // Skip current job
     if (type === "skip") {
       swipeDeckRef.current?.swipeLeft();
+      return;
     }
 
     // Undo
@@ -528,7 +634,11 @@ export default function FeedScreen() {
       if (didUndo) {
         setCurrentJobIndex((prev) => Math.max(0, prev - 1));
       }
+      return;
     }
+
+    // Details — currently no programmatic card expansion support
+    // The user can tap the card to expand it
   }, [pendingAction]);
 
   // Handle enabling notifications
@@ -834,12 +944,12 @@ export default function FeedScreen() {
               <Animated.View style={isAutomationLive ? livePulseStyle : undefined}>
                 <MonitorPlay
                   size={Math.round(26 * uiScale)}
-                  color={isAutomationLive ? "#10B981" : "#009688"}
+                  color={isAutomationLive ? colors.success : colors.textTertiary}
                   strokeWidth={1.8}
                 />
               </Animated.View>
               {isAutomationLive && queueStats?.processing ? (
-                <View style={[styles.headerBadge, { backgroundColor: "#10B981" }]}>
+                <View style={[styles.headerBadge, { backgroundColor: colors.success }]}>
                   <Text style={styles.headerBadgeText}>{queueStats.processing}</Text>
                 </View>
               ) : null}
@@ -860,15 +970,20 @@ export default function FeedScreen() {
             </Pressable>
           </View>
 
-          {/* Center: Logo */}
-          <Image
-            source={require("../../assets/full-logo-cropped.png")}
-            style={[
-              styles.brandLogo,
-              { tintColor: isDark ? "#FFFFFF" : colors.text },
-            ]}
-            resizeMode="contain"
-          />
+          {/* Center: Scout brand */}
+          <MaskedView
+            maskElement={
+              <Text style={styles.brandText}>Scout</Text>
+            }
+          >
+            <LinearGradient
+              colors={["#126BA3", "#1A8FD8"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Text style={[styles.brandText, { opacity: 0 }]}>Scout</Text>
+            </LinearGradient>
+          </MaskedView>
 
           {/* Right icons: Gift (credits) + Filter */}
           <View style={styles.headerSide}>
@@ -881,7 +996,7 @@ export default function FeedScreen() {
             >
               <Gift
                 size={Math.round(26 * uiScale)}
-                color="#9C27B0"
+                color={colors.textTertiary}
                 strokeWidth={1.8}
               />
             </Pressable>
@@ -1028,7 +1143,7 @@ export default function FeedScreen() {
             <Ionicons
               name="arrow-undo"
               size={Math.round(26 * uiScale)}
-              color="#FBC02D"
+              color={colors.warning}
             />
           </TouchableOpacity>
 
@@ -1044,7 +1159,7 @@ export default function FeedScreen() {
             <Ionicons
               name="close"
               size={Math.round(30 * uiScale)}
-              color="#F72585"
+              color={colors.error}
             />
           </TouchableOpacity>
 
@@ -1064,7 +1179,7 @@ export default function FeedScreen() {
             <MaterialCommunityIcons
               name={isAutoPilotActive ? "pause" : "waveform"}
               size={Math.round(36 * uiScale)}
-              color={isAutoPilotActive ? "#FFFFFF" : colors.textSecondary}
+              color={isAutoPilotActive ? colors.textInverse : colors.textSecondary}
             />
           </TouchableOpacity>
 
@@ -1080,7 +1195,7 @@ export default function FeedScreen() {
             <Ionicons
               name="heart"
               size={Math.round(30 * uiScale)}
-              color="#00C853"
+              color={colors.success}
             />
           </TouchableOpacity>
 
@@ -1096,7 +1211,7 @@ export default function FeedScreen() {
             <Ionicons
               name="person-circle-outline"
               size={Math.round(26 * uiScale)}
-              color="#FF9800"
+              color={colors.warning}
             />
           </TouchableOpacity>
         </View>
@@ -1167,9 +1282,10 @@ const styles = StyleSheet.create({
     paddingTop: spacing[2],
     paddingBottom: spacing[2],
   },
-  brandLogo: {
-    height: 28,
-    width: 105,
+  brandText: {
+    fontSize: Math.round(26 * uiScale),
+    fontWeight: "800",
+    letterSpacing: -0.3,
   },
   headerSide: {
     flexDirection: "row",

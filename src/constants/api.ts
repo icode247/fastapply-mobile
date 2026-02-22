@@ -109,7 +109,7 @@ export const ENDPOINTS = {
 
 // App Configuration
 export const APP_CONFIG = {
-  APP_NAME: "FastApply",
+  APP_NAME: "Scout",
   APP_SCHEME: "fastapply",
   TOKEN_REFRESH_THRESHOLD: 60 * 5, // 5 minutes before expiry
   MAX_RESUME_SIZE_MB: 5,

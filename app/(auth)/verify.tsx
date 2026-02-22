@@ -243,7 +243,7 @@ export default function VerifyScreen() {
             <GradientText>Verify Your Email</GradientText>
             <Text style={styles.subtitle}>
               Enter the 6-digit code sent to your email{"\n"}
-              <Text style={styles.emailText}>{email || "hello@fastapply.co"}</Text>
+              <Text style={styles.emailText}>{email || "hello@scout.co"}</Text>
             </Text>
           </Animated.View>
 

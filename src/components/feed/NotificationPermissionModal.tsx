@@ -142,7 +142,7 @@ export const NotificationPermissionModal: React.FC<
             </View>
             <View style={styles.notificationText}>
               <View style={styles.notificationHeader}>
-                <Text style={styles.notificationAppName}>FastApply</Text>
+                <Text style={styles.notificationAppName}>Scout</Text>
                 <Text style={styles.notificationTime}>now</Text>
               </View>
               <Text style={styles.notificationTitle}>Application Update</Text>

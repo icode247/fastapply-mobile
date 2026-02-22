@@ -137,7 +137,7 @@ export const RewardsModal: React.FC<RewardsModalProps> = ({
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Join FastApply and get free credits! Use my referral code: ${referralCode}\n\nhttps://fastapply.co/refer?code=${referralCode}`,
+        message: `Join Scout and get free credits! Use my referral code: ${referralCode}\n\nhttps://fastapply.co/refer?code=${referralCode}`,
       });
     } catch {
       // User cancelled

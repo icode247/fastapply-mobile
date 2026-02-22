@@ -305,7 +305,7 @@ const ResumeCard: React.FC<{
           style={[
             styles.resumeIcon,
             {
-              backgroundColor: isActive ? "#0ea5e920" : colors.surfaceSecondary,
+              backgroundColor: isActive ? colors.primary + "20" : colors.surfaceSecondary,
             },
           ]}
         >
@@ -562,10 +562,10 @@ export default function ProfilesScreen() {
             profiles.map((profile, index) => {
               // Generate consistent gradient based on index
               const gradients = [
-                ["#0ea5e9", "#0284c7"],
-                ["#F59E0B", "#EF4444"],
-                ["#10B981", "#059669"],
-                ["#8B5CF6", "#6D28D9"],
+                [colors.primary, colors.primaryDark],
+                [colors.warning, colors.error],
+                [colors.success, colors.successDark],
+                [colors.statusProcessing, "#6D28D9"],
               ];
               const gradient = gradients[index % gradients.length];
 

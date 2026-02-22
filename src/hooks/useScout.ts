@@ -22,6 +22,7 @@ export function useScout() {
   const isProcessingRef = useRef(false);
   const hasSpokenRef = useRef(false);
   const noSpeechTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevOverlayVisible = useRef(false);
 
   // Warm up TTS cache on mount
   useEffect(() => {
@@ -49,6 +50,25 @@ export function useScout() {
       wakeWordService.stop();
     };
   }, []);
+
+  // Cleanup when overlay closes (close button, auto-dismiss, or Android back)
+  useEffect(() => {
+    if (prevOverlayVisible.current && !store.isOverlayVisible) {
+      // Overlay just closed — run full cleanup
+      abortRef.current?.abort();
+      abortRef.current = null;
+      isProcessingRef.current = false;
+      hasSpokenRef.current = false;
+      if (noSpeechTimerRef.current) {
+        clearTimeout(noSpeechTimerRef.current);
+        noSpeechTimerRef.current = null;
+      }
+      voiceRecordingService.cancelRecording();
+      scoutTTSService.stop();
+      restartWakeWord();
+    }
+    prevOverlayVisible.current = store.isOverlayVisible;
+  }, [store.isOverlayVisible]);
 
   /**
    * Clear the no-speech timeout
@@ -89,7 +109,9 @@ export function useScout() {
       },
       onMeteringUpdate: (level) => {
         useScoutStore.getState().setAudioLevel(level);
-        if (level > 0.25) {
+        // Normalized: 0.58 = -25dB, 0.5 = -30dB, 0.42 = -35dB
+        // Require level above 0.58 (~-25dB) to confirm actual speech, not ambient noise
+        if (level > 0.58) {
           hasSpokenRef.current = true;
           // User started speaking — cancel the no-speech timer
           clearNoSpeechTimer();

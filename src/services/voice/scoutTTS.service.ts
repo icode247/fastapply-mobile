@@ -102,10 +102,10 @@ class ScoutTTSService {
         Authorization: `Bearer ${this.apiKey}`,
       },
       body: JSON.stringify({
-        model: "tts-1",
+        model: "tts-1-hd",
         voice: "nova",
         input: text,
-        speed: 1.1,
+        speed: 1.0,
       }),
     });
 
@@ -205,14 +205,19 @@ class ScoutTTSService {
     await this.stopCurrentSound();
 
     try {
-      // Configure audio for playback
+      // Configure audio for playback — interrupt other audio
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: false,
       });
 
       const { sound } = await Audio.Sound.createAsync({ uri });
       this.currentSound = sound;
+
+      // Set volume to maximum for clear AI voice playback
+      await sound.setVolumeAsync(1.0);
 
       // Wait for playback to finish
       return new Promise<void>((resolve) => {

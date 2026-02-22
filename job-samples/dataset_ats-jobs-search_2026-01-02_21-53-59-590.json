@@ -1,0 +1,2733 @@
+[{
+  "id": "44a4bda3-370b-43b2-aca8-a6d58e3cf4f7",
+  "title": "Software Engineer",
+  "company.name": "Grapevine",
+  "listing_url": "https://jobs.ashbyhq.com/grapevine/c6491794-7825-424c-b04a-53ee32655f95/application",
+  "apply_url": "https://jobs.ashbyhq.com/grapevine/c6491794-7825-424c-b04a-53ee32655f95/application",
+  "locations": [
+    {
+      "location": "NYC HQ",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 189600,
+    "max": 189600,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$189.6K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-11T21:34:27.777Z",
+  "is_remote": false
+},
+{
+  "id": "dbce6f56-10ad-4cdf-8ac2-3fe75f9ba39c",
+  "title": "Software Engineer",
+  "company.name": "Coolbet",
+  "listing_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
+  "apply_url": "https://jobs.lever.co/coolbet/4ec3b353-76c4-42c1-8d7f-4c9afb55f61a",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2016-12-01T00:00:00Z",
+  "is_remote": false
+},
+{
+  "id": "0d743f4f-924b-4fc4-a6ec-501bd8d4f79f",
+  "title": "Software Engineer",
+  "company.name": "Titan",
+  "listing_url": "https://jobs.ashbyhq.com/titan-msp/91ea2775-e02f-4c3f-985c-650c652e8fe0/application",
+  "apply_url": "https://jobs.ashbyhq.com/titan-msp/91ea2775-e02f-4c3f-985c-650c652e8fe0/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 175000,
+    "max": 300000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$175K - $300K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-08-11T14:36:59.158Z",
+  "is_remote": false
+},
+{
+  "id": "2d28e590-0648-4c39-9d2d-9e120e4f39ef",
+  "title": "Software Engineer",
+  "company.name": "Plaid",
+  "listing_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
+  "apply_url": "https://jobs.lever.co/plaid/49139a62-a9bc-4400-ae89-789818b34cb8",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 148800,
+    "max": 223200,
+    "currency": "USD",
+    "period": null,
+    "raw_text": "$148,800 - $223,200 per per-year-salary",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-06-06T17:21:41.679Z",
+  "is_remote": false
+},
+{
+  "id": "2635b26b-dc5a-403f-ba9b-1a13971cb281",
+  "title": "Software Engineer",
+  "company.name": "Plaid",
+  "listing_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
+  "apply_url": "https://jobs.lever.co/plaid/f456f4fa-a9f7-4673-892a-8943e3cfa3fe",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 148800,
+    "max": 223200,
+    "currency": "USD",
+    "period": null,
+    "raw_text": "$148,800 - $223,200 per per-year-salary",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2024-08-28T18:46:03.809Z",
+  "is_remote": false
+},
+{
+  "id": "f145ac1f-4b93-4991-b0e8-1c29e284bade",
+  "title": "Software Engineer",
+  "company.name": "Candid Health",
+  "listing_url": "https://jobs.ashbyhq.com/candidhealth/f770bdc1-6704-44c6-9417-b98c1a4c75c4/application",
+  "apply_url": "https://jobs.ashbyhq.com/candidhealth/f770bdc1-6704-44c6-9417-b98c1a4c75c4/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-06-03T17:35:43.229Z",
+  "is_remote": false
+},
+{
+  "id": "a2530176-69ec-46af-b46b-8258b59a9bc1",
+  "title": "Software Engineer",
+  "company.name": "Moab",
+  "listing_url": "https://jobs.ashbyhq.com/moab/3d60277d-29d6-4556-809c-3cdc532244d6/application",
+  "apply_url": "https://jobs.ashbyhq.com/moab/3d60277d-29d6-4556-809c-3cdc532244d6/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 150000,
+    "max": 200000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$150K - $200K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-03T18:52:37.279Z",
+  "is_remote": false
+},
+{
+  "id": "b28dfe2a-3033-4606-930d-5fac2e086e05",
+  "title": "Software Engineer",
+  "company.name": "Arch",
+  "listing_url": "https://jobs.ashbyhq.com/arch.co/d9f0ba15-fda3-47a1-977f-4fba3afc473c/application",
+  "apply_url": "https://jobs.ashbyhq.com/arch.co/d9f0ba15-fda3-47a1-977f-4fba3afc473c/application",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 100000,
+    "max": 180000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$100K - $180K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-08T20:49:29.204Z",
+  "is_remote": false
+},
+{
+  "id": "24a5a672-99d3-4293-94e0-bb36b6c41ff2",
+  "title": "Software Engineer",
+  "company.name": "General Medicine",
+  "listing_url": "https://jobs.ashbyhq.com/general-medicine/574b65bb-38af-46a6-aaa4-e101d926101e/application",
+  "apply_url": "https://jobs.ashbyhq.com/general-medicine/574b65bb-38af-46a6-aaa4-e101d926101e/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-07-05T22:21:01.327Z",
+  "is_remote": false
+},
+{
+  "id": "0da35765-8f74-ca2a-e742-441df906572d",
+  "title": "Software Engineer",
+  "company.name": "Twitch",
+  "listing_url": "https://job-boards.greenhouse.io/twitch/jobs/8345959002",
+  "apply_url": "https://boards.greenhouse.io/twitch/jobs/8345959002#app",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 99500,
+    "max": 185000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$99,500 - $185,000 USD per year",
+    "is_estimated": false
+  },
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-12-18T22:17:01Z",
+  "is_remote": false
+},
+{
+  "id": "abb42457-5b03-4411-8e92-fbf8f359ddcd",
+  "title": "Software Engineer",
+  "company.name": "Maybern",
+  "listing_url": "https://jobs.ashbyhq.com/maybern/0e6d43a6-a5f9-44fb-be3e-78a160a8fb11/application",
+  "apply_url": "https://jobs.ashbyhq.com/maybern/0e6d43a6-a5f9-44fb-be3e-78a160a8fb11/application",
+  "locations": [
+    {
+      "location": "New York Office",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 140000,
+    "max": 180000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$140K - $180K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-10T20:18:55.294Z",
+  "is_remote": false
+},
+{
+  "id": "32f5f9d9-8edf-47f5-a453-a1747b40e8b8",
+  "title": "Software Engineer",
+  "company.name": "Aquatic Capital Management",
+  "listing_url": "https://job-boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002",
+  "apply_url": "https://boards.greenhouse.io/aquaticcapitalmanagement/jobs/7534120002#app",
+  "locations": [
+    {
+      "location": "Chicago, New York, London",
+      "city": null,
+      "state": null,
+      "country": null,
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2024-07-11T18:37:04Z",
+  "is_remote": false
+},
+{
+  "id": "df47e1d2-4600-48e0-b7cf-85aac9ec3598",
+  "title": "Software Engineer",
+  "company.name": "Merge API",
+  "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592473004",
+  "apply_url": "https://boards.greenhouse.io/merge/jobs/5592473004#app",
+  "locations": [
+    {
+      "location": "New York City, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-07-18T19:21:59Z",
+  "is_remote": false
+},
+{
+  "id": "7ba05422-79d0-4104-a835-6df02f0e5c40",
+  "title": "Software Engineer",
+  "company.name": "Literati",
+  "listing_url": "https://job-boards.greenhouse.io/liberate/jobs/4969408008",
+  "apply_url": "https://boards.greenhouse.io/liberate/jobs/4969408008#app",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-10-28T23:22:19Z",
+  "is_remote": false
+},
+{
+  "id": "157642d1-45a5-4631-b9c4-6873508793d8",
+  "title": "Software Engineer",
+  "company.name": "Outschool",
+  "listing_url": "https://job-boards.greenhouse.io/outschool/jobs/4607423006",
+  "apply_url": "https://boards.greenhouse.io/outschool/jobs/4607423006#app",
+  "locations": [
+    {
+      "location": "San Francisco (Hybrid)",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-10-07T22:30:40Z",
+  "is_remote": false
+},
+{
+  "id": "f848ea98-536f-42ff-a8f5-2dfda4c1f71a",
+  "title": "Software Engineer",
+  "company.name": "Quantcast",
+  "listing_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
+  "apply_url": "https://jobs.lever.co/quantcast/fb62370c-e6a6-418e-b116-09de79ad50cf",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-04-24T19:25:41.315Z",
+  "is_remote": false
+},
+{
+  "id": "b8361728-ca3c-47fc-8bd2-cef2e11061d0",
+  "title": "Software Engineer",
+  "company.name": "Merge API",
+  "listing_url": "https://job-boards.greenhouse.io/merge/jobs/5592469004",
+  "apply_url": "https://boards.greenhouse.io/merge/jobs/5592469004#app",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-07-18T19:22:08Z",
+  "is_remote": false
+},
+{
+  "id": "593e7241-817e-455a-ab79-30ae2cf251c3",
+  "title": "Software Engineer",
+  "company.name": "Highbeam",
+  "listing_url": "https://jobs.ashbyhq.com/highbeam/aa2a6a4e-1fb0-4a1e-a3e1-ffb36d40860b/application",
+  "apply_url": "https://jobs.ashbyhq.com/highbeam/aa2a6a4e-1fb0-4a1e-a3e1-ffb36d40860b/application",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 260000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $260K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-17T17:37:47.96Z",
+  "is_remote": false
+},
+{
+  "id": "7b6b0c92-f6dd-4706-901d-53e6525825ea",
+  "title": "Software Engineer",
+  "company.name": "LogRocket",
+  "listing_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
+  "apply_url": "https://jobs.lever.co/logrocket/df132970-e1b6-4075-9545-7cf80cc49a32",
+  "locations": [
+    {
+      "location": "Boston or NYC",
+      "city": "Boston",
+      "state": "Massachusetts",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "location": "Boston or NYC",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 100000,
+    "max": 145000,
+    "currency": "USD",
+    "period": null,
+    "raw_text": "$100,000 - $145,000 per per-year-salary",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-10-10T14:50:22.323Z",
+  "is_remote": false
+},
+{
+  "id": "71a970fa-14e8-4814-9763-ad3f97374ad4",
+  "title": "Software Engineer",
+  "company.name": "Podium Automation",
+  "listing_url": "https://jobs.ashbyhq.com/podium-automation/b534e0dc-a114-4676-9efb-bdefd122ae7a/application",
+  "apply_url": "https://jobs.ashbyhq.com/podium-automation/b534e0dc-a114-4676-9efb-bdefd122ae7a/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 100000,
+    "max": 150000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$100K - $150K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-20T15:13:50.039Z",
+  "is_remote": false
+},
+{
+  "id": "2a3a77cb-d3b8-417c-9e1e-ea9389fc3cca",
+  "title": "Software Engineer",
+  "company.name": "Octaura",
+  "listing_url": "https://job-boards.greenhouse.io/octaura/jobs/4624477007",
+  "apply_url": "https://boards.greenhouse.io/octaura/jobs/4624477007#app",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-01-24T13:17:43Z",
+  "is_remote": false
+},
+{
+  "id": "a2ec0225-1256-4eab-8375-c415b68d174d",
+  "title": "Software Engineer",
+  "company.name": "Finch Legal",
+  "listing_url": "https://jobs.ashbyhq.com/finch-legal/2db83191-0f88-4702-9019-59abfe239139/application",
+  "apply_url": "https://jobs.ashbyhq.com/finch-legal/2db83191-0f88-4702-9019-59abfe239139/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 250000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $250K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-11T03:48:32.121Z",
+  "is_remote": false
+},
+{
+  "id": "fd19f591-9d77-44ea-91c2-518985323878",
+  "title": "Software Engineer",
+  "company.name": "January",
+  "listing_url": "https://jobs.ashbyhq.com/january/c80de7a2-79e5-4f3d-8765-7fe5a6211e61/application",
+  "apply_url": "https://jobs.ashbyhq.com/january/c80de7a2-79e5-4f3d-8765-7fe5a6211e61/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 190000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $190K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-04T01:20:05.658Z",
+  "is_remote": false
+},
+{
+  "id": "a3533a05-78b6-4265-86bd-1641a4880659",
+  "title": "Software Engineer",
+  "company.name": "Parafin",
+  "listing_url": "https://jobs.ashbyhq.com/parafin/b98df926-5599-4e36-a290-ea4ee6c0bc8d/application",
+  "apply_url": "https://jobs.ashbyhq.com/parafin/b98df926-5599-4e36-a290-ea4ee6c0bc8d/application",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-05-01T22:13:23.859Z",
+  "is_remote": false
+},
+{
+  "id": "794443e5-bf9d-4004-80a1-459d39931d2b",
+  "title": "Software Engineer",
+  "company.name": "Middesk",
+  "listing_url": "https://jobs.ashbyhq.com/middesk/e1c6af86-dce1-495f-a710-ad369fd1308c/application",
+  "apply_url": "https://jobs.ashbyhq.com/middesk/e1c6af86-dce1-495f-a710-ad369fd1308c/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 148000,
+    "max": 230000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$148K - $230K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-05-21T16:12:36.174Z",
+  "is_remote": false
+},
+{
+  "id": "ac566829-9e1e-4539-bef0-3581f0b0c841",
+  "title": "Software Engineer",
+  "company.name": "Windfall",
+  "listing_url": "https://jobs.ashbyhq.com/windmill/f832a79f-5190-4961-b4e6-5c8da8aa3ad1/application",
+  "apply_url": "https://jobs.ashbyhq.com/windmill/f832a79f-5190-4961-b4e6-5c8da8aa3ad1/application",
+  "locations": [
+    {
+      "location": "New York, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-10-22T20:43:13.674Z",
+  "is_remote": false
+},
+{
+  "id": "66f1da9d-0efa-4954-a808-5c8612286b65",
+  "title": "Software Engineer",
+  "company.name": "PDT Partners",
+  "listing_url": "https://job-boards.greenhouse.io/pdtpartners/jobs/3914106",
+  "apply_url": "https://boards.greenhouse.io/pdtpartners/jobs/3914106#app",
+  "locations": [
+    {
+      "location": "New York, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2022-02-11T18:58:43Z",
+  "is_remote": false
+},
+{
+  "id": "b3ce7f31-2f16-e23e-3c5c-de6e635c5743",
+  "title": "Software Engineer",
+  "company.name": "Mirage",
+  "listing_url": "https://jobs.ashbyhq.com/mirage/0c3a5052-ab73-4529-8892-4302316f65a6",
+  "apply_url": "https://jobs.ashbyhq.com/mirage/0c3a5052-ab73-4529-8892-4302316f65a6/application",
+  "locations": [
+    {
+      "location": "Union Square, New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 185000,
+    "max": 285000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$185K - $285K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-22T15:39:53.332Z",
+  "is_remote": false
+},
+{
+  "id": "718491bb-2600-472e-a89a-41593c5e0203",
+  "title": "Software Engineer",
+  "company.name": "Valon Tech",
+  "listing_url": "https://jobs.ashbyhq.com/valon/495b5050-0d48-4ff7-ab21-2a6155d62658/application",
+  "apply_url": "https://jobs.ashbyhq.com/valon/495b5050-0d48-4ff7-ab21-2a6155d62658/application",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-03T19:10:16.611Z",
+  "is_remote": false
+},
+{
+  "id": "98f7300c-6144-441c-88ea-aee2b176bf32",
+  "title": "Software Engineer",
+  "company.name": "WalkMe",
+  "listing_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
+  "apply_url": "https://jobs.lever.co/walkme/21076c3b-366a-476c-a613-19318e184450",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-03-12T17:17:08.868Z",
+  "is_remote": false
+},
+{
+  "id": "8d7e3f30-6976-4b3f-a66b-fc1cf26faea8",
+  "title": "Software Engineer",
+  "company.name": "Pylon",
+  "listing_url": "https://jobs.ashbyhq.com/pylon-labs/edba2728-f620-49f8-b18c-7a4294fe08af/application",
+  "apply_url": "https://jobs.ashbyhq.com/pylon-labs/edba2728-f620-49f8-b18c-7a4294fe08af/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 180000,
+    "max": 300000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$180K - $300K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-11-14T17:16:19.179Z",
+  "is_remote": false
+},
+{
+  "id": "e80eef69-6757-44c7-a8d2-b808067e70c3",
+  "title": "Software Engineer",
+  "company.name": "Morgan & Morgan, P.A.",
+  "listing_url": "https://job-boards.greenhouse.io/morganmorganjobsapplynow/jobs/5611714004",
+  "apply_url": "https://boards.greenhouse.io/morganmorganjobsapplynow/jobs/5611714004#app",
+  "locations": [
+    {
+      "location": "Brooklyn, New York, United States",
+      "city": "Brooklyn",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 145000,
+    "max": 165000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$145,000 - $165,000 USD per year",
+    "is_estimated": false
+  },
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-08-05T22:50:51Z",
+  "is_remote": false
+},
+{
+  "id": "e7efb234-9784-433f-98de-13acac36b633",
+  "title": "Software Engineer",
+  "company.name": "Revise Robotics",
+  "listing_url": "https://jobs.ashbyhq.com/reviserobotics/b84b2383-66f6-4a0a-8b37-a46c55cee463/application",
+  "apply_url": "https://jobs.ashbyhq.com/reviserobotics/b84b2383-66f6-4a0a-8b37-a46c55cee463/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 120000,
+    "max": 160000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$120K - $160K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-13T21:11:58.318Z",
+  "is_remote": false
+},
+{
+  "id": "224a2092-f802-2de3-f745-ba13c45aa73f",
+  "title": "Software Engineer",
+  "company.name": "Flip",
+  "listing_url": "https://job-boards.greenhouse.io/flip/jobs/4592556008",
+  "apply_url": "https://boards.greenhouse.io/flip/jobs/4592556008#app",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 110000,
+    "max": 150000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$110,000 - $150,000 USD per year",
+    "is_estimated": false
+  },
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-03-21T18:30:22Z",
+  "is_remote": false
+},
+{
+  "id": "b57af7c3-5244-4ca9-aa58-097fa046cf66",
+  "title": "Software Engineer",
+  "company.name": "Fractional",
+  "listing_url": "https://jobs.ashbyhq.com/fractional-ai/1db16198-e91e-425d-83a4-3551ca674e46/application",
+  "apply_url": "https://jobs.ashbyhq.com/fractional-ai/1db16198-e91e-425d-83a4-3551ca674e46/application",
+  "locations": [
+    {
+      "location": "San Francisco Office",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-11-29T17:12:58.872Z",
+  "is_remote": false
+},
+{
+  "id": "544a3dd2-b286-4647-bcc4-7a0d7467b818",
+  "title": "Software Engineer",
+  "company.name": "Ascend",
+  "listing_url": "https://job-boards.greenhouse.io/ascend21/jobs/4575263008",
+  "apply_url": "https://boards.greenhouse.io/ascend21/jobs/4575263008#app",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-03-10T16:09:10Z",
+  "is_remote": false
+},
+{
+  "id": "8fcf77cc-3652-7424-60f9-dae0d000ce2b",
+  "title": "Software Engineer",
+  "company.name": "V2 Strategic Advisors",
+  "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/7381166",
+  "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/7381166#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-11-18T18:59:31Z",
+  "is_remote": false
+},
+{
+  "id": "dec7dbcd-6374-1236-7256-64c2ed51526c",
+  "title": "Product Manager",
+  "company.name": "Traversal",
+  "listing_url": "https://job-boards.greenhouse.io/traversal/jobs/4622045008",
+  "apply_url": "https://boards.greenhouse.io/traversal/jobs/4622045008#app",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "East New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": 40.66677,
+      "longitude": -73.88236
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2026-01-02T16:20:13Z",
+  "is_remote": false
+},
+{
+  "id": "0c54d767-b861-6392-dbfb-652d355c90d4",
+  "title": "Software Engineer",
+  "company.name": "V2 Strategic Advisors",
+  "listing_url": "https://job-boards.greenhouse.io/schonfeld/jobs/6964474",
+  "apply_url": "https://boards.greenhouse.io/schonfeld/jobs/6964474#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-06-09T21:59:31Z",
+  "is_remote": false
+},
+{
+  "id": "c315afec-7565-4a84-9a48-2c652d674737",
+  "title": "Product Manager",
+  "company.name": "Mariana Minerals",
+  "listing_url": "https://jobs.ashbyhq.com/marianaminerals/b529adef-b0e8-4d11-8ec8-7dddf797e129/application",
+  "apply_url": "https://jobs.ashbyhq.com/marianaminerals/b529adef-b0e8-4d11-8ec8-7dddf797e129/application",
+  "locations": [
+    {
+      "location": "San Francisco HQ",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 90000,
+    "max": 160000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$90K - $160K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-13T01:50:19.599Z",
+  "is_remote": false
+},
+{
+  "id": "e380eeb4-4c3d-4551-9894-5b01799ab932",
+  "title": "Product Manager",
+  "company.name": "Lemurian Labs",
+  "listing_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
+  "apply_url": "https://jobs.lever.co/lemurian-labs/80759ff5-1fcc-4bee-ba2e-ff0b2bb228da",
+  "locations": [
+    {
+      "location": "SF Bay Area",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-10-31T19:10:00.542Z",
+  "is_remote": false
+},
+{
+  "id": "d4b7139a-a6d6-4081-aeb8-c16d0a4e0279",
+  "title": "Software Engineer",
+  "company.name": "Savvy Wealth",
+  "listing_url": "https://jobs.ashbyhq.com/savvy/073aefc5-5eb1-4e67-9cb3-d4059dd8ce58/application",
+  "apply_url": "https://jobs.ashbyhq.com/savvy/073aefc5-5eb1-4e67-9cb3-d4059dd8ce58/application",
+  "locations": [
+    {
+      "location": "NYC Office",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 134000,
+    "max": 164000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$134K - $164K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-01T20:46:20.828Z",
+  "is_remote": false
+},
+{
+  "id": "3d5d105a-82af-4e41-99db-f6519fd73c1a",
+  "title": "Product Manager",
+  "company.name": "Lever Implementation Training Environment",
+  "listing_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
+  "apply_url": "https://jobs.lever.co/leverdemo-8/7c437b7d-84b1-4027-9886-ca61148197b1",
+  "locations": [
+    {
+      "location": "San Francisco, California",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2019-08-05T18:40:53.56Z",
+  "is_remote": false
+},
+{
+  "id": "cd3be03a-166b-4957-b7c1-f1abdc28f833",
+  "title": "Software Engineer",
+  "company.name": "Scarlet",
+  "listing_url": "https://jobs.ashbyhq.com/scarlet/e62ddb46-0fa6-4050-baa5-fa1860ef898c/application",
+  "apply_url": "https://jobs.ashbyhq.com/scarlet/e62ddb46-0fa6-4050-baa5-fa1860ef898c/application",
+  "locations": [
+    {
+      "location": "Remote",
+      "city": null,
+      "state": null,
+      "country": "Remote",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 60000,
+    "max": 150000,
+    "currency": "GBP",
+    "period": "year",
+    "raw_text": "£60K - £150K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-11-13T08:23:33.823Z",
+  "is_remote": false
+},
+{
+  "id": "eaed3d72-09da-4a47-8068-594fe675a472",
+  "title": "Software Engineer",
+  "company.name": "Jane Street",
+  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/4274288002",
+  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/4274288002#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2019-05-06T19:18:54Z",
+  "is_remote": false
+},
+{
+  "id": "00f9a64c-12d3-4536-bc92-7a09e997b872",
+  "title": "Software Engineer",
+  "company.name": "Jane Street",
+  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8046410002",
+  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8046410002#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-07-07T08:39:32Z",
+  "is_remote": false
+},
+{
+  "id": "6629e1d9-b192-02c6-c7d5-fcc5cb08b0e7",
+  "title": "Product Manager",
+  "company.name": "Runwise",
+  "listing_url": "https://job-boards.greenhouse.io/runwise/jobs/4623112006",
+  "apply_url": "https://boards.greenhouse.io/runwise/jobs/4623112006#app",
+  "locations": [
+    {
+      "location": "New York, New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-12-03T21:17:12Z",
+  "is_remote": false
+},
+{
+  "id": "acf60dd5-010a-424b-9740-0e5d4ab74d99",
+  "title": "Software Engineer",
+  "company.name": "Chalk",
+  "listing_url": "https://job-boards.greenhouse.io/chalkinc/jobs/4031707005",
+  "apply_url": "https://boards.greenhouse.io/chalkinc/jobs/4031707005#app",
+  "locations": [
+    {
+      "location": "NY or SF",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "location": "NY or SF",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2022-06-17T20:12:59Z",
+  "is_remote": false
+},
+{
+  "id": "2edd8c68-75e8-404c-8cdb-597ce1a2209b",
+  "title": "Software Engineer",
+  "company.name": "Adaptive Security",
+  "listing_url": "https://jobs.ashbyhq.com/adaptivesecurity/f68039ab-5904-41e0-b8e4-605ec642bfd3/application",
+  "apply_url": "https://jobs.ashbyhq.com/adaptivesecurity/f68039ab-5904-41e0-b8e4-605ec642bfd3/application",
+  "locations": [
+    {
+      "location": "NYC",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-11-21T14:33:57.891Z",
+  "is_remote": false
+},
+{
+  "id": "d6a767d6-bd16-4a8b-bd1d-f582943b8003",
+  "title": "Software Engineer",
+  "company.name": "Arena AI",
+  "listing_url": "https://job-boards.eu.greenhouse.io/arenaai/jobs/4593097101",
+  "apply_url": "https://boards.eu.greenhouse.io/arenaai/jobs/4593097101#app",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-05-21T03:02:05Z",
+  "is_remote": false
+},
+{
+  "id": "f6fd7cdc-bbab-4230-8c3f-47333432e2f0",
+  "title": "Software Engineer",
+  "company.name": "Nudge",
+  "listing_url": "https://jobs.ashbyhq.com/nudge/54fbd79c-ff00-48fc-9346-133ba980e6f1/application",
+  "apply_url": "https://jobs.ashbyhq.com/nudge/54fbd79c-ff00-48fc-9346-133ba980e6f1/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-23T01:07:16.198Z",
+  "is_remote": false
+},
+{
+  "id": "0b56d9b0-d760-4c16-9dae-02924e8b903e",
+  "title": "Software Engineering",
+  "company.name": "Silna Health",
+  "listing_url": "https://jobs.ashbyhq.com/silnahealth.com/1be7e643-cae8-4270-b998-f01d8d8e0389/application",
+  "apply_url": "https://jobs.ashbyhq.com/silnahealth.com/1be7e643-cae8-4270-b998-f01d8d8e0389/application",
+  "locations": [
+    {
+      "location": "NYC",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 130000,
+    "max": 200000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$130K - $200K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-04-30T18:38:54.057Z",
+  "is_remote": false
+},
+{
+  "id": "46729e13-8ee3-4d88-97d5-b45616c9797a",
+  "title": "Software Engineer",
+  "company.name": "Aucto",
+  "listing_url": "https://jobs.ashbyhq.com/auctor/45cd780b-30bd-4887-b1e8-0b4858aa8e63/application",
+  "apply_url": "https://jobs.ashbyhq.com/auctor/45cd780b-30bd-4887-b1e8-0b4858aa8e63/application",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 175000,
+    "max": 290000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$175K - $290K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-07-08T23:53:12.143Z",
+  "is_remote": false
+},
+{
+  "id": "3b0aa130-5de2-4a28-a9d0-1ae0d241e3d3",
+  "title": "Software Engineer",
+  "company.name": "Jane Street",
+  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8040547002",
+  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8040547002#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-07-10T13:33:56Z",
+  "is_remote": false
+},
+{
+  "id": "02932051-85b6-4ea8-87b3-89fc17c6294e",
+  "title": "Software Engineer",
+  "company.name": "super{set} Hive Community ",
+  "listing_url": "https://job-boards.greenhouse.io/superset/jobs/4990626008",
+  "apply_url": "https://boards.greenhouse.io/superset/jobs/4990626008#app",
+  "locations": [
+    {
+      "location": "San Francisco, California",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-12-11T01:09:45Z",
+  "is_remote": false
+},
+{
+  "id": "6876c99b-1eed-448e-a2b2-acf6201e0c64",
+  "title": "Software Engineer",
+  "company.name": "Jane Street",
+  "listing_url": "https://job-boards.greenhouse.io/janestreet/jobs/8160791002",
+  "apply_url": "https://boards.greenhouse.io/janestreet/jobs/8160791002#app",
+  "locations": [
+    {
+      "location": "New York, New York, United States",
+      "city": "New City",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-11-03T15:53:10Z",
+  "is_remote": false
+},
+{
+  "id": "54115348-aa47-44bc-8aa5-8f288d968b31",
+  "title": "Software Engineer",
+  "company.name": "Watney Robotics",
+  "listing_url": "https://jobs.ashbyhq.com/watneyrobotics/c63ceae1-c671-44e8-9cec-13849336bcbc/application",
+  "apply_url": "https://jobs.ashbyhq.com/watneyrobotics/c63ceae1-c671-44e8-9cec-13849336bcbc/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 150000,
+    "max": 200000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$150K - $200K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-05T12:20:19.691Z",
+  "is_remote": false
+},
+{
+  "id": "cd55536a-af6a-4b07-b306-812297dc0ca5",
+  "title": "Software Engineer",
+  "company.name": "Lever Implementation Training Environment",
+  "listing_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
+  "apply_url": "https://jobs.lever.co/leverdemo-8/e6528436-8f32-4aa0-b870-999d610534a6",
+  "locations": [
+    {
+      "location": "San Francisco, California",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2019-08-30T16:22:16.31Z",
+  "is_remote": false
+},
+{
+  "id": "d6e703e3-70fd-4c81-a993-2f9d0958b332",
+  "title": "Software Engineer",
+  "company.name": "Root Access",
+  "listing_url": "https://jobs.ashbyhq.com/root-access/49ca1155-2c94-4be6-aff5-c0c3524eada9",
+  "apply_url": "https://jobs.ashbyhq.com/root-access/49ca1155-2c94-4be6-aff5-c0c3524eada9/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-16T23:25:32.921Z",
+  "is_remote": false
+},
+{
+  "id": "b8285906-d9d5-499c-b44e-8a5bef599206",
+  "title": "Software Engineer",
+  "company.name": "Modern Treasury",
+  "listing_url": "https://jobs.ashbyhq.com/moderntreasury/f2ff4c9c-0c2f-4bb8-b446-77cab281126a/application",
+  "apply_url": "https://jobs.ashbyhq.com/moderntreasury/f2ff4c9c-0c2f-4bb8-b446-77cab281126a/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 120000,
+    "max": 240000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$120K - $240K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-03T22:35:53.471Z",
+  "is_remote": false
+},
+{
+  "id": "74df38aa-bd70-4e62-9a42-87b8d41fd673",
+  "title": "Software Engineer",
+  "company.name": "Neon",
+  "listing_url": "https://jobs.ashbyhq.com/Neon/dc5bf47b-d705-49e3-a82b-f0cac2a98d6f/application",
+  "apply_url": "https://jobs.ashbyhq.com/Neon/dc5bf47b-d705-49e3-a82b-f0cac2a98d6f/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 105000,
+    "max": 160000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$105K - $160K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-14T23:04:08.97Z",
+  "is_remote": false
+},
+{
+  "id": "99ac3c98-79bc-4543-b878-53d4b8678395",
+  "title": "Software Engineer",
+  "company.name": "Neon",
+  "listing_url": "https://jobs.ashbyhq.com/Neon/593e01db-ee32-40ba-845a-b2683025f0c3/application",
+  "apply_url": "https://jobs.ashbyhq.com/Neon/593e01db-ee32-40ba-845a-b2683025f0c3/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 105000,
+    "max": 160000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$105K - $160K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-05T01:04:23.201Z",
+  "is_remote": false
+},
+{
+  "id": "510a94a2-7dbf-4276-a6fb-c0d7580fcd85",
+  "title": "Software Engineer",
+  "company.name": "Coalition",
+  "listing_url": "https://jobs.ashbyhq.com/cognition/e8086415-62bc-4cc0-96a4-84bb56182d35/application",
+  "apply_url": "https://jobs.ashbyhq.com/cognition/e8086415-62bc-4cc0-96a4-84bb56182d35/application",
+  "locations": [
+    {
+      "location": "San Francisco Bay Area",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-03-10T00:40:56.854Z",
+  "is_remote": false
+},
+{
+  "id": "c7a796e6-c1b9-4c14-b0d2-11ed8b463c23",
+  "title": "Software Engineer",
+  "company.name": "Opal Security",
+  "listing_url": "https://jobs.ashbyhq.com/opal/d96e2c87-4cc4-45ac-a3a3-1c6060a90bf1/application",
+  "apply_url": "https://jobs.ashbyhq.com/opal/d96e2c87-4cc4-45ac-a3a3-1c6060a90bf1/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 140000,
+    "max": 250000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$140K - $250K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-08-29T16:51:59.819Z",
+  "is_remote": false
+},
+{
+  "id": "ffdbde2d-a561-4d9d-bd6a-738871e32e95",
+  "title": "Software Engineer",
+  "company.name": "Graphite",
+  "listing_url": "https://jobs.ashbyhq.com/graphite/5379d006-abe5-4fbf-a459-4928245da6bb/application",
+  "apply_url": "https://jobs.ashbyhq.com/graphite/5379d006-abe5-4fbf-a459-4928245da6bb/application",
+  "locations": [
+    {
+      "location": "New York City, New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 200000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $200K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-04-29T20:47:47.267Z",
+  "is_remote": false
+},
+{
+  "id": "a3f2d7d3-8f1f-4077-9d1e-cd997868109b",
+  "title": "Software Engineer",
+  "company.name": "Spellbrush",
+  "listing_url": "https://jobs.ashbyhq.com/spellbrush/550b3de6-2c6d-4a80-aa3b-a530b6e48464/application",
+  "apply_url": "https://jobs.ashbyhq.com/spellbrush/550b3de6-2c6d-4a80-aa3b-a530b6e48464/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-10-30T22:10:03.613Z",
+  "is_remote": false
+},
+{
+  "id": "c5553dc1-3a46-4601-a70f-25ef27b37aee",
+  "title": "Software Engineer",
+  "company.name": "Assured",
+  "listing_url": "https://jobs.ashbyhq.com/assured-health/f373ebcc-def6-47e3-94cc-882e48bf7d2c/application",
+  "apply_url": "https://jobs.ashbyhq.com/assured-health/f373ebcc-def6-47e3-94cc-882e48bf7d2c/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-03T05:07:01.259Z",
+  "is_remote": false
+},
+{
+  "id": "8659a840-5978-468e-b17b-3bcbb5cd2d37",
+  "title": "Software Engineer",
+  "company.name": "Halliday",
+  "listing_url": "https://jobs.ashbyhq.com/halliday/fcb6293c-76b6-4bcc-b75b-ebdb0ae7ec6a/application",
+  "apply_url": "https://jobs.ashbyhq.com/halliday/fcb6293c-76b6-4bcc-b75b-ebdb0ae7ec6a/application",
+  "locations": [
+    {
+      "location": "San Francisco, CA | New York, NY",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-17T21:41:33.182Z",
+  "is_remote": false
+},
+{
+  "id": "a5c9c47e-3c2e-4219-8520-37415d37b6ab",
+  "title": "Software Engineer",
+  "company.name": "Ivo",
+  "listing_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
+  "apply_url": "https://jobs.lever.co/ivo/1629cbb2-c07c-4214-a1e2-b4e96c9cc66c",
+  "locations": [
+    {
+      "location": "San Francisco, California",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": "onsite",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-01-27T05:35:18.639Z",
+  "is_remote": false
+},
+{
+  "id": "a02cc9b0-1a93-4c1a-9b14-864bc5422201",
+  "title": "Software Engineer",
+  "company.name": "Collate",
+  "listing_url": "https://jobs.ashbyhq.com/comulate/4d5a3632-2812-4ab0-b3ad-ca6cf6083348/application",
+  "apply_url": "https://jobs.ashbyhq.com/comulate/4d5a3632-2812-4ab0-b3ad-ca6cf6083348/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 140000,
+    "max": 180000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$140K - $180K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-02-01T21:59:40.788Z",
+  "is_remote": false
+},
+{
+  "id": "08c8aee9-c394-846a-f264-861678b712d7",
+  "title": "Software Engineer",
+  "company.name": "Voltage Park",
+  "listing_url": "https://jobs.ashbyhq.com/voltagepark.com/66918d98-1eb2-4b23-aef8-bfd2ee49941e",
+  "apply_url": "https://jobs.ashbyhq.com/voltagepark.com/66918d98-1eb2-4b23-aef8-bfd2ee49941e/application",
+  "locations": [
+    {
+      "location": "San Francisco, California",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": 37.77493,
+      "longitude": -122.41942
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 200000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $200K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-08-08T20:49:05.544Z",
+  "is_remote": false
+},
+{
+  "id": "0a7c51ff-ceec-4853-a39f-f6d91f8f8266",
+  "title": "Software Engineer",
+  "company.name": "Garage",
+  "listing_url": "https://jobs.ashbyhq.com/garage/8fdfafcd-34d3-4cf0-b63f-e9d16deeb61c/application",
+  "apply_url": "https://jobs.ashbyhq.com/garage/8fdfafcd-34d3-4cf0-b63f-e9d16deeb61c/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-08-20T13:09:47.788Z",
+  "is_remote": false
+},
+{
+  "id": "677a362f-93fa-4782-9fb0-b647a33801c6",
+  "title": "Software Engineer",
+  "company.name": "Cartesia",
+  "listing_url": "https://jobs.ashbyhq.com/cartesia/7628169d-3703-4b82-a1d0-ed3124790643/application",
+  "apply_url": "https://jobs.ashbyhq.com/cartesia/7628169d-3703-4b82-a1d0-ed3124790643/application",
+  "locations": [
+    {
+      "location": "*HQ - San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 180000,
+    "max": 250000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$180K - $250K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-11-07T17:41:58.254Z",
+  "is_remote": false
+},
+{
+  "id": "389a04b5-15c1-413d-b8b6-e05dcdc57662",
+  "title": "Software Engineer",
+  "company.name": "Rilla",
+  "listing_url": "https://jobs.ashbyhq.com/rilla/37228ca3-4e4a-4e3c-9414-d8a2046ff496/application",
+  "apply_url": "https://jobs.ashbyhq.com/rilla/37228ca3-4e4a-4e3c-9414-d8a2046ff496/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2023-08-10T19:57:39.546Z",
+  "is_remote": false
+},
+{
+  "id": "ce32180c-c6bb-4cd0-85a0-95a65c0cd004",
+  "title": "Software Engineer",
+  "company.name": "OpenAI",
+  "listing_url": "https://jobs.ashbyhq.com/openai/c6233eda-6788-4bcb-93d2-bbf7c81dcef7",
+  "apply_url": "https://jobs.ashbyhq.com/openai/c6233eda-6788-4bcb-93d2-bbf7c81dcef7/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 160000,
+    "max": 300000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$160K - $300K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-17T01:30:12.756Z",
+  "is_remote": false
+},
+{
+  "id": "0f8e6d41-8988-4f84-a79c-d3df123fbd60",
+  "title": "Product Manager",
+  "company.name": "Harvey",
+  "listing_url": "https://jobs.ashbyhq.com/harvey/9277ea6c-565a-4102-973f-3d762f82124f/application",
+  "apply_url": "https://jobs.ashbyhq.com/harvey/9277ea6c-565a-4102-973f-3d762f82124f/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 149500,
+    "max": 202500,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$149.5K - $202.5K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-28T15:10:13.206Z",
+  "is_remote": false
+},
+{
+  "id": "a3dabe83-3898-4136-a99d-a6af94173f6c",
+  "title": "Software Engineer",
+  "company.name": "Two Dots",
+  "listing_url": "https://jobs.ashbyhq.com/two-dots/085636cd-d0af-43f5-ae83-94fac6559580/application",
+  "apply_url": "https://jobs.ashbyhq.com/two-dots/085636cd-d0af-43f5-ae83-94fac6559580/application",
+  "locations": [
+    {
+      "location": "San Francisco HQ",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 150000,
+    "max": 275000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$150K - $275K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-01-03T23:32:02.332Z",
+  "is_remote": false
+},
+{
+  "id": "62dad94d-8721-4159-8fdb-7d483023691d",
+  "title": "Product Manager",
+  "company.name": "Console",
+  "listing_url": "https://jobs.ashbyhq.com/console/a947201b-99c9-4c94-9fb1-3d3ba64d33fa/application",
+  "apply_url": "https://jobs.ashbyhq.com/console/a947201b-99c9-4c94-9fb1-3d3ba64d33fa/application",
+  "locations": [
+    {
+      "location": "San Francisco (On-site)",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 190000,
+    "max": 280000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$190K - $280K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-11-19T17:22:05.192Z",
+  "is_remote": false
+},
+{
+  "id": "e322da28-e66f-4cdf-8949-bcc21b35ab4c",
+  "title": "Product Manager",
+  "company.name": "Levelpath",
+  "listing_url": "https://jobs.ashbyhq.com/levelpath/4ed33734-d7f2-480c-a5d7-8ed8a3e8e372/application",
+  "apply_url": "https://jobs.ashbyhq.com/levelpath/4ed33734-d7f2-480c-a5d7-8ed8a3e8e372/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-06-24T13:14:08.468Z",
+  "is_remote": false
+},
+{
+  "id": "88628b78-e826-06dd-2da8-5a7290adcd70",
+  "title": "Software Engineer",
+  "company.name": "Broccoli AI",
+  "listing_url": "https://jobs.ashbyhq.com/broccoli/3e59cf67-61dd-4210-b5dc-c7338fa91eba",
+  "apply_url": "https://jobs.ashbyhq.com/broccoli/3e59cf67-61dd-4210-b5dc-c7338fa91eba/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-18T20:19:11.534Z",
+  "is_remote": false
+},
+{
+  "id": "0fb0197f-a087-415d-a55c-3c66a768a670",
+  "title": "Product Manager",
+  "company.name": "Peregrine Technologies",
+  "listing_url": "https://job-boards.greenhouse.io/peregrinetechnologies/jobs/4218184005",
+  "apply_url": "https://boards.greenhouse.io/peregrinetechnologies/jobs/4218184005#app",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2024-08-28T16:53:19Z",
+  "is_remote": false
+},
+{
+  "id": "af9cde97-7ac2-4314-80d5-432b01d29323",
+  "title": "Software Engineer",
+  "company.name": "Vooma",
+  "listing_url": "https://jobs.ashbyhq.com/vooma/19e806f0-fca9-4e71-98aa-21d1b9751c37/application",
+  "apply_url": "https://jobs.ashbyhq.com/vooma/19e806f0-fca9-4e71-98aa-21d1b9751c37/application",
+  "locations": [
+    {
+      "location": "San Francisco Office",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-03-26T06:57:56.4Z",
+  "is_remote": false
+},
+{
+  "id": "84872d86-6920-485f-9ec1-a94adc03aa9d",
+  "title": "Software Engineer",
+  "company.name": "Column",
+  "listing_url": "https://jobs.ashbyhq.com/column/8ad3cf7b-7ea3-47f6-86c4-c83a9d78ff50/application",
+  "apply_url": "https://jobs.ashbyhq.com/column/8ad3cf7b-7ea3-47f6-86c4-c83a9d78ff50/application",
+  "locations": [
+    {
+      "location": "San Francisco, CA",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-02-17T19:15:44.614Z",
+  "is_remote": false
+},
+{
+  "id": "4960e9ab-b901-4716-8059-a1e2890e529b",
+  "title": "Software Engineer",
+  "company.name": "Method Financial",
+  "listing_url": "https://jobs.ashbyhq.com/method/1dd4c513-e7c1-4cbf-b0ac-bac2729e00dd/application",
+  "apply_url": "https://jobs.ashbyhq.com/method/1dd4c513-e7c1-4cbf-b0ac-bac2729e00dd/application",
+  "locations": [
+    {
+      "location": "New York, NY, Austin, TX, Washington, D.C.",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-01T22:47:44.627Z",
+  "is_remote": false
+},
+{
+  "id": "f4d95ae7-870e-43a4-99f1-9ae258038bf1",
+  "title": "Software Engineer",
+  "company.name": "Oso",
+  "listing_url": "https://jobs.ashbyhq.com/oso/1778e946-7138-4ab7-8ad2-8d664d11dd8f/application",
+  "apply_url": "https://jobs.ashbyhq.com/oso/1778e946-7138-4ab7-8ad2-8d664d11dd8f/application",
+  "locations": [
+    {
+      "location": "New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2023-01-16T16:01:40.872Z",
+  "is_remote": false
+},
+{
+  "id": "e3608a20-956f-9e05-d3ea-cb9b07a44d5f",
+  "title": "Product Manager",
+  "company.name": "Clear Street",
+  "listing_url": "https://job-boards.greenhouse.io/clearstreet/jobs/7493713",
+  "apply_url": "https://boards.greenhouse.io/clearstreet/jobs/7493713#app",
+  "locations": [
+    {
+      "location": "New York, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-12-23T18:31:32Z",
+  "is_remote": false
+},
+{
+  "id": "83466c7e-5f8c-4bf4-8529-3834ca177a52",
+  "title": "Software Engineer",
+  "company.name": "Zefr",
+  "listing_url": "https://jobs.ashbyhq.com/zefir/1548a67a-41d0-4614-a5a2-610dbad8e3cc/application",
+  "apply_url": "https://jobs.ashbyhq.com/zefir/1548a67a-41d0-4614-a5a2-610dbad8e3cc/application",
+  "locations": [
+    {
+      "location": "Paris or remote",
+      "city": "Paris",
+      "state": "Ile-de-France",
+      "country": "France",
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "location": "Paris or remote",
+      "city": null,
+      "state": null,
+      "country": "Remote",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 53000,
+    "max": 85500,
+    "currency": "EUR",
+    "period": "year",
+    "raw_text": "€53K - €85.5K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-09-25T08:33:23.228Z",
+  "is_remote": false
+},
+{
+  "id": "e6b8a534-a0de-489c-b5ea-ae3590709e94",
+  "title": "Software Engineer",
+  "company.name": "Tandem",
+  "listing_url": "https://jobs.ashbyhq.com/tandem/a7b0368a-97aa-4cd8-afbc-cae8e86dafb7/application",
+  "apply_url": "https://jobs.ashbyhq.com/tandem/a7b0368a-97aa-4cd8-afbc-cae8e86dafb7/application",
+  "locations": [
+    {
+      "location": "New York office",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 175000,
+    "max": 300000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$175K - $300K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-06-18T02:02:28.878Z",
+  "is_remote": false
+},
+{
+  "id": "747701e3-b4da-4329-9b4e-535e12189147",
+  "title": "Software Engineer",
+  "company.name": "Sieve",
+  "listing_url": "https://jobs.ashbyhq.com/sieve/70847a5f-1262-4163-a496-db4db9fdb138/application",
+  "apply_url": "https://jobs.ashbyhq.com/sieve/70847a5f-1262-4163-a496-db4db9fdb138/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-09-02T23:55:45.761Z",
+  "is_remote": false
+},
+{
+  "id": "12234765-22be-2461-5c30-83540f6f0172",
+  "title": "Software Engineer",
+  "company.name": "Multiply Labs",
+  "listing_url": "https://jobs.ashbyhq.com/multiply/2ebc0086-8e9c-465e-921f-adf64ac91618",
+  "apply_url": "https://jobs.ashbyhq.com/multiply/2ebc0086-8e9c-465e-921f-adf64ac91618/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-12-22T22:04:20.255Z",
+  "is_remote": false
+},
+{
+  "id": "67e712b8-70e7-4a2b-b33d-ed601d4e7c05",
+  "title": "Software Engineer",
+  "company.name": "Agentio",
+  "listing_url": "https://jobs.ashbyhq.com/agentio/d22f7e19-cf51-4b48-9e5c-0e663dcfd389/application",
+  "apply_url": "https://jobs.ashbyhq.com/agentio/d22f7e19-cf51-4b48-9e5c-0e663dcfd389/application",
+  "locations": [
+    {
+      "location": "New York, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 225000,
+    "max": 350000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$225K - $350K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-05-01T17:40:28.259Z",
+  "is_remote": false
+},
+{
+  "id": "f3e4786e-a160-4082-8763-7a63980cd2a8",
+  "title": "Product Manager",
+  "company.name": "Candid Health",
+  "listing_url": "https://jobs.ashbyhq.com/candidhealth/6695d8d8-54ee-4acf-9bd9-7d3e05264e51/application",
+  "apply_url": "https://jobs.ashbyhq.com/candidhealth/6695d8d8-54ee-4acf-9bd9-7d3e05264e51/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-05-06T18:37:15.394Z",
+  "is_remote": false
+},
+{
+  "id": "044f1fa3-830b-4c60-add5-efb68ca1f232",
+  "title": "Product Manager",
+  "company.name": "Stainless",
+  "listing_url": "https://jobs.ashbyhq.com/stainlessapi/ce139a3d-fc08-4c00-8eb4-f9d22a033d19/application",
+  "apply_url": "https://jobs.ashbyhq.com/stainlessapi/ce139a3d-fc08-4c00-8eb4-f9d22a033d19/application",
+  "locations": [
+    {
+      "location": "New York Office",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-07-22T16:36:40.126Z",
+  "is_remote": false
+},
+{
+  "id": "555a1359-4a76-495c-a37b-e0c8e6f15784",
+  "title": "Software Engineer",
+  "company.name": "Atlas",
+  "listing_url": "https://jobs.ashbyhq.com/atlas/8acfd23c-fd87-4322-bed1-4258b7199c3d/application",
+  "apply_url": "https://jobs.ashbyhq.com/atlas/8acfd23c-fd87-4322-bed1-4258b7199c3d/application",
+  "locations": [
+    {
+      "location": "San Francisco",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2024-12-14T17:52:47.18Z",
+  "is_remote": false
+},
+{
+  "id": "653ec123-5e33-4213-8ccf-690e9e029122",
+  "title": "Product Manager",
+  "company.name": "Bubble",
+  "listing_url": "https://jobs.ashbyhq.com/bubble/ba94ebe6-72fa-43f4-b4a2-559156920811/application",
+  "apply_url": "https://jobs.ashbyhq.com/bubble/ba94ebe6-72fa-43f4-b4a2-559156920811/application",
+  "locations": [
+    {
+      "location": "NYC, New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 119000,
+    "max": 161000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$119K - $161K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-07-07T15:06:23.892Z",
+  "is_remote": false
+},
+{
+  "id": "29a18dbc-d69c-4487-baf2-eb995fcb8ef1",
+  "title": "Software Engineer",
+  "company.name": "Brellium",
+  "listing_url": "https://jobs.ashbyhq.com/brellium/8209ac68-d966-4d5f-a925-3b277f8583c3/application",
+  "apply_url": "https://jobs.ashbyhq.com/brellium/8209ac68-d966-4d5f-a925-3b277f8583c3/application",
+  "locations": [
+    {
+      "location": "New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 135000,
+    "max": 185000,
+    "currency": "USD",
+    "period": "year",
+    "raw_text": "$135K - $185K",
+    "is_estimated": false
+  },
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-10-16T13:51:55.623Z",
+  "is_remote": false
+},
+{
+  "id": "97b68bd1-7a03-43b5-aa9e-82840678f5b8",
+  "title": "Product Manager",
+  "company.name": "Canary Technologies",
+  "listing_url": "https://jobs.lever.co/canarytechnologies/95120ef8-493f-401b-a794-0fde77500280",
+  "apply_url": "https://jobs.lever.co/canarytechnologies/95120ef8-493f-401b-a794-0fde77500280",
+  "locations": [
+    {
+      "location": "New York, NY",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": {
+    "min": 120000,
+    "max": 160000,
+    "currency": "USD",
+    "period": null,
+    "raw_text": "$120,000 - $160,000 per per-year-salary",
+    "is_estimated": false
+  },
+  "employment_type": null,
+  "workplace_type": "hybrid",
+  "experience_level": null,
+  "source": "lever_co",
+  "date_posted": "2025-07-08T13:16:40.004Z",
+  "is_remote": false
+},
+{
+  "id": "60e1c03b-6b78-418a-b5a3-067de3ead3d3",
+  "title": "Product Manager",
+  "company.name": "Sixfold",
+  "listing_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
+  "apply_url": "https://boards.greenhouse.io/sixfold/jobs/4990866008#app",
+  "locations": [
+    {
+      "location": "New York, New York",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-11-17T21:43:32Z",
+  "is_remote": false
+},
+{
+  "id": "fc058b69-cf6c-404b-93c9-eca8d48bb338",
+  "title": "Product Manager",
+  "company.name": "Swayable",
+  "listing_url": "https://boards.greenhouse.io/swayable/jobs/4829801007#app",
+  "apply_url": "https://boards.greenhouse.io/swayable/jobs/4829801007#app",
+  "locations": [
+    {
+      "location": "San Francisco or New York City",
+      "city": "San Francisco",
+      "state": "California",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    },
+    {
+      "location": "San Francisco or New York City",
+      "city": "New York",
+      "state": "New York",
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": null,
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "greenhouse",
+  "date_posted": "2025-08-15T17:31:03Z",
+  "is_remote": false
+},
+{
+  "id": "3488f14f-b8de-422f-aef8-9d8811e3e66c",
+  "title": "Product Manager",
+  "company.name": "Crux",
+  "listing_url": "https://jobs.ashbyhq.com/cruxclimate/74be2fdb-3a18-47b7-8eee-491d45eb90a9/application",
+  "apply_url": "https://jobs.ashbyhq.com/cruxclimate/74be2fdb-3a18-47b7-8eee-491d45eb90a9/application",
+  "locations": [
+    {
+      "location": "Remote (US)",
+      "city": null,
+      "state": null,
+      "country": "United States",
+      "latitude": null,
+      "longitude": null
+    }
+  ],
+  "compensation": null,
+  "employment_type": "full_time",
+  "workplace_type": null,
+  "experience_level": null,
+  "source": "ashby",
+  "date_posted": "2025-11-06T13:51:57.141Z",
+  "is_remote": false
+}]

@@ -201,9 +201,9 @@ const PendingSwipeItem: React.FC<{
       <View style={styles.applicationItemInner}>
         {/* Company Logo */}
         <View
-          style={[styles.companyLogo, { backgroundColor: "#64748B" + "20" }]}
+          style={[styles.companyLogo, { backgroundColor: colors.secondary + "20" }]}
         >
-          <Text style={[styles.logoText, { color: "#64748B" }]}>
+          <Text style={[styles.logoText, { color: colors.secondary }]}>
             {job.company[0]?.toUpperCase() || "?"}
           </Text>
         </View>
@@ -220,15 +220,15 @@ const PendingSwipeItem: React.FC<{
             <View
               style={[
                 styles.statusBadge,
-                { backgroundColor: "#64748B" + "20", flexShrink: 0 },
+                { backgroundColor: colors.secondary + "20", flexShrink: 0 },
               ]}
             >
               <Ionicons
                 name="time-outline"
                 size={Math.round(12 * uiScale)}
-                color="#64748B"
+                color={colors.secondary}
               />
-              <Text style={[styles.statusText, { color: "#64748B" }]}>
+              <Text style={[styles.statusText, { color: colors.secondary }]}>
                 Queued
               </Text>
             </View>
@@ -263,7 +263,7 @@ const PendingSwipeItem: React.FC<{
         </View>
 
         {/* Pending indicator instead of arrow */}
-        <ActivityIndicator size="small" color="#64748B" />
+        <ActivityIndicator size="small" color={colors.secondary} />
       </View>
     </Animated.View>
   );
@@ -319,14 +319,14 @@ const ApplicationItem: React.FC<{
     string,
     { color: string; label: string; icon: keyof typeof Ionicons.glyphMap }
   > = {
-    pending: { color: "#F59E0B", label: "Pending", icon: "time" },
-    processing: { color: "#8B5CF6", label: "Processing", icon: "sync" },
-    completed: { color: "#10B981", label: "Completed", icon: "checkmark-done-circle" },
-    failed: { color: "#EF4444", label: "Failed", icon: "alert-circle" },
-    skipped: { color: "#6B7280", label: "Skipped", icon: "remove-circle" },
+    pending: { color: colors.statusPending, label: "Pending", icon: "time" },
+    processing: { color: colors.statusProcessing, label: "Processing", icon: "sync" },
+    completed: { color: colors.statusCompleted, label: "Completed", icon: "checkmark-done-circle" },
+    failed: { color: colors.statusFailed, label: "Failed", icon: "alert-circle" },
+    skipped: { color: colors.statusSkipped, label: "Skipped", icon: "remove-circle" },
     // Legacy statuses for backward compatibility
-    applied: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    submitted: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
+    applied: { color: colors.statusApplied, label: "Applied", icon: "checkmark-circle" },
+    submitted: { color: colors.statusApplied, label: "Applied", icon: "checkmark-circle" },
   };
 
   const config = statusConfig[status] || statusConfig.pending;
@@ -498,7 +498,7 @@ const ApplicationsHeader: React.FC<{
             ]}
           />
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: "#10B981" }]}>
+            <Text style={[styles.statNumber, { color: colors.statusCompleted }]}>
               {offerCount}
             </Text>
             <Text
@@ -516,7 +516,7 @@ const ApplicationsHeader: React.FC<{
             ]}
           />
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: "#0284c7" }]}>
+            <Text style={[styles.statNumber, { color: colors.statusProcessing }]}>
               {interviewCount}
             </Text>
             <Text

@@ -98,7 +98,7 @@ export default function SubscriptionScreen() {
       <Ionicons
         name={included ? "checkmark-circle" : "close-circle"}
         size={20}
-        color={included ? "#10B981" : "#EF4444"}
+        color={included ? colors.success : colors.error}
       />
       <Text style={[styles.featureText, { color: colors.text }]}>{text}</Text>
     </View>
@@ -107,14 +107,14 @@ export default function SubscriptionScreen() {
   const renderBadge = (tier: PlanTier) => {
     if (tier === "pro") {
       return (
-        <View style={[styles.badgeContainer, { backgroundColor: "#F59E0B" }]}>
+        <View style={[styles.badgeContainer, { backgroundColor: colors.warning }]}>
           <Text style={styles.badgeText}>🔥 Most Popular</Text>
         </View>
       );
     }
     if (tier === "unlimited") {
       return (
-        <View style={[styles.badgeContainer, { backgroundColor: "#10B981" }]}>
+        <View style={[styles.badgeContainer, { backgroundColor: colors.success }]}>
           <Text style={styles.badgeText}>⚡ Best Value</Text>
         </View>
       );

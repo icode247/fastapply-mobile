@@ -253,8 +253,8 @@ export default function ProfileDetailsScreen() {
           {/* Info Card */}
           <Card style={styles.card} variant="elevated">
             <View style={styles.infoRow}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
+              <View style={[styles.avatar, { backgroundColor: colors.primary + "20" }]}>
+                <Text style={[styles.avatarText, { color: colors.primary }]}>
                   {profile.name.charAt(0).toUpperCase()}
                 </Text>
               </View>

@@ -187,22 +187,22 @@ const ApplicationCard: React.FC<{
     { color: string; label: string; icon: string }
   > = {
     // Backend statuses
-    submitted: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    pending: { color: "#F59E0B", label: "Pending", icon: "time" },
-    processing: { color: "#8B5CF6", label: "Processing", icon: "sync" },
+    submitted: { color: colors.statusApplied, label: "Applied", icon: "checkmark-circle" },
+    pending: { color: colors.statusPending, label: "Pending", icon: "time" },
+    processing: { color: colors.statusProcessing, label: "Processing", icon: "sync" },
     completed: {
-      color: "#10B981",
+      color: colors.statusCompleted,
       label: "Completed",
       icon: "checkmark-done-circle",
     },
-    failed: { color: "#EF4444", label: "Failed", icon: "alert-circle" },
-    cancelled: { color: "#6B7280", label: "Cancelled", icon: "close-circle" },
+    failed: { color: colors.statusFailed, label: "Failed", icon: "alert-circle" },
+    cancelled: { color: colors.statusSkipped, label: "Cancelled", icon: "close-circle" },
     // Legacy/UI statuses
-    applied: { color: "#3B82F6", label: "Applied", icon: "checkmark-circle" },
-    reviewing: { color: "#F59E0B", label: "In Review", icon: "eye" },
-    interview: { color: "#0284c7", label: "Interview", icon: "calendar" },
-    offer: { color: "#10B981", label: "Offer", icon: "trophy" },
-    rejected: { color: "#EF4444", label: "Rejected", icon: "close-circle" },
+    applied: { color: colors.statusApplied, label: "Applied", icon: "checkmark-circle" },
+    reviewing: { color: colors.statusPending, label: "In Review", icon: "eye" },
+    interview: { color: colors.info, label: "Interview", icon: "calendar" },
+    offer: { color: colors.statusCompleted, label: "Offer", icon: "trophy" },
+    rejected: { color: colors.error, label: "Rejected", icon: "close-circle" },
   };
 
   const config = statusConfig[status] || statusConfig.submitted;
@@ -379,7 +379,7 @@ const CreditRing: React.FC<{ used: number; total: number }> = ({
         ]}
       >
         <LinearGradient
-          colors={["#0ea5e9", "#0284c7", "#38bdf8"]}
+          colors={[colors.primary, colors.primaryDark, colors.primaryLight]}
           style={[
             styles.creditProgress,
             { transform: [{ rotate: `${(percentage / 100) * 360}deg` }] },
@@ -530,7 +530,7 @@ export default function DashboardScreen() {
       value: queueStats?.processing ?? 0,
       subtitle: "In Progress",
       icon: "sync" as const,
-      gradient: ["#8B5CF6", "#7C3AED"],
+      gradient: [colors.statusProcessing, "#7C3AED"],
     },
     {
       title: "Pending",
@@ -544,7 +544,7 @@ export default function DashboardScreen() {
       value: queueStats?.failed ?? 0,
       subtitle: "Errors",
       icon: "alert-circle" as const,
-      gradient: [colors.error, "#DC2626"],
+      gradient: [colors.error, colors.errorDark],
     },
   ];
 
@@ -582,19 +582,19 @@ export default function DashboardScreen() {
     {
       icon: "add-circle" as const,
       label: "New Application",
-      color: "#0ea5e9",
+      color: colors.primary,
       onPress: () => router.push("/(tabs)/" as any),
     },
     {
       icon: "document-text" as const,
       label: "Update Resume",
-      color: "#10B981",
+      color: colors.success,
       onPress: () => router.push("/(tabs)/profiles" as any),
     },
     {
       icon: "analytics" as const,
       label: "View Analytics",
-      color: "#F59E0B",
+      color: colors.warning,
       onPress: () => router.push("/(tabs)/applications" as any),
     },
   ];
@@ -660,7 +660,7 @@ export default function DashboardScreen() {
                   size={Math.round(26 * uiScale)}
                   color={colors.text}
                 />
-                <View style={[styles.notificationDot, { borderColor: colors.background }]} />
+                <View style={[styles.notificationDot, { backgroundColor: colors.error, borderColor: colors.background }]} />
               </BlurView>
             ) : (
               <View
@@ -671,7 +671,7 @@ export default function DashboardScreen() {
                   size={Math.round(26 * uiScale)}
                   color={colors.text}
                 />
-                <View style={[styles.notificationDot, { borderColor: colors.background }]} />
+                <View style={[styles.notificationDot, { backgroundColor: colors.error, borderColor: colors.background }]} />
               </View>
             )}
           </TouchableOpacity>
@@ -744,7 +744,7 @@ export default function DashboardScreen() {
                     style={styles.upgradeBtnGradient}
                   >
                     <Text style={styles.upgradeBtnText}>Upgrade Plan</Text>
-                    <Ionicons name="sparkles" size={Math.round(16 * uiScale)} color="#FFF" />
+                    <Ionicons name="sparkles" size={Math.round(16 * uiScale)} color={colors.textInverse} />
                   </LinearGradient>
                 </TouchableOpacity>
               )}

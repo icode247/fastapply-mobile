@@ -55,7 +55,7 @@ export interface ApiJob {
   visaSponsorship?: boolean;
 }
 
-// Legacy Job interface for backward compatibility
+// Legacy Job interface for backward compatibility (ATS format)
 export interface Job {
   id: string;
   title: string;
@@ -72,7 +72,9 @@ export interface Job {
     min: number;
     max: number;
     currency: string;
+    period?: string;
     raw_text: string;
+    is_estimated?: boolean;
   } | null;
   employment_type: EmploymentType;
   workplace_type: WorkplaceType;
@@ -80,6 +82,49 @@ export interface Job {
   source: string;
   date_posted: string;
   is_remote: boolean;
+}
+
+// Career-site job format (from career-site-job-listing-api datasets)
+export interface CareerSiteJob {
+  id: string;
+  title: string;
+  organization: string;
+  organization_url?: string;
+  organization_logo?: string;
+  url: string;
+  source: string;
+  source_domain?: string;
+  date_posted: string;
+  description_text?: string;
+  employment_type?: string;
+  location_type?: string;
+  locations_derived?: string[];
+  cities_derived?: string[];
+  regions_derived?: string[];
+  countries_derived?: string[];
+  remote_derived?: boolean;
+  salary_raw?: {
+    "@type": string;
+    currency: string;
+    value: {
+      "@type": string;
+      minValue: number;
+      maxValue: number;
+      unitText: string;
+    };
+  } | null;
+  ai_salary_currency?: string | null;
+  ai_salary_value?: number | null;
+  ai_salary_minvalue?: number | null;
+  ai_salary_maxvalue?: number | null;
+  ai_salary_unittext?: string | null;
+  ai_experience_level?: string | null;
+  ai_work_arrangement?: string | null;
+  ai_key_skills?: string[] | null;
+  ai_benefits?: string[] | null;
+  ai_requirements_summary?: string | null;
+  ai_visa_sponsorship?: boolean | null;
+  ai_employment_type?: string | null;
 }
 
 // Normalized job for UI display
@@ -268,10 +313,15 @@ export function normalizeJob(job: Job): NormalizedJob {
         .join(", ")
     : "Location not specified";
 
-  const salary = job.compensation
-    ? job.compensation.raw_text ||
-      `$${(job.compensation.min / 1000).toFixed(0)}k - $${(job.compensation.max / 1000).toFixed(0)}k`
-    : "Salary not disclosed";
+  let salary = "Salary not disclosed";
+  if (job.compensation) {
+    const { min, max, currency, period, raw_text } = job.compensation;
+    if (min != null && max != null && (min > 0 || max > 0)) {
+      salary = formatSalaryRange(min, max, currency, period);
+    } else if (raw_text) {
+      salary = cleanSalaryText(raw_text) || raw_text.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 60) || "Salary not disclosed";
+    }
+  }
 
   const postedDate = new Date(job.date_posted);
   const now = new Date();
@@ -334,6 +384,204 @@ export function normalizeJob(job: Job): NormalizedJob {
     source: job.source,
     isRemote: job.is_remote,
   };
+}
+
+// Normalize a career-site job to NormalizedJob
+export function normalizeCareerSiteJob(job: CareerSiteJob): NormalizedJob {
+  // Build location string
+  const location =
+    job.locations_derived?.join(", ") ||
+    job.cities_derived?.join(", ") ||
+    "Location not specified";
+
+  // Build salary from ai_salary_* fields first, then salary_raw
+  let salary = "Salary not disclosed";
+  let salaryMin: number | undefined;
+  let salaryMax: number | undefined;
+  let salaryCurrency: string | undefined;
+
+  if (job.ai_salary_minvalue != null && job.ai_salary_maxvalue != null) {
+    salaryMin = job.ai_salary_minvalue;
+    salaryMax = job.ai_salary_maxvalue;
+    salaryCurrency = job.ai_salary_currency || "USD";
+    salary = formatSalaryRange(
+      salaryMin,
+      salaryMax,
+      salaryCurrency,
+      job.ai_salary_unittext || undefined
+    );
+  } else if (job.ai_salary_value != null) {
+    const val = job.ai_salary_value;
+    salaryCurrency = job.ai_salary_currency || "USD";
+    const sym = salaryCurrency === "GBP" ? "£" : salaryCurrency === "EUR" ? "€" : "$";
+    const isHourly =
+      job.ai_salary_unittext === "HOUR" || job.ai_salary_unittext === "hour";
+    salary = isHourly ? `${sym}${val.toFixed(2)}/hr` : `${sym}${val.toLocaleString("en-US")}`;
+    salaryMin = val;
+    salaryMax = val;
+  } else if (job.salary_raw?.value) {
+    const v = job.salary_raw.value;
+    salaryMin = v.minValue;
+    salaryMax = v.maxValue;
+    salaryCurrency = job.salary_raw.currency || "USD";
+    salary = formatSalaryRange(
+      v.minValue,
+      v.maxValue,
+      salaryCurrency,
+      v.unitText
+    );
+  }
+
+  // Posted-at
+  const postedDate = new Date(job.date_posted);
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - postedDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const postedAt =
+    diffDays === 0
+      ? "Today"
+      : diffDays === 1
+        ? "1 day ago"
+        : diffDays < 7
+          ? `${diffDays} days ago`
+          : diffDays < 30
+            ? `${Math.floor(diffDays / 7)} weeks ago`
+            : `${Math.floor(diffDays / 30)} months ago`;
+
+  // Work mode
+  const isRemote = job.remote_derived || job.ai_work_arrangement === "remote";
+  const workModeRaw = job.ai_work_arrangement || job.location_type;
+  const workMode = isRemote
+    ? "Remote"
+    : workModeRaw === "hybrid"
+      ? "Hybrid"
+      : "On-site";
+
+  // Experience
+  const expMap: Record<string, string> = {
+    entry: "Entry Level",
+    mid: "Mid Level",
+    senior: "Senior Level",
+    lead: "Lead",
+    executive: "Executive",
+  };
+  const experience = job.ai_experience_level
+    ? expMap[job.ai_experience_level] || job.ai_experience_level
+    : "Not specified";
+
+  // Employment type
+  const typeMap: Record<string, string> = {
+    full_time: "Full-time",
+    FULL_TIME: "Full-time",
+    part_time: "Part-time",
+    PART_TIME: "Part-time",
+    contract: "Contract",
+    CONTRACT: "Contract",
+    internship: "Internship",
+    INTERNSHIP: "Internship",
+  };
+  const empType =
+    job.ai_employment_type || job.employment_type || "full_time";
+  const type = typeMap[empType] || "Full-time";
+
+  const tags =
+    job.ai_key_skills?.slice(0, 6) || extractTagsFromTitle(job.title);
+
+  const fallbackLogo = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.organization)}&background=random&size=128`;
+  const logo =
+    job.organization_logo && job.organization_logo.trim() !== ""
+      ? job.organization_logo
+      : fallbackLogo;
+
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.organization,
+    companyUrl: job.organization_url,
+    logo,
+    salary,
+    salaryMin,
+    salaryMax,
+    salaryCurrency,
+    type,
+    workMode,
+    location,
+    experience,
+    description:
+      job.description_text?.slice(0, 500) ||
+      `Apply for ${job.title} at ${job.organization}. ${location}. ${salary}.`,
+    postedAt,
+    tags,
+    listingUrl: job.url,
+    applyUrl: job.url,
+    source: job.source || job.source_domain || "career-site",
+    isRemote,
+    benefits: job.ai_benefits || undefined,
+    keySkills: job.ai_key_skills || undefined,
+    requirementsSummary: job.ai_requirements_summary || undefined,
+    visaSponsorship: job.ai_visa_sponsorship || undefined,
+  };
+}
+
+/**
+ * Strip HTML tags/entities from a string and extract a salary-like value.
+ * Returns null if no dollar amount or recognizable salary is found.
+ */
+function cleanSalaryText(raw: string): string | null {
+  // Strip HTML tags
+  let text = raw.replace(/<[^>]*>/g, " ");
+  // Decode common HTML entities
+  text = text
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#xa;/g, " ")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"');
+  // Collapse whitespace
+  text = text.replace(/\s+/g, " ").trim();
+
+  // Try to extract a salary pattern like "$X - $Y" or "$X/hr" etc.
+  const salaryPattern =
+    /(?:(?:Range:\s*)?(?:\$[\d,.]+[kK]?\s*(?:[-–—to]+\s*\$[\d,.]+[kK]?)?\s*(?:\/\s*(?:hr|hour|yr|year))?\s*(?:per\s+(?:hour|year|month|week|per-year-salary|per-hour-wage))?\s*(?:USD|GBP|EUR)?)|(?:£|€)[\d,.]+[kK]?\s*[-–—]\s*(?:£|€)?[\d,.]+[kK]?(?:\s*(?:USD|GBP|EUR))?)/i;
+  const match = text.match(salaryPattern);
+  if (match) {
+    return match[0].replace(/\s+/g, " ").trim();
+  }
+
+  // If the cleaned text is short enough and contains a currency symbol, use it as-is
+  if (text.length < 80 && /[$£€]/.test(text)) {
+    return text;
+  }
+
+  return null;
+}
+
+/**
+ * Format a salary range from numeric min/max values.
+ */
+function formatSalaryRange(
+  min: number,
+  max: number,
+  currency?: string,
+  period?: string
+): string {
+  const sym = currency === "GBP" ? "£" : currency === "EUR" ? "€" : "$";
+  const isHourly = period === "hour" || period === "HOUR";
+
+  const fmt = (n: number) => {
+    if (isHourly || n < 1000) return `${sym}${n.toFixed(2)}`;
+    if (n >= 1000 && n < 10000) return `${sym}${n.toLocaleString("en-US")}`;
+    return `${sym}${(n / 1000).toFixed(0)}K`;
+  };
+
+  const suffix = isHourly ? "/hr" : period === "month" ? "/mo" : "";
+  if (min === max) return `${fmt(min)}${suffix}`;
+  if (min > 0 && max <= 0) return `${fmt(min)}+${suffix}`;
+  if (min <= 0 && max > 0) return `Up to ${fmt(max)}${suffix}`;
+  return `${fmt(min)} - ${fmt(max)}${suffix}`;
 }
 
 // Extract relevant tags from job title

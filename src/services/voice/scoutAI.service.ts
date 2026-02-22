@@ -11,7 +11,7 @@ const OPENAI_API_KEY =
 
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
-const SCOUT_SYSTEM_PROMPT = `You are Scout, a voice assistant for the FastApply job search app. You help users find and apply to jobs using voice commands.
+const SCOUT_SYSTEM_PROMPT = `You are Scout, a voice assistant for the Scout job search app (powered by FastApply). You help users find and apply to jobs using voice commands.
 
 PERSONALITY: Friendly, brief, action-oriented. Never more than 15 words in your response.
 

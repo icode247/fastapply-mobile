@@ -31,9 +31,13 @@ const InputField: React.FC<{
   onChangeText: (text: string) => void;
   error?: string;
   keyboardType?: "default" | "email-address";
+  inputMode?: "text" | "email" | "none";
   autoCapitalize?: "none" | "sentences" | "words" | "characters";
   autoCorrect?: boolean;
+  autoComplete?: "name" | "email" | "off";
   textContentType?: "emailAddress" | "name" | "none";
+  returnKeyType?: "done" | "next" | "go";
+  onSubmitEditing?: () => void;
 }> = ({
   label,
   placeholder,
@@ -41,9 +45,13 @@ const InputField: React.FC<{
   onChangeText,
   error,
   keyboardType = "default",
+  inputMode = "text",
   autoCapitalize = "none",
   autoCorrect = false,
+  autoComplete = "off",
   textContentType = "none",
+  returnKeyType = "done",
+  onSubmitEditing,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
 
@@ -66,13 +74,15 @@ const InputField: React.FC<{
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           keyboardType={keyboardType}
+          inputMode={inputMode}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
-          autoComplete={keyboardType === "email-address" ? "email" : "off"}
+          autoComplete={autoComplete}
           textContentType={textContentType}
           selectionColor="rgba(255,255,255,0.5)"
           cursorColor="#FFFFFF"
-          returnKeyType="done"
+          returnKeyType={returnKeyType}
+          onSubmitEditing={onSubmitEditing}
           enablesReturnKeyAutomatically
         />
       </View>
@@ -266,8 +276,12 @@ export default function SignInScreen() {
               onChangeText={(text) => { setEmail(text); setError(""); }}
               error={error}
               keyboardType="email-address"
+              inputMode="email"
               autoCapitalize="none"
+              autoComplete="email"
               textContentType="emailAddress"
+              returnKeyType="go"
+              onSubmitEditing={handleSignIn}
             />
           </Animated.View>
 
